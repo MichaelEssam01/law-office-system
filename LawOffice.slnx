@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="LawOffice.API\LawOffice.API.csproj" />
+  <Project Path="LawOffice.Domain\LawOffice.Domain.csproj" />
+  <Project Path="LawOffice.Application\LawOffice.Application.csproj" />
+  <Project Path="LawOffice.Infrastructure\LawOffice.Infrastructure.csproj" />
+</Solution>

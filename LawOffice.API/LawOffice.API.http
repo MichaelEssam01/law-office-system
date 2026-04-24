@@ -1,0 +1,6 @@
+@LawOffice.API_HostAddress = http://localhost:5137
+
+GET {{LawOffice.API_HostAddress}}/api/test
+Accept: application/json
+
+###

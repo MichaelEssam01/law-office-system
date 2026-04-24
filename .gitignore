@@ -1,0 +1,32 @@
+# .NET / ASP.NET Core
+bin/
+obj/
+*.swp
+*.*~
+project.lock.json
+.DS_Store
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+.vscode/
+
+# App Data / Uploads
+LawOffice.API/App_Data/uploads/documents/*
+!LawOffice.API/App_Data/uploads/documents/.gitkeep
+
+appsettings.Development.json
+
+# Node / Angular
+node_modules/
+law-office-ui/node_modules/
+law-office-ui/.angular/
+law-office-ui/dist/
+law-office-ui/npm-debug.log*
+law-office-ui/yarn-debug.log*
+law-office-ui/yarn-error.log*
+law-office-ui/.editorconfig
+
+# Logs
+logs/
+*.log

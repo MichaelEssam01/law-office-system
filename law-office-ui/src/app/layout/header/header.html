@@ -1,0 +1,40 @@
+<div class="flex justify-between items-center w-full">
+    <!-- Left Section (Search & Mobile Toggle) -->
+    <div class="flex items-center gap-4 flex-1">
+        <button class="md:hidden p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+            <i class="pi pi-bars text-xl"></i>
+        </button>
+        
+        <div class="hidden md:flex relative w-96">
+            <i class="pi pi-search absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 z-10"></i>
+            <input pInputText type="text" placeholder="ابحث عن قضية، عميل، أو جلسة..." class="w-full pl-4 pr-10 py-2 rounded-lg border-slate-200 bg-slate-50 focus:bg-white transition-colors" />
+        </div>
+    </div>
+
+    <!-- Right Section (Actions & Profile) -->
+    <div class="flex items-center gap-2 md:gap-5">
+        <!-- Notifications -->
+        <button class="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+            <i class="pi pi-bell text-xl"></i>
+            <span class="absolute top-1 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+        </button>
+
+        <!-- Language Switcher -->
+        <button class="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 font-medium text-sm transition-colors border border-transparent hover:border-slate-200">
+            <i class="pi pi-globe text-lg"></i>
+            <span>English</span>
+        </button>
+        
+        <div class="h-8 w-px bg-slate-200 hidden sm:block mx-1"></div>
+
+        <!-- User Profile -->
+        <div class="flex items-center gap-3 cursor-pointer p-1.5 rounded-lg hover:bg-slate-50 transition-colors border border-transparent hover:border-slate-200">
+            <p-avatar [label]="authService.currentUser()?.fullName?.charAt(0) || 'U'" styleClass="bg-blue-100 text-blue-700 font-bold" shape="circle"></p-avatar>
+            <div class="hidden sm:block text-right leading-tight">
+                <p class="text-sm font-bold text-slate-800">{{ authService.currentUser()?.fullName || 'User' }}</p>
+                <p class="text-xs text-slate-500">{{ authService.currentUser()?.role || 'Role' }}</p>
+            </div>
+            <i class="pi pi-angle-down text-sm text-slate-400 hidden sm:block"></i>
+        </div>
+    </div>
+</div>

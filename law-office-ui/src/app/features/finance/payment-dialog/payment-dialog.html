@@ -1,0 +1,96 @@
+<p-dialog header="تسجيل دفعة جديدة" 
+          [(visible)]="visible" 
+          [modal]="true" 
+          [breakpoints]="{ '960px': '75vw', '640px': '90vw' }" 
+          [style]="{ width: '500px' }" 
+          [draggable]="false" 
+          [resizable]="false"
+          styleClass="rtl-dialog">
+    
+    <form [formGroup]="paymentForm" class="flex flex-col gap-4 mt-2" dir="rtl">
+        <!-- Case Selection -->
+        <div class="flex flex-col gap-2">
+            <label for="caseId" class="font-bold text-slate-700">القضية</label>
+            <p-select id="caseId" [options]="cases()" formControlName="caseId" 
+                      optionLabel="title" optionValue="id" [filter]="true" filterBy="caseNumber,title"
+                      placeholder="اختر القضية" styleClass="w-full"
+                      (onChange)="onCaseChange($event)"
+                      [class.p-invalid]="paymentForm.get('caseId')?.touched && paymentForm.get('caseId')?.invalid">
+                <ng-template pTemplate="selectedItem" let-selectedOption>
+                    <div class="flex items-center gap-2" *ngIf="selectedOption">
+                        <span class="font-mono text-blue-600 font-bold">{{ selectedOption.caseNumber }}</span>
+                        <span>-</span>
+                        <span>{{ selectedOption.title }}</span>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="item" let-case>
+                    <div class="flex flex-col">
+                        <span class="font-mono text-blue-600 text-xs font-bold">{{ case.caseNumber }}</span>
+                        <span class="text-sm">{{ case.title }}</span>
+                    </div>
+                </ng-template>
+            </p-select>
+        </div>
+
+        <!-- Invoice Selection (Conditional) -->
+        <div class="flex flex-col gap-2" *ngIf="paymentForm.get('caseId')?.value">
+            <label for="invoiceId" class="font-bold text-slate-700">الفاتورة (اختياري)</label>
+            <p-select id="invoiceId" [options]="invoices()" formControlName="invoiceId" 
+                      optionLabel="title" optionValue="id"
+                      placeholder="اختر الفاتورة" styleClass="w-full"
+                      (onChange)="onInvoiceChange($event)" [showClear]="true">
+                <ng-template pTemplate="item" let-inv>
+                    <div class="flex justify-between items-center w-full">
+                        <div class="flex flex-col">
+                            <span class="font-bold">{{ inv.invoiceNumber }}</span>
+                            <span class="text-xs text-slate-500">{{ inv.title }}</span>
+                        </div>
+                        <div class="text-xs font-mono text-orange-600">
+                            متبقي: {{ inv.remainingAmount | number }}
+                        </div>
+                    </div>
+                </ng-template>
+            </p-select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <!-- Amount -->
+            <div class="flex flex-col gap-2">
+                <label for="amount" class="font-bold text-slate-700">مبلغ الدفعة</label>
+                <p-inputNumber id="amount" formControlName="amount" mode="currency" currency="EGP" locale="ar-EG" 
+                              [min]="1" styleClass="w-full"
+                              [class.p-invalid]="paymentForm.get('amount')?.touched && paymentForm.get('amount')?.invalid"></p-inputNumber>
+                <small class="text-red-500" *ngIf="paymentForm.get('amount')?.hasError('overpayment')">المبلغ يتجاوز رصيد الفاتورة</small>
+                <small class="text-red-500" *ngIf="paymentForm.get('amount')?.touched && paymentForm.get('amount')?.hasError('min')">المبلغ مطلوب</small>
+            </div>
+
+            <!-- Payment Date -->
+            <div class="flex flex-col gap-2">
+                <label for="paymentDate" class="font-bold text-slate-700">تاريخ الدفع</label>
+                <p-datepicker id="paymentDate" formControlName="paymentDate" placeholder="اختر التاريخ" appendTo="body" 
+                             styleClass="w-full"></p-datepicker>
+            </div>
+        </div>
+
+        <!-- Method -->
+        <div class="flex flex-col gap-2">
+            <label for="method" class="font-bold text-slate-700">طريقة الدفع</label>
+            <p-select id="method" [options]="methods" formControlName="method" 
+                      optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+        </div>
+
+        <!-- Notes -->
+        <div class="flex flex-col gap-2">
+            <label for="notes" class="font-bold text-slate-700">ملاحظات</label>
+            <textarea pTextarea id="notes" formControlName="notes" [rows]="2" placeholder="أي تفاصيل..."></textarea>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2" dir="rtl">
+            <button pButton label="إلغاء" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="close()"></button>
+            <button pButton label="تسجيل الدفعة" icon="pi pi-check" 
+                    class="p-button-success shadow-md" [loading]="saving()" (click)="save()"></button>
+        </div>
+    </ng-template>
+</p-dialog>

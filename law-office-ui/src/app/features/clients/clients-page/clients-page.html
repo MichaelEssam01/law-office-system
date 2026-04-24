@@ -1,0 +1,66 @@
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h2 class="text-2xl font-bold text-slate-800">إدارة العملاء</h2>
+            <p class="text-slate-500 text-sm mt-1">إضافة، تعديل، وحذف العملاء الخاصين بالمكتب.</p>
+        </div>
+        <p-button label="إضافة عميل" icon="pi pi-plus" severity="primary" (onClick)="openNew()"></p-button>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden p-4">
+        <p-table #dt [value]="clients" [loading]="loading" [paginator]="true" [rows]="10"
+                 [globalFilterFields]="['fullName', 'nationalId', 'phone']"
+                 styleClass="p-datatable-sm" [tableStyle]="{'min-width': '50rem'}">
+            
+            <ng-template pTemplate="caption">
+                <div class="flex items-center justify-between">
+                    <span class="p-input-icon-left relative w-full sm:w-auto">
+                        <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                        <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
+                               placeholder="بحث عن عميل..." class="pl-10 py-2 border-slate-200 rounded-lg w-full sm:w-auto" />
+                    </span>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="fullName">الاسم <p-sortIcon field="fullName"></p-sortIcon></th>
+                    <th pSortableColumn="nationalId">الرقم القومي <p-sortIcon field="nationalId"></p-sortIcon></th>
+                    <th>الهاتف</th>
+                    <th>البريد الإلكتروني</th>
+                    <th>الإجراءات</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-client>
+                <tr>
+                    <td class="font-medium text-slate-800">{{client.fullName}}</td>
+                    <td>{{client.nationalId}}</td>
+                    <td dir="ltr" class="text-right">{{client.phone}}</td>
+                    <td>{{client.email}}</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <p-button icon="pi pi-pencil" severity="info" [rounded]="true" [text]="true" (onClick)="editClient(client)"></p-button>
+                            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [text]="true" (onClick)="deleteClient(client)"></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="5" class="text-center py-6 text-slate-500">لا يوجد عملاء مضافين بعد.</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+
+<p-dialog [(visible)]="displayDialog" [style]="{width: '500px'}" [header]="selectedClient ? 'تعديل بيانات العميل' : 'إضافة عميل جديد'" [modal]="true" styleClass="p-fluid">
+    <app-client-dialog *ngIf="displayDialog" 
+                       [client]="selectedClient" 
+                       (onSave)="onSave($event)" 
+                       (onCancel)="onDialogHide()">
+    </app-client-dialog>
+</p-dialog>
+
+<p-toast position="top-left"></p-toast>
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>

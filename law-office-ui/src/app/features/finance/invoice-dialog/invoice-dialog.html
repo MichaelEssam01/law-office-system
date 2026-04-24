@@ -1,0 +1,90 @@
+<p-dialog [header]="invoice() ? 'تعديل فاتورة' : 'فاتورة جديدة'" 
+          [(visible)]="visible" 
+          [modal]="true" 
+          [breakpoints]="{ '960px': '75vw', '640px': '90vw' }" 
+          [style]="{ width: '500px' }" 
+          [draggable]="false" 
+          [resizable]="false"
+          styleClass="rtl-dialog">
+    
+    <form [formGroup]="invoiceForm" class="flex flex-col gap-4 mt-2" dir="rtl">
+        <!-- Case Selection -->
+        <div class="flex flex-col gap-2">
+            <label for="caseId" class="font-bold text-slate-700">القضية المرتبطة</label>
+            <p-select id="caseId" [options]="cases()" formControlName="caseId" 
+                      optionLabel="title" optionValue="id" [filter]="true" filterBy="caseNumber,title"
+                      placeholder="اختر القضية" styleClass="w-full"
+                      [class.p-invalid]="invoiceForm.get('caseId')?.touched && invoiceForm.get('caseId')?.invalid">
+                <ng-template pTemplate="selectedItem" let-selectedOption>
+                    <div class="flex items-center gap-2" *ngIf="selectedOption">
+                        <span class="font-mono text-blue-600 font-bold">{{ selectedOption.caseNumber }}</span>
+                        <span>-</span>
+                        <span>{{ selectedOption.title }}</span>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="item" let-case>
+                    <div class="flex flex-col">
+                        <span class="font-mono text-blue-600 text-xs font-bold">{{ case.caseNumber }}</span>
+                        <span class="text-sm">{{ case.title }}</span>
+                    </div>
+                </ng-template>
+            </p-select>
+            <small class="text-red-500" *ngIf="invoiceForm.get('caseId')?.touched && invoiceForm.get('caseId')?.invalid">يجب اختيار قضية</small>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <!-- Invoice Number -->
+            <div class="flex flex-col gap-2">
+                <label for="invoiceNumber" class="font-bold text-slate-700">رقم الفاتورة</label>
+                <input pInputText id="invoiceNumber" formControlName="invoiceNumber" placeholder="مثلاً: INV-001" 
+                       [class.p-invalid]="invoiceForm.get('invoiceNumber')?.touched && invoiceForm.get('invoiceNumber')?.invalid" />
+            </div>
+
+            <!-- Title -->
+            <div class="flex flex-col gap-2">
+                <label for="title" class="font-bold text-slate-700">عنوان الفاتورة</label>
+                <input pInputText id="title" formControlName="title" placeholder="مثلاً: أتعاب المرافعة" 
+                       [class.p-invalid]="invoiceForm.get('title')?.touched && invoiceForm.get('title')?.invalid" />
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <!-- Amount -->
+            <div class="flex flex-col gap-2">
+                <label for="amount" class="font-bold text-slate-700">المبلغ</label>
+                <p-inputNumber id="amount" formControlName="amount" mode="currency" currency="EGP" locale="ar-EG" 
+                              [min]="1" styleClass="w-full"
+                              [class.p-invalid]="invoiceForm.get('amount')?.touched && invoiceForm.get('amount')?.invalid"></p-inputNumber>
+                <small class="text-red-500" *ngIf="invoiceForm.get('amount')?.touched && invoiceForm.get('amount')?.invalid">المبلغ يجب أن يكون أكبر من صفر</small>
+            </div>
+
+            <!-- Due Date -->
+            <div class="flex flex-col gap-2">
+                <label for="dueDate" class="font-bold text-slate-700">تاريخ الاستحقاق</label>
+                <p-datepicker id="dueDate" formControlName="dueDate" placeholder="اختر التاريخ" appendTo="body" 
+                             styleClass="w-full" [class.p-invalid]="invoiceForm.get('dueDate')?.touched && invoiceForm.get('dueDate')?.invalid"></p-datepicker>
+            </div>
+        </div>
+
+        <!-- Status (Only in Edit Mode) -->
+        <div class="flex flex-col gap-2" *ngIf="invoice()">
+            <label for="status" class="font-bold text-slate-700">الحالة</label>
+            <p-select id="status" [options]="statuses" formControlName="status" 
+                      optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+        </div>
+
+        <!-- Notes -->
+        <div class="flex flex-col gap-2">
+            <label for="notes" class="font-bold text-slate-700">ملاحظات</label>
+            <textarea pTextarea id="notes" formControlName="notes" [rows]="3" placeholder="أي تفاصيل إضافية..."></textarea>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2" dir="rtl">
+            <button pButton label="إلغاء" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="close()"></button>
+            <button pButton [label]="invoice() ? 'تحديث' : 'حفظ'" icon="pi pi-check" 
+                    class="p-button-primary shadow-md" [loading]="saving()" (click)="save()"></button>
+        </div>
+    </ng-template>
+</p-dialog>

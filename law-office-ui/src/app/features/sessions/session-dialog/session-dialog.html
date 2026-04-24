@@ -1,0 +1,83 @@
+<p-dialog [header]="session() ? 'تعديل جلسة' : 'جلسة جديدة'" 
+          [(visible)]="visible" 
+          [modal]="true" 
+          [breakpoints]="{ '960px': '75vw', '640px': '90vw' }" 
+          [style]="{ width: '500px' }" 
+          [draggable]="false" 
+          [resizable]="false"
+          styleClass="rtl-dialog">
+    
+    <form [formGroup]="sessionForm" class="flex flex-col gap-4 mt-2" dir="rtl">
+        <!-- Title -->
+        <div class="flex flex-col gap-2">
+            <label for="title" class="font-bold text-slate-700">عنوان الجلسة</label>
+            <input pInputText id="title" formControlName="title" placeholder="مثلاً: جلسة المرافعة الأولى" 
+                   [class.p-invalid]="sessionForm.get('title')?.touched && sessionForm.get('title')?.invalid" />
+            <small class="text-red-500" *ngIf="sessionForm.get('title')?.touched && sessionForm.get('title')?.invalid">العنوان مطلوب</small>
+        </div>
+
+        <!-- Case Selection -->
+        <div class="flex flex-col gap-2">
+            <label for="caseId" class="font-bold text-slate-700">القضية المرتبطة</label>
+            <p-select id="caseId" [options]="cases()" formControlName="caseId" 
+                      optionLabel="title" optionValue="id" [filter]="true" filterBy="caseNumber,title"
+                      placeholder="اختر القضية" styleClass="w-full"
+                      [class.p-invalid]="sessionForm.get('caseId')?.touched && sessionForm.get('caseId')?.invalid">
+                <ng-template pTemplate="selectedItem" let-selectedOption>
+                    <div class="flex items-center gap-2" *ngIf="selectedOption">
+                        <span class="font-mono text-blue-600 font-bold">{{ selectedOption.caseNumber }}</span>
+                        <span>-</span>
+                        <span>{{ selectedOption.title }}</span>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="item" let-case>
+                    <div class="flex flex-col">
+                        <span class="font-mono text-blue-600 text-xs font-bold">{{ case.caseNumber }}</span>
+                        <span class="text-sm">{{ case.title }}</span>
+                    </div>
+                </ng-template>
+            </p-select>
+            <small class="text-red-500" *ngIf="sessionForm.get('caseId')?.touched && sessionForm.get('caseId')?.invalid">يجب اختيار قضية</small>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <!-- Scheduled At (Date & Time) -->
+            <div class="flex flex-col gap-2">
+                <label for="scheduledAt" class="font-bold text-slate-700">التاريخ والوقت</label>
+                <p-datepicker id="scheduledAt" formControlName="scheduledAt" [showTime]="true" [hourFormat]="'24'"
+                             placeholder="اختر الموعد" appendTo="body" styleClass="w-full"
+                             [class.p-invalid]="sessionForm.get('scheduledAt')?.touched && sessionForm.get('scheduledAt')?.invalid"></p-datepicker>
+                <small class="text-red-500" *ngIf="sessionForm.get('scheduledAt')?.touched && sessionForm.get('scheduledAt')?.invalid">الموعد مطلوب</small>
+            </div>
+
+            <!-- Status -->
+            <div class="flex flex-col gap-2">
+                <label for="status" class="font-bold text-slate-700">حالة الجلسة</label>
+                <p-select id="status" [options]="statuses" formControlName="status" 
+                          optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+            </div>
+        </div>
+
+        <!-- Court Name -->
+        <div class="flex flex-col gap-2">
+            <label for="courtName" class="font-bold text-slate-700">المكان / المحكمة</label>
+            <input pInputText id="courtName" formControlName="courtName" placeholder="مثلاً: محكمة جنوب القاهرة - الدائرة 5"
+                   [class.p-invalid]="sessionForm.get('courtName')?.touched && sessionForm.get('courtName')?.invalid" />
+            <small class="text-red-500" *ngIf="sessionForm.get('courtName')?.touched && sessionForm.get('courtName')?.invalid">المكان مطلوب</small>
+        </div>
+
+        <!-- Notes -->
+        <div class="flex flex-col gap-2">
+            <label for="notes" class="font-bold text-slate-700">ملاحظات إضافية</label>
+            <textarea pTextarea id="notes" formControlName="notes" [rows]="3" placeholder="أي تفاصيل إضافية عن الجلسة..."></textarea>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2" dir="rtl">
+            <button pButton label="إلغاء" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="close()"></button>
+            <button pButton [label]="session() ? 'تحديث' : 'إضافة'" icon="pi pi-check" 
+                    class="p-button-primary shadow-md" [loading]="saving()" (click)="save()"></button>
+        </div>
+    </ng-template>
+</p-dialog>

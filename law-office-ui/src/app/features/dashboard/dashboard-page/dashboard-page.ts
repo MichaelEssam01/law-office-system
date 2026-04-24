@@ -1,0 +1,100 @@
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { CardModule } from 'primeng/card';
+import { ChartModule } from 'primeng/chart';
+import { ButtonModule } from 'primeng/button';
+import { DashboardService, DashboardStatsDto } from '../../../core/services/dashboard.service';
+
+@Component({
+  selector: 'app-dashboard-page',
+  standalone: true,
+  imports: [CommonModule, RouterModule, CardModule, ChartModule, ButtonModule],
+  templateUrl: './dashboard-page.html'
+})
+export class DashboardPage implements OnInit {
+  private dashboardService = inject(DashboardService);
+  
+  stats = signal<DashboardStatsDto | null>(null);
+  loading = signal(true);
+
+  // Chart Data
+  caseChartData: any;
+  financeChartData: any;
+  chartOptions: any;
+
+  async ngOnInit() {
+    await this.loadStats();
+    this.initChartOptions();
+  }
+
+  async loadStats() {
+    this.loading.set(true);
+    try {
+      const data = await this.dashboardService.getStats();
+      this.stats.set(data);
+      this.initCharts(data);
+    } catch (error) {
+      console.error('Error loading dashboard stats', error);
+    } finally {
+      this.loading.set(false);
+    }
+  }
+
+  initCharts(data: DashboardStatsDto) {
+    // 1. Cases by Status (Pie/Doughnut)
+    this.caseChartData = {
+      labels: data.casesByStatus.map(x => this.translateStatus(x.label)),
+      datasets: [
+        {
+          data: data.casesByStatus.map(x => x.value),
+          backgroundColor: ['#3B82F6', '#F59E0B', '#10B981', '#EF4444', '#64748B'],
+          hoverBackgroundColor: ['#2563EB', '#D97706', '#059669', '#DC2626', '#475569']
+        }
+      ]
+    };
+
+    // 2. Finance Summary (Bar)
+    this.financeChartData = {
+      labels: data.last6MonthsFinance.map(x => x.month),
+      datasets: [
+        {
+          label: 'المطلوبات',
+          backgroundColor: '#3B82F6',
+          data: data.last6MonthsFinance.map(x => x.invoiced)
+        },
+        {
+          label: 'المحصل',
+          backgroundColor: '#10B981',
+          data: data.last6MonthsFinance.map(x => x.paid)
+        }
+      ]
+    };
+  }
+
+  initChartOptions() {
+    this.chartOptions = {
+      plugins: {
+        legend: {
+          labels: {
+            font: { family: 'Cairo, sans-serif' },
+            usePointStyle: true
+          },
+          position: 'bottom'
+        }
+      },
+      responsive: true,
+      maintainAspectRatio: false
+    };
+  }
+
+  translateStatus(status: string): string {
+    switch (status) {
+      case 'Open': return 'مفتوحة';
+      case 'Pending': return 'قيد الانتظار';
+      case 'Closed': return 'مغلقة';
+      case 'Cancelled': return 'ملغاة';
+      default: return status;
+    }
+  }
+}

@@ -1,0 +1,124 @@
+<div class="p-6" dir="rtl">
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+    
+    <!-- Header Area -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-800">إدارة الجلسات</h1>
+            <p class="text-slate-500">متابعة مواعيد الجلسات والادعاءات القانونية</p>
+        </div>
+        <button pButton label="جلسة جديدة" icon="pi pi-plus" class="p-button-primary shadow-md" (click)="openNew()"></button>
+    </div>
+
+    <!-- Filters Area -->
+    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div class="flex flex-col gap-2">
+                <label class="text-xs font-bold text-slate-500">البحث</label>
+                <p-iconField iconPosition="left">
+                    <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+                    <input pInputText type="text" [(ngModel)]="searchTerm" (ngModelChange)="dt.filterGlobal($event, 'contains')"
+                           placeholder="ابحث بالعنوان أو المحكمة..." class="w-full rounded-lg border-slate-200" />
+                </p-iconField>
+            </div>
+            
+            <div class="flex flex-col gap-2">
+                <label class="text-xs font-bold text-slate-500">الحالة</label>
+                <p-select [options]="statuses" [(ngModel)]="selectedStatus" (onChange)="onFilterChange()"
+                          optionLabel="label" optionValue="value" placeholder="كل الحالات" 
+                          [showClear]="true" styleClass="w-full rounded-lg"></p-select>
+            </div>
+
+            <div class="flex flex-col gap-2 md:col-span-1">
+                <label class="text-xs font-bold text-slate-500">القضية</label>
+                <p-select [options]="cases()" [(ngModel)]="selectedCase" (onChange)="onFilterChange()"
+                          optionLabel="title" optionValue="id" placeholder="كل القضايا" 
+                          [showClear]="true" [filter]="true" filterBy="caseNumber,title"
+                          styleClass="w-full rounded-lg">
+                    <ng-template pTemplate="item" let-case>
+                        <div class="flex flex-col">
+                            <span class="font-mono text-blue-600 text-xs font-bold">{{ case.caseNumber }}</span>
+                            <span class="text-sm">{{ case.title }}</span>
+                        </div>
+                    </ng-template>
+                </p-select>
+            </div>
+
+            <div class="flex justify-end">
+                <button pButton icon="pi pi-filter-slash" class="p-button-outlined p-button-secondary h-[42px] px-4" 
+                        (click)="resetFilters()" pTooltip="إعادة تعيين الفلاتر"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <p-table #dt [value]="sessions()" [loading]="loading()" [rows]="10" [paginator]="true" 
+                 [globalFilterFields]="['title', 'caseNumber', 'courtName']"
+                 styleClass="p-datatable-sm" [rowHover]="true"
+                 responsiveLayout="scroll">
+            
+            <ng-template pTemplate="header">
+                <tr class="bg-slate-50 text-slate-700">
+                    <th pSortableColumn="title" class="p-4">عنوان الجلسة <p-sortIcon field="title"></p-sortIcon></th>
+                    <th pSortableColumn="caseNumber" class="p-4">رقم القضية <p-sortIcon field="caseNumber"></p-sortIcon></th>
+                    <th pSortableColumn="scheduledAt" class="p-4 text-center">التاريخ والوقت <p-sortIcon field="scheduledAt"></p-sortIcon></th>
+                    <th pSortableColumn="courtName" class="p-4">المكان/المحكمة <p-sortIcon field="courtName"></p-sortIcon></th>
+                    <th pSortableColumn="status" class="p-4">الحالة <p-sortIcon field="status"></p-sortIcon></th>
+                    <th class="p-4 text-center">الإجراءات</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-session>
+                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="p-4 font-medium text-slate-800">{{ session.title }}</td>
+                    <td class="p-4">
+                        <a [routerLink]="['/cases', session.caseId]" class="text-blue-600 hover:underline font-bold">
+                            {{ session.caseNumber }}
+                        </a>
+                        <div class="text-xs text-slate-400">{{ session.caseTitle }}</div>
+                    </td>
+                    <td class="p-4 text-center">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-slate-700">{{ session.scheduledAt | date:'dd/MM/yyyy' }}</span>
+                            <span class="text-xs text-slate-500">{{ session.scheduledAt | date:'HH:mm' }}</span>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-map-marker text-red-400"></i>
+                            <span>{{ session.courtName }}</span>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <p-tag [value]="getStatusLabel(session.status)" [severity]="getStatusSeverity(session.status)" styleClass="text-xs"></p-tag>
+                    </td>
+                    <td class="p-4 text-center">
+                        <div class="flex justify-center gap-2">
+                            <button pButton icon="pi pi-pencil" class="p-button-text p-button-secondary p-button-sm" (click)="editSession(session)"></button>
+                            <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" (click)="deleteSession(session)"></button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="6" class="p-12 text-center text-slate-500">
+                        <div class="flex flex-col items-center gap-3">
+                            <i class="pi pi-calendar-times text-4xl text-slate-200"></i>
+                            <p>لم يتم العثور على جلسات تطابق البحث.</p>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+
+    <!-- Session Dialog -->
+    <app-session-dialog [(visible)]="displayDialog" 
+                        [session]="selectedSession" 
+                        (onSave)="onSave($event)">
+    </app-session-dialog>
+</div>
