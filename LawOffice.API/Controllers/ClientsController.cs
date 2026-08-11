@@ -36,6 +36,15 @@ public class ClientsController : ControllerBase
         return Ok(client);
     }
 
+    [Authorize(Policy = Permissions.Clients.View)]
+    [HttpGet("{id:guid}/works")]
+    public async Task<ActionResult<ClientWorksDto>> GetWorks(Guid id)
+    {
+        var works = await _clientService.GetClientWorksAsync(id);
+        if (works == null) return NotFound();
+        return Ok(works);
+    }
+
     [Authorize(Policy = Permissions.Clients.Create)]
     [HttpPost]
     public async Task<ActionResult<ClientDto>> Create([FromBody] CreateClientDto createDto)

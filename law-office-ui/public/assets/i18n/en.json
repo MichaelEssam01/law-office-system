@@ -130,7 +130,19 @@
     "CREATE_SUCCESS": "Client added successfully",
     "LOAD_ERROR": "Failed to load clients",
     "SAVE_ERROR": "Failed to process request",
-    "NATIONAL_ID_EXISTS": "A client with this National ID already exists"
+    "NATIONAL_ID_EXISTS": "A client with this National ID already exists",
+    "WORKS_TITLE": "Client Activity & History",
+    "VIEW_WORKS": "View Client Activities",
+    "TABS": {
+      "CASES": "Cases",
+      "SESSIONS": "Court Sessions",
+      "INVOICES": "Financial Invoices",
+      "DOCUMENTS": "Documents"
+    },
+    "NO_CASES": "No cases linked to this client",
+    "NO_SESSIONS": "No court sessions for this client",
+    "NO_INVOICES": "No invoices generated for this client",
+    "NO_DOCUMENTS": "No documents uploaded for this client"
   },
   "CASES": {
     "TITLE": "Cases",

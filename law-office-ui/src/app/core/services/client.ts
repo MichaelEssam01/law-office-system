@@ -11,6 +11,65 @@ export interface Client {
   nationalId: string;
 }
 
+export interface ClientCaseSummary {
+  id: string;
+  caseNumber: string;
+  title: string;
+  status: string;
+  lawyerName: string;
+  startDate: string;
+}
+
+export interface ClientSessionSummary {
+  id: string;
+  caseId: string;
+  caseNumber: string;
+  title: string;
+  scheduledAt: string;
+  courtName: string;
+  status: string;
+}
+
+export interface ClientPaymentSummary {
+  id: string;
+  amount: number;
+  paymentDate: string;
+  method: string;
+  notes?: string;
+}
+
+export interface ClientInvoiceSummary {
+  id: string;
+  caseId: string;
+  caseNumber: string;
+  invoiceNumber: string;
+  title: string;
+  amount: number;
+  paidAmount: number;
+  remainingAmount: number;
+  dueDate: string;
+  status: string;
+  payments: ClientPaymentSummary[];
+}
+
+export interface ClientDocumentSummary {
+  id: string;
+  caseId: string;
+  caseNumber: string;
+  originalFileName: string;
+  category: string;
+  fileSize: number;
+  createdAt: string;
+}
+
+export interface ClientWorks {
+  client: Client;
+  cases: ClientCaseSummary[];
+  sessions: ClientSessionSummary[];
+  invoices: ClientInvoiceSummary[];
+  documents: ClientDocumentSummary[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -24,6 +83,10 @@ export class ClientService {
 
   async getClient(id: string): Promise<Client> {
     return firstValueFrom(this.http.get<Client>(`${this.apiUrl}/${id}`));
+  }
+
+  async getClientWorks(id: string): Promise<ClientWorks> {
+    return firstValueFrom(this.http.get<ClientWorks>(`${this.apiUrl}/${id}/works`));
   }
 
   async createClient(client: Client): Promise<Client> {

@@ -2,6 +2,7 @@ using LawOffice.Application.DTOs.Clients;
 using LawOffice.Application.Interfaces.Repositories;
 using LawOffice.Application.Interfaces.Services;
 using LawOffice.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace LawOffice.Application.Services;
 
@@ -30,6 +31,78 @@ public class ClientService : IClientService
         if (client == null) return null;
         
         return MapToDto(client);
+    }
+
+    public async Task<ClientWorksDto?> GetClientWorksAsync(Guid id)
+    {
+        var client = await _clientRepository.GetByIdAsync(id);
+        if (client == null) return null;
+
+        var cases = await _unitOfWork.Repository<Case>().Query()
+            .Include(c => c.AssignedLawyer)
+            .Include(c => c.Sessions)
+            .Include(c => c.Invoices)
+                .ThenInclude(i => i.Payments)
+            .Include(c => c.Documents)
+            .Where(c => c.ClientId == id)
+            .AsNoTracking()
+            .ToListAsync();
+
+        var worksDto = new ClientWorksDto
+        {
+            Client = MapToDto(client),
+            Cases = cases.Select(c => new ClientCaseSummaryDto
+            {
+                Id = c.Id,
+                CaseNumber = c.CaseNumber,
+                Title = c.Title,
+                Status = c.Status.ToString(),
+                LawyerName = c.AssignedLawyer?.FullName ?? string.Empty,
+                StartDate = c.StartDate
+            }).ToList(),
+            Sessions = cases.SelectMany(c => c.Sessions.Select(s => new ClientSessionSummaryDto
+            {
+                Id = s.Id,
+                CaseId = c.Id,
+                CaseNumber = c.CaseNumber,
+                Title = s.Title,
+                ScheduledAt = s.ScheduledAt,
+                CourtName = s.CourtName,
+                Status = s.Status.ToString()
+            })).OrderByDescending(s => s.ScheduledAt).ToList(),
+            Invoices = cases.SelectMany(c => c.Invoices.Select(i => new ClientInvoiceSummaryDto
+            {
+                Id = i.Id,
+                CaseId = c.Id,
+                CaseNumber = c.CaseNumber,
+                InvoiceNumber = i.InvoiceNumber,
+                Title = i.Title,
+                Amount = i.Amount,
+                PaidAmount = i.Payments.Sum(p => p.Amount),
+                DueDate = i.DueDate,
+                Status = i.Status.ToString(),
+                Payments = i.Payments.Select(p => new ClientPaymentSummaryDto
+                {
+                    Id = p.Id,
+                    Amount = p.Amount,
+                    PaymentDate = p.PaymentDate,
+                    Method = p.Method.ToString(),
+                    Notes = p.Notes
+                }).OrderByDescending(p => p.PaymentDate).ToList()
+            })).OrderByDescending(i => i.DueDate).ToList(),
+            Documents = cases.SelectMany(c => c.Documents.Select(d => new ClientDocumentSummaryDto
+            {
+                Id = d.Id,
+                CaseId = c.Id,
+                CaseNumber = c.CaseNumber,
+                OriginalFileName = d.OriginalFileName,
+                Category = d.Category.ToString(),
+                FileSize = d.FileSize,
+                CreatedAt = d.CreatedAt
+            })).OrderByDescending(d => d.CreatedAt).ToList()
+        };
+
+        return worksDto;
     }
 
     public async Task<ClientDto> CreateClientAsync(CreateClientDto clientDto)

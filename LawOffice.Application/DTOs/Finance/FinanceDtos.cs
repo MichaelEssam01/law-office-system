@@ -8,6 +8,7 @@ public class InvoiceListDto
     public Guid Id { get; set; }
     public Guid CaseId { get; set; }
     public Guid ClientId { get; set; }
+    public string ClientName { get; set; } = string.Empty;
     public string CaseNumber { get; set; } = string.Empty;
     public string CaseTitle { get; set; } = string.Empty;
     public string InvoiceNumber { get; set; } = string.Empty;

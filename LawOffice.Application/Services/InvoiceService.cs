@@ -20,6 +20,7 @@ public class InvoiceService : IInvoiceService
     {
         var query = _unitOfWork.Repository<Invoice>().Query()
             .Include(i => i.Case)
+                .ThenInclude(c => c!.Client)
             .Include(i => i.Payments)
             .AsQueryable();
 
@@ -33,6 +34,7 @@ public class InvoiceService : IInvoiceService
                 Id = i.Id,
                 CaseId = i.CaseId,
                 ClientId = i.Case!.ClientId,
+                ClientName = i.Case.Client != null ? i.Case.Client.FullName : string.Empty,
                 CaseNumber = i.Case!.CaseNumber,
                 CaseTitle = i.Case!.Title,
                 InvoiceNumber = i.InvoiceNumber,
@@ -51,6 +53,7 @@ public class InvoiceService : IInvoiceService
     {
         var i = await _unitOfWork.Repository<Invoice>().Query()
             .Include(i => i.Case)
+                .ThenInclude(c => c!.Client)
             .Include(i => i.Payments)
             .FirstOrDefaultAsync(i => i.Id == id);
 
@@ -61,6 +64,7 @@ public class InvoiceService : IInvoiceService
             Id = i.Id,
             CaseId = i.CaseId,
             ClientId = i.Case!.ClientId,
+            ClientName = i.Case.Client != null ? i.Case.Client.FullName : string.Empty,
             CaseNumber = i.Case!.CaseNumber,
             CaseTitle = i.Case!.Title,
             InvoiceNumber = i.InvoiceNumber,

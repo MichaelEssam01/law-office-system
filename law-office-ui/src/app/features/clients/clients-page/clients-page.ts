@@ -9,8 +9,12 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { TabsModule } from 'primeng/tabs';
+import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
+import { RippleModule } from 'primeng/ripple';
 import { AppStateService } from '../../../core/services/app-state.service';
-import { ClientService, Client } from '../../../core/services/client';
+import { ClientService, Client, ClientWorks } from '../../../core/services/client';
 import { ClientDialog } from '../client-dialog/client-dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -28,7 +32,11 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     ClientDialog,
     TranslateModule,
     IconFieldModule,
-    InputIconModule
+    InputIconModule,
+    TabsModule,
+    TagModule,
+    TooltipModule,
+    RippleModule
   ],
   templateUrl: './clients-page.html',
   styleUrl: './clients-page.css',
@@ -39,6 +47,10 @@ export class ClientsPage implements OnInit {
   selectedClient: Client | null = null;
   displayDialog: boolean = false;
   loading: boolean = true;
+
+  displayWorksDialog: boolean = false;
+  clientWorks: ClientWorks | null = null;
+  loadingWorks: boolean = false;
 
   constructor(
     private clientService: ClientService,
@@ -146,6 +158,28 @@ export class ClientsPage implements OnInit {
           detail: this.translate.instant('CLIENTS.SAVE_ERROR') 
         });
       }
+    }
+  }
+
+  async viewClientWorks(client: Client) {
+    if (!client.id) return;
+    this.selectedClient = client;
+    this.displayWorksDialog = true;
+    this.loadingWorks = true;
+    this.clientWorks = null;
+    this.cdr.detectChanges();
+
+    try {
+      this.clientWorks = await this.clientService.getClientWorks(client.id);
+    } catch (err) {
+      this.messageService.add({
+        severity: 'error',
+        summary: this.translate.instant('COMMON.ERROR'),
+        detail: this.translate.instant('CLIENTS.LOAD_ERROR')
+      });
+    } finally {
+      this.loadingWorks = false;
+      this.cdr.detectChanges();
     }
   }
 }

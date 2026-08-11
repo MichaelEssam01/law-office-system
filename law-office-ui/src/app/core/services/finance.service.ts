@@ -22,6 +22,7 @@ export interface InvoiceListDto {
   id: string;
   caseId: string;
   clientId?: string;
+  clientName?: string;
   caseNumber: string;
   caseTitle: string;
   invoiceNumber: string;
