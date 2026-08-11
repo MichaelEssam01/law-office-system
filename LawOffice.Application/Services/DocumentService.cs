@@ -44,6 +44,26 @@ public class DocumentService : IDocumentService
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<DocumentDto>> GetAllDocumentsAsync()
+    {
+        return await _unitOfWork.Repository<Document>().Query()
+            .Include(d => d.Case)
+            .OrderByDescending(d => d.CreatedAt)
+            .Select(d => new DocumentDto
+            {
+                Id = d.Id,
+                CaseId = d.CaseId,
+                OriginalFileName = d.OriginalFileName,
+                FileSize = d.FileSize,
+                ContentType = d.ContentType,
+                Category = d.Category,
+                Description = d.Description,
+                UploadedAt = d.CreatedAt,
+                CaseTitle = d.Case != null ? d.Case.Title : "N/A"
+            })
+            .ToListAsync();
+    }
+
     public async Task<DocumentDto> UploadDocumentAsync(UploadDocumentDto dto, Stream fileStream, string fileName, string contentType, long fileSize, Guid userId)
     {
         var caseExists = await _unitOfWork.Repository<Case>().Query().AnyAsync(c => c.Id == dto.CaseId);

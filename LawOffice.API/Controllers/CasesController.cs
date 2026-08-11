@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using LawOffice.Application.DTOs.Cases;
 using LawOffice.Application.Interfaces.Services;
+using LawOffice.Application.Common.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,6 +19,7 @@ public class CasesController : ControllerBase
         _caseService = caseService;
     }
 
+    [Authorize(Policy = Permissions.Cases.View)]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CaseListDto>>> GetAll(
         [FromQuery] string? status = null, 
@@ -28,6 +30,7 @@ public class CasesController : ControllerBase
         return Ok(cases);
     }
 
+    [Authorize(Policy = Permissions.Cases.View)]
     [HttpGet("{id}")]
     public async Task<ActionResult<CaseDetailDto>> GetById(Guid id)
     {
@@ -36,6 +39,7 @@ public class CasesController : ControllerBase
         return Ok(@case);
     }
 
+    [Authorize(Policy = Permissions.Cases.Create)]
     [HttpPost]
     public async Task<ActionResult<CaseDetailDto>> Create([FromBody] CreateCaseDto dto)
     {
@@ -44,6 +48,7 @@ public class CasesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = createdCase.Id }, createdCase);
     }
 
+    [Authorize(Policy = Permissions.Cases.Update)]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCaseDto dto)
     {
@@ -56,6 +61,7 @@ public class CasesController : ControllerBase
         return NoContent();
     }
 
+    [Authorize(Policy = Permissions.Cases.Delete)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {

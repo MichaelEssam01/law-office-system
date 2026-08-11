@@ -5,9 +5,8 @@ namespace LawOffice.Application.DTOs.Cases;
 
 public class CreateCaseDto
 {
-    [Required]
     [StringLength(50)]
-    public string CaseNumber { get; set; } = string.Empty;
+    public string? CaseNumber { get; set; }
 
     [Required]
     [StringLength(200)]

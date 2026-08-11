@@ -1,0 +1,95 @@
+<div class="p-6 space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold text-slate-800">{{ 'USERS.TITLE' | translate }}</h1>
+            <p class="text-slate-500">{{ 'USERS.SUBTITLE' | translate }}</p>
+        </div>
+        <p-button [label]="'USERS.ADD_USER' | translate" icon="pi pi-user-plus" 
+                  styleClass="bg-blue-600 border-none hover:bg-blue-700 rounded-xl px-6 py-3 font-semibold shadow-lg shadow-blue-600/20"
+                  (onClick)="openNew()"></p-button>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+        <p-table #dt [value]="users()" [loading]="loading()" [paginator]="true" [rows]="10"
+                 [globalFilterFields]="['fullName', 'email', 'role']"
+                 (onFilter)="cdr.detectChanges()"
+                 styleClass="p-datatable-gridlines p-datatable-sm">
+            
+            <ng-template pTemplate="caption">
+                <div class="flex items-center justify-between p-2">
+                    <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
+                        <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+                        <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
+                               [placeholder]="'COMMON.SEARCH' | translate" class="pl-10 py-2.5 border-slate-200 rounded-xl w-full sm:w-64 focus:ring-2 focus:ring-blue-500/20" />
+                    </p-iconField>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="header">
+                <tr class="bg-slate-50">
+                    <th pSortableColumn="fullName" class="px-4 py-4 text-slate-700 font-bold uppercase text-xs tracking-wider">{{ 'USERS.NAME' | translate }} <p-sortIcon field="fullName"></p-sortIcon></th>
+                    <th pSortableColumn="email" class="px-4 py-4 text-slate-700 font-bold uppercase text-xs tracking-wider">{{ 'USERS.EMAIL' | translate }} <p-sortIcon field="email"></p-sortIcon></th>
+                    <th pSortableColumn="role" class="px-4 py-4 text-slate-700 font-bold uppercase text-xs tracking-wider">{{ 'USERS.ROLE' | translate }} <p-sortIcon field="role"></p-sortIcon></th>
+                    <th class="px-4 py-4 text-slate-700 font-bold uppercase text-xs tracking-wider">{{ 'USERS.STATUS' | translate }}</th>
+                    <th class="px-4 py-4 text-slate-700 font-bold uppercase text-xs tracking-wider w-32">{{ 'COMMON.ACTIONS' | translate }}</th>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="body" let-user>
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-4 py-4">
+                        <div class="font-semibold text-slate-800">{{user.fullName}}</div>
+                    </td>
+                    <td class="px-4 py-4 text-slate-600">{{user.email}}</td>
+                    <td class="px-4 py-4">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+                              [ngClass]="{
+                                'bg-purple-100 text-purple-700': user.role === 'Admin',
+                                'bg-blue-100 text-blue-700': user.role === 'Lawyer',
+                                'bg-teal-100 text-teal-700': user.role === 'Receptionist',
+                                'bg-amber-100 text-amber-700': user.role === 'Accountant'
+                              }">
+                            {{user.role}}
+                        </span>
+                    </td>
+                    <td class="px-4 py-4">
+                        <span class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full" [class.bg-green-500]="user.isActive" [class.bg-red-500]="!user.isActive"></span>
+                            <span class="text-sm" [class.text-green-700]="user.isActive" [class.text-red-700]="!user.isActive">
+                                {{ user.isActive ? ('USERS.ACTIVE' | translate) : ('USERS.INACTIVE' | translate) }}
+                            </span>
+                        </span>
+                    </td>
+                    <td class="px-4 py-4">
+                        <div class="flex gap-1">
+                            <p-button icon="pi pi-pencil" severity="info" [rounded]="true" [text]="true" (onClick)="editUser(user)"></p-button>
+                            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [text]="true" (onClick)="deleteUser(user)"></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="5" class="text-center py-12 text-slate-500 italic">
+                        {{ 'COMMON.NO_DATA' | translate }}
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+
+<p-dialog [(visible)]="displayDialog" 
+          [header]="(selectedUserId() ? 'USERS.EDIT_USER' : 'USERS.ADD_USER') | translate" 
+          [modal]="true" 
+          [breakpoints]="{ '960px': '75vw', '640px': '100vw' }"
+          [style]="{ width: '600px' }"
+          styleClass="p-fluid">
+    @if (displayDialog()) {
+        <app-user-management-dialog [userId]="selectedUserId()" (onSave)="onSave()" (onCancel)="onCancel()"></app-user-management-dialog>
+    }
+</p-dialog>
+
+<p-toast position="top-left"></p-toast>
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>

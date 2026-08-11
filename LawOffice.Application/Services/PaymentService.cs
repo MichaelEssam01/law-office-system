@@ -10,11 +10,13 @@ public class PaymentService : IPaymentService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IInvoiceService _invoiceService;
+    private readonly IFinanceService _financeService;
 
-    public PaymentService(IUnitOfWork unitOfWork, IInvoiceService invoiceService)
+    public PaymentService(IUnitOfWork unitOfWork, IInvoiceService invoiceService, IFinanceService financeService)
     {
         _unitOfWork = unitOfWork;
         _invoiceService = invoiceService;
+        _financeService = financeService;
     }
 
     public async Task<IEnumerable<PaymentListDto>> GetPaymentsAsync(Guid? caseId = null, Guid? invoiceId = null)
@@ -79,17 +81,22 @@ public class PaymentService : IPaymentService
                 .FirstOrDefaultAsync(i => i.Id == dto.InvoiceId.Value);
             
             if (invoice == null) throw new Exception("Invoice not found");
-            
-            // Validation: Invoice belongs to same case
             if (invoice.CaseId != dto.CaseId) throw new Exception("Invoice does not belong to the selected case");
 
-            // Validation: Prevent overpayment
+            // Validation: Prevent overpayment for specific invoice
             var alreadyPaid = invoice.Payments.Sum(p => p.Amount);
             if (alreadyPaid + dto.Amount > invoice.Amount)
             {
-                 // We can allow it but maybe warn. For now, strict as per requirement "Prevent overpayment unless intentionally allowed"
-                 // I'll throw exception for strictness.
                  throw new Exception($"Payment exceeds invoice balance. Remaining: {invoice.Amount - alreadyPaid}");
+            }
+        }
+        else
+        {
+            // Validation: Prevent overpayment for the whole Case
+            var summary = await _financeService.GetCaseSummaryAsync(dto.CaseId);
+            if (dto.Amount > summary.TotalRemaining)
+            {
+                throw new Exception($"Payment exceeds total case balance. Remaining: {summary.TotalRemaining}");
             }
         }
 

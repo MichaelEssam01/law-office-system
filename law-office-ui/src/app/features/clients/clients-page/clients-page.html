@@ -1,34 +1,34 @@
 <div class="space-y-6">
     <div class="flex justify-between items-center">
         <div>
-            <h2 class="text-2xl font-bold text-slate-800">إدارة العملاء</h2>
-            <p class="text-slate-500 text-sm mt-1">إضافة، تعديل، وحذف العملاء الخاصين بالمكتب.</p>
+            <h2 class="text-2xl font-bold text-slate-800">{{ 'CLIENTS.TITLE' | translate }}</h2>
         </div>
-        <p-button label="إضافة عميل" icon="pi pi-plus" severity="primary" (onClick)="openNew()"></p-button>
+        <p-button [label]="'CLIENTS.ADD_CLIENT' | translate" icon="pi pi-plus" severity="primary" (onClick)="openNew()"></p-button>
     </div>
 
     <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden p-4">
         <p-table #dt [value]="clients" [loading]="loading" [paginator]="true" [rows]="10"
                  [globalFilterFields]="['fullName', 'nationalId', 'phone']"
+                 (onFilter)="cdr.detectChanges()"
                  styleClass="p-datatable-sm" [tableStyle]="{'min-width': '50rem'}">
             
             <ng-template pTemplate="caption">
                 <div class="flex items-center justify-between">
-                    <span class="p-input-icon-left relative w-full sm:w-auto">
-                        <i class="pi pi-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
+                        <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
                         <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
-                               placeholder="بحث عن عميل..." class="pl-10 py-2 border-slate-200 rounded-lg w-full sm:w-auto" />
-                    </span>
+                               [placeholder]="'COMMON.SEARCH' | translate" class="w-full sm:w-auto" />
+                    </p-iconField>
                 </div>
             </ng-template>
 
             <ng-template pTemplate="header">
                 <tr>
-                    <th pSortableColumn="fullName">الاسم <p-sortIcon field="fullName"></p-sortIcon></th>
-                    <th pSortableColumn="nationalId">الرقم القومي <p-sortIcon field="nationalId"></p-sortIcon></th>
-                    <th>الهاتف</th>
-                    <th>البريد الإلكتروني</th>
-                    <th>الإجراءات</th>
+                    <th pSortableColumn="fullName">{{ 'CLIENTS.NAME' | translate }} <p-sortIcon field="fullName"></p-sortIcon></th>
+                    <th pSortableColumn="nationalId">{{ 'CLIENTS.NATIONAL_ID' | translate }} <p-sortIcon field="nationalId"></p-sortIcon></th>
+                    <th>{{ 'CLIENTS.PHONE' | translate }}</th>
+                    <th>{{ 'CLIENTS.EMAIL' | translate }}</th>
+                    <th>{{ 'COMMON.ACTIONS' | translate }}</th>
                 </tr>
             </ng-template>
             <ng-template pTemplate="body" let-client>
@@ -47,19 +47,21 @@
             </ng-template>
             <ng-template pTemplate="emptymessage">
                 <tr>
-                    <td colspan="5" class="text-center py-6 text-slate-500">لا يوجد عملاء مضافين بعد.</td>
+                    <td colspan="5" class="text-center py-6 text-slate-500">{{ 'COMMON.NO_DATA' | translate }}</td>
                 </tr>
             </ng-template>
         </p-table>
     </div>
 </div>
 
-<p-dialog [(visible)]="displayDialog" [style]="{width: '500px'}" [header]="selectedClient ? 'تعديل بيانات العميل' : 'إضافة عميل جديد'" [modal]="true" styleClass="p-fluid">
-    <app-client-dialog *ngIf="displayDialog" 
-                       [client]="selectedClient" 
-                       (onSave)="onSave($event)" 
-                       (onCancel)="onDialogHide()">
-    </app-client-dialog>
+<p-dialog [(visible)]="displayDialog" [style]="{width: '500px'}" [header]="selectedClient ? ('CLIENTS.EDIT_CLIENT' | translate) : ('CLIENTS.ADD_CLIENT' | translate)" [modal]="true" styleClass="p-fluid">
+    @if (displayDialog) {
+        <app-client-dialog 
+                           [client]="selectedClient" 
+                           (onSave)="onSave($event)" 
+                           (onCancel)="onDialogHide()">
+        </app-client-dialog>
+    }
 </p-dialog>
 
 <p-toast position="top-left"></p-toast>

@@ -1,32 +1,53 @@
 <div class="space-y-4 pt-2">
     <div class="field">
-        <label for="fullName" class="block font-medium text-slate-700 mb-1">الاسم الكامل <span class="text-red-500">*</span></label>
+        <label for="fullName" class="block font-medium text-slate-700 mb-1">{{ 'CLIENTS.NAME' | translate }} <span class="text-red-500">*</span></label>
         <input type="text" pInputText id="fullName" [(ngModel)]="formData.fullName" required autofocus class="w-full border-slate-300" />
     </div>
 
     <div class="field">
-        <label for="nationalId" class="block font-medium text-slate-700 mb-1">الرقم القومي <span class="text-red-500">*</span></label>
-        <input type="text" pInputText id="nationalId" [(ngModel)]="formData.nationalId" required class="w-full border-slate-300" />
+        <label for="nationalId" class="block font-medium text-slate-700 mb-1">
+            {{ 'CLIENTS.NATIONAL_ID' | translate }} 
+            @if (!hasNoNationalId) {
+                <span class="text-red-500">*</span>
+            }
+        </label>
+        <input type="text" pInputText id="nationalId" [(ngModel)]="formData.nationalId" 
+               [disabled]="hasNoNationalId"
+               [class.ng-invalid]="!hasNoNationalId && formData.nationalId && !isNationalIdValid()"
+               [class.ng-dirty]="!hasNoNationalId && formData.nationalId"
+               class="w-full border-slate-300" />
+        
+        <div class="flex items-center gap-2 mt-2">
+            <p-checkbox [(ngModel)]="hasNoNationalId" [binary]="true" inputId="noNationalId"
+                        (onChange)="hasNoNationalId ? formData.nationalId = '' : ''"></p-checkbox>
+            <label for="noNationalId" class="text-sm text-slate-600 cursor-pointer">
+                {{ 'CLIENTS.NO_NATIONAL_ID' | translate }}
+            </label>
+        </div>
+
+        @if (!hasNoNationalId && formData.nationalId && !isNationalIdValid()) {
+            <small class="text-red-500 block mt-1">{{ 'CLIENTS.NATIONAL_ID_INVALID' | translate }}</small>
+        }
     </div>
 
     <div class="grid grid-cols-2 gap-4">
         <div class="field">
-            <label for="phone" class="block font-medium text-slate-700 mb-1">الهاتف</label>
+            <label for="phone" class="block font-medium text-slate-700 mb-1">{{ 'CLIENTS.PHONE' | translate }}</label>
             <input type="text" pInputText id="phone" [(ngModel)]="formData.phone" class="w-full border-slate-300" dir="ltr" />
         </div>
         <div class="field">
-            <label for="email" class="block font-medium text-slate-700 mb-1">البريد الإلكتروني</label>
+            <label for="email" class="block font-medium text-slate-700 mb-1">{{ 'CLIENTS.EMAIL' | translate }}</label>
             <input type="email" pInputText id="email" [(ngModel)]="formData.email" class="w-full border-slate-300" dir="ltr" />
         </div>
     </div>
 
     <div class="field">
-        <label for="address" class="block font-medium text-slate-700 mb-1">العنوان</label>
+        <label for="address" class="block font-medium text-slate-700 mb-1">{{ 'CLIENTS.ADDRESS' | translate }}</label>
         <input type="text" pInputText id="address" [(ngModel)]="formData.address" class="w-full border-slate-300" />
     </div>
 </div>
 
 <div class="flex justify-end gap-2 mt-6 border-t pt-4 border-slate-100">
-    <p-button label="إلغاء" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="cancel()"></p-button>
-    <p-button label="حفظ" icon="pi pi-check" (onClick)="save()" [disabled]="!formData.fullName || !formData.nationalId"></p-button>
+    <p-button [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="cancel()"></p-button>
+    <p-button [label]="'COMMON.SAVE' | translate" icon="pi pi-check" (onClick)="save()" [disabled]="!formData.fullName || !isNationalIdValid()"></p-button>
 </div>

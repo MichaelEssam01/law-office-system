@@ -10,6 +10,7 @@ public class CaseListDto
     public CaseStatus Status { get; set; }
     public string ClientName { get; set; } = string.Empty;
     public string LawyerName { get; set; } = string.Empty;
+    public Guid ClientId { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime CreatedAt { get; set; }
 }

@@ -1,0 +1,55 @@
+<form [formGroup]="userForm" (ngSubmit)="save()" class="space-y-6 py-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold text-slate-700">{{ 'USERS.NAME' | translate }}</label>
+            <input pInputText formControlName="fullName" [placeholder]="'USERS.NAME_PLACEHOLDER' | translate" class="rounded-xl border-slate-200" />
+        </div>
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold text-slate-700">{{ 'USERS.EMAIL' | translate }}</label>
+            <input pInputText formControlName="email" type="email" [placeholder]="'USERS.EMAIL_PLACEHOLDER' | translate" class="rounded-xl border-slate-200" />
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold text-slate-700">{{ 'USERS.ROLE' | translate }}</label>
+            <p-select [options]="roles" formControlName="role" [placeholder]="'USERS.SELECT_ROLE' | translate" styleClass="rounded-xl border-slate-200" optionLabel="label" optionValue="value"></p-select>
+        </div>
+        <div class="flex flex-col gap-2">
+            <label class="font-semibold text-slate-700">{{ (userId ? 'USERS.NEW_PASSWORD_OPTIONAL' : 'USERS.PASSWORD') | translate }}</label>
+            <p-password formControlName="password" [toggleMask]="true" [feedback]="!userId" styleClass="w-full" inputStyleClass="w-full rounded-xl border-slate-200"></p-password>
+        </div>
+    </div>
+
+    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+        <p-toggleswitch formControlName="isActive"></p-toggleswitch>
+        <span class="font-semibold text-slate-700">{{ 'USERS.ACTIVE_ACCOUNT' | translate }}</span>
+    </div>
+
+    <div class="space-y-4">
+        <h3 class="text-lg font-bold text-slate-800 border-b pb-2">{{ 'USERS.PERMISSIONS_TITLE' | translate }}</h3>
+        <div class="space-y-4 max-h-[400px] overflow-y-auto p-2">
+            @for (group of groupedPermissions(); track group.category) {
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <h4 class="font-bold text-blue-700 mb-3 uppercase tracking-wider text-xs">{{ 'USERS.CATEGORIES.' + group.category.toUpperCase() | translate }}</h4>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        @for (perm of group.perms; track perm.value) {
+                            <div class="flex items-center gap-2 group">
+                                <p-checkbox [value]="perm.value" formControlName="permissions" [inputId]="perm.value"></p-checkbox>
+                                <label [for]="perm.value" class="text-sm text-slate-600 cursor-pointer group-hover:text-blue-600 transition-colors">
+                                    {{ 'USERS.ACTIONS.' + perm.action.toUpperCase() | translate }}
+                                </label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="flex justify-end gap-3 pt-4 border-t">
+        <p-button [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="cancel()"></p-button>
+        <p-button [label]="'COMMON.SAVE' | translate" icon="pi pi-check" [loading]="loading()" type="submit" 
+                  styleClass="bg-blue-600 border-none rounded-xl px-8 shadow-lg shadow-blue-600/20"></p-button>
+    </div>
+</form>

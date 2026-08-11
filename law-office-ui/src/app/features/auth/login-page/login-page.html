@@ -1,61 +1,104 @@
-<div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8" dir="rtl">
-    <div class="sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="flex justify-center text-blue-600">
-            <i class="pi pi-shield text-5xl"></i>
-        </div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            مكتب المحاماة
-        </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
-            تسجيل الدخول للنظام
-        </p>
+<div class="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative font-sans" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
+    <!-- Decorative Header Gradient -->
+    <div class="absolute top-0 left-0 w-full h-64 bg-slate-900 z-0"></div>
+
+    <!-- Language Toggle -->
+    <div class="absolute top-8 right-8 z-50">
+        <button (click)="appState.toggleLanguage()" 
+                class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white/80 hover:text-white hover:bg-white/10 font-semibold text-sm transition-all border border-white/20">
+            <i class="pi pi-globe text-lg"></i>
+            <span>{{ appState.currentLang() === 'en' ? 'العربية' : 'English' }}</span>
+        </button>
     </div>
 
-    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="bg-white py-8 px-4 shadow-sm sm:rounded-lg sm:px-10 border border-gray-200">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md z-10">
+        <div class="flex justify-center mb-6">
+            <div class="w-20 h-20 bg-white rounded-2xl shadow-2xl flex items-center justify-center transform hover:rotate-6 transition-transform duration-300">
+                <img src="lawyer-svgrepo-com.svg" class="w-12 h-12" alt="Logo">
+            </div>
+        </div>
+        <h2 class="text-center text-3xl font-bold tracking-tight text-white mb-2">
+            {{ appState.settings().firmName }}
+        </h2>
+    </div>
+
+    <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10 px-4">
+        <div class="bg-white py-12 px-6 shadow-[0_20px_50px_rgba(0,0,0,0.1)] sm:rounded-3xl sm:px-12 border border-slate-100">
+            <div class="mb-10 text-center">
+                <h3 class="text-2xl font-bold text-slate-900 mb-2">{{ 'AUTH.LOGIN_TITLE' | translate }}</h3>
+                <p class="text-slate-500">{{ 'AUTH.LOGIN_DESCRIPTION' | translate }}</p>
+            </div>
+
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
-                <div *ngIf="errorMessage()" class="p-3 bg-red-50 border border-red-200 rounded-md">
-                    <p class="text-sm text-red-600">{{ errorMessage() }}</p>
-                </div>
+                @if (errorMessage()) {
+                    <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded-xl flex items-start gap-3">
+                        <i class="pi pi-exclamation-circle text-red-500 mt-0.5"></i>
+                        <p class="text-sm font-medium text-red-800">{{ errorMessage() }}</p>
+                    </div>
+                }
 
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">البريد الإلكتروني</label>
-                    <div class="mt-1 relative rounded-md shadow-sm">
+                <div class="space-y-2">
+                    <label for="email" class="block text-sm font-bold text-slate-700 tracking-wide uppercase">{{ 'AUTH.EMAIL' | translate }}</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-slate-900 transition-colors">
+                            <i class="pi pi-envelope"></i>
+                        </div>
                         <input id="email" formControlName="email" type="email" required 
-                               class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                               [class.border-red-500]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+                               class="block w-full ps-12 pe-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 outline-none transition-all duration-200"
+                               [class.border-red-500]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+                               [placeholder]="'email@firm.com'">
                     </div>
                 </div>
 
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">كلمة المرور</label>
-                    <div class="mt-1">
-                        <input id="password" formControlName="password" type="password" required 
-                               class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                               [class.border-red-500]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+                <div class="space-y-2">
+                    <label for="password" class="block text-sm font-bold text-slate-700 tracking-wide uppercase">{{ 'AUTH.PASSWORD' | translate }}</label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-slate-900 transition-colors">
+                            <i class="pi pi-lock"></i>
+                        </div>
+                        <input id="password" formControlName="password" [type]="showPassword() ? 'text' : 'password'" required 
+                               class="block w-full ps-12 pe-12 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 outline-none transition-all duration-200"
+                               [class.border-red-500]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+                               [placeholder]="'••••••••'">
+                        <button type="button" 
+                                (click)="showPassword.set(!showPassword())"
+                                class="absolute inset-y-0 end-0 pe-4 flex items-center text-slate-400 hover:text-slate-900 transition-colors">
+                            <i [class]="showPassword() ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+                        </button>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between py-2">
                     <div class="flex items-center">
                         <input id="remember-me" name="remember-me" type="checkbox" 
-                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                        <label for="remember-me" class="mr-2 block text-sm text-gray-900">تذكرني</label>
+                               class="h-4 w-4 text-slate-900 focus:ring-slate-900 border-slate-300 rounded cursor-pointer">
+                        <label for="remember-me" class="ms-2 block text-sm font-medium text-slate-600 cursor-pointer select-none">
+                            {{ 'AUTH.REMEMBER_ME' | translate }}
+                        </label>
                     </div>
 
                     <div class="text-sm">
-                        <a href="#" class="font-medium text-blue-600 hover:text-blue-500">نسيت كلمة المرور؟</a>
+                        <a routerLink="/forgot-password" class="font-bold text-slate-900 hover:underline transition-colors">
+                            {{ 'AUTH.FORGOT_PASSWORD' | translate }}
+                        </a>
                     </div>
                 </div>
 
-                <div>
-                    <button type="submit" [disabled]="loginForm.invalid || loading()"
-                            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span *ngIf="!loading()">تسجيل الدخول</span>
-                        <i *ngIf="loading()" class="pi pi-spin pi-spinner mr-2"></i>
-                    </button>
-                </div>
+                <button type="submit" [disabled]="loginForm.invalid || loading()"
+                        class="w-full flex justify-center items-center gap-3 py-4 px-4 bg-slate-900 hover:bg-black text-white rounded-2xl font-bold transition-all duration-300 shadow-xl shadow-slate-900/20 disabled:opacity-50 disabled:cursor-not-allowed transform active:scale-95">
+                    @if (!loading()) {
+                        <span>{{ 'AUTH.LOGIN_BUTTON' | translate }}</span>
+                        <i class="pi pi-arrow-right me-2"></i>
+                    }
+                    @if (loading()) {
+                        <i class="pi pi-spin pi-spinner text-xl"></i>
+                    }
+                </button>
             </form>
         </div>
+
+        <footer class="mt-12 text-center text-sm text-slate-400">
+            <p>&copy; {{ currentYear }} {{ appState.settings().firmName }}. {{ 'AUTH.FOOTER_RIGHTS' | translate }}</p>
+        </footer>
     </div>
 </div>

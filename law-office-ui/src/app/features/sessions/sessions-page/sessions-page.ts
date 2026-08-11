@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -16,6 +16,8 @@ import { MessageService, ConfirmationService } from 'primeng/api';
 import { SessionService, SessionListDto, SessionStatus, SessionDetailDto } from '../../../core/services/session.service';
 import { CaseService, CaseListDto } from '../../../core/services/case.service';
 import { SessionDialog } from '../session-dialog/session-dialog';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { AppStateService } from '../../../core/services/app-state.service';
 
 @Component({
   selector: 'app-sessions-page',
@@ -34,7 +36,8 @@ import { SessionDialog } from '../session-dialog/session-dialog';
     ConfirmDialogModule,
     SelectModule,
     TooltipModule,
-    SessionDialog
+    SessionDialog,
+    TranslateModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './sessions-page.html'
@@ -44,6 +47,8 @@ export class SessionsPage implements OnInit {
   private caseService = inject(CaseService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
+  private translate = inject(TranslateService);
+  public appState = inject(AppStateService);
   private cdr = inject(ChangeDetectorRef);
 
   sessions = signal<SessionListDto[]>([]);
@@ -58,14 +63,27 @@ export class SessionsPage implements OnInit {
   selectedCase = signal<string | null>(null);
   
   cases = signal<CaseListDto[]>([]);
-  statuses = [
-    { label: 'مجدولة', value: '0' },
-    { label: 'مكتملة', value: '1' },
-    { label: 'مؤجلة', value: '2' },
-    { label: 'ملغاة', value: '3' }
-  ];
+  statuses = signal<any[]>([]);
+
+  constructor() {
+    effect(() => {
+      // Trigger update when language changes
+      const lang = this.appState.currentLang();
+      this.updateStatusLabels();
+    });
+  }
+
+  updateStatusLabels() {
+    this.statuses.set([
+      { label: this.translate.instant('SESSIONS.SCHEDULED'), value: '0' },
+      { label: this.translate.instant('SESSIONS.COMPLETED'), value: '1' },
+      { label: this.translate.instant('SESSIONS.POSTPONED'), value: '2' },
+      { label: this.translate.instant('SESSIONS.CANCELLED'), value: '3' }
+    ]);
+  }
 
   async ngOnInit() {
+    this.updateStatusLabels();
     await Promise.all([
       this.loadSessions(),
       this.loadCases()
@@ -91,7 +109,11 @@ export class SessionsPage implements OnInit {
       this.sessions.set(data);
     } catch (error) {
       console.error('Error loading sessions', error);
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في تحميل الجلسات' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: this.translate.instant('SESSIONS.LOAD_ERROR') 
+      });
     } finally {
       this.loading.set(false);
       this.cdr.detectChanges();
@@ -120,24 +142,36 @@ export class SessionsPage implements OnInit {
       this.selectedSession.set(fullSession);
       this.displayDialog.set(true);
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في تحميل تفاصيل الجلسة' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: this.translate.instant('SESSIONS.DETAILS_ERROR') 
+      });
     }
   }
 
   deleteSession(sessionItem: SessionListDto) {
     this.confirmationService.confirm({
-      message: `هل أنت متأكد من حذف جلسة "${sessionItem.title}"؟`,
-      header: 'تأكيد الحذف',
+      message: this.translate.instant('SESSIONS.DELETE_CONFIRM', { title: sessionItem.title }),
+      header: this.translate.instant('COMMON.CONFIRM'),
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'نعم، احذف',
-      rejectLabel: 'إلغاء',
+      acceptLabel: this.translate.instant('COMMON.YES'),
+      rejectLabel: this.translate.instant('COMMON.CANCEL'),
       accept: async () => {
         try {
           await this.sessionService.deleteSession(sessionItem.id);
-          this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم حذف الجلسة بنجاح' });
+          this.messageService.add({ 
+            severity: 'success', 
+            summary: this.translate.instant('COMMON.SUCCESS'), 
+            detail: this.translate.instant('SESSIONS.DELETE_SUCCESS') 
+          });
           await this.loadSessions();
         } catch (error) {
-          this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في حذف الجلسة' });
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: this.translate.instant('COMMON.ERROR'), 
+            detail: this.translate.instant('SESSIONS.DELETE_ERROR') 
+          });
         }
       }
     });
@@ -147,15 +181,27 @@ export class SessionsPage implements OnInit {
     try {
       if (sessionData.id) {
         await this.sessionService.updateSession(sessionData.id, sessionData);
-        this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم تحديث الجلسة بنجاح' });
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: this.translate.instant('COMMON.SUCCESS'), 
+          detail: this.translate.instant('SESSIONS.UPDATE_SUCCESS') 
+        });
       } else {
         await this.sessionService.createSession(sessionData);
-        this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم إضافة الجلسة بنجاح' });
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: this.translate.instant('COMMON.SUCCESS'), 
+          detail: this.translate.instant('SESSIONS.CREATE_SUCCESS') 
+        });
       }
       this.displayDialog.set(false);
       await this.loadSessions();
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في حفظ الجلسة' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: this.translate.instant('SESSIONS.SAVE_ERROR') 
+      });
     }
   }
 
@@ -171,11 +217,11 @@ export class SessionsPage implements OnInit {
 
   getStatusLabel(status: SessionStatus): string {
     switch (status) {
-      case SessionStatus.Scheduled: return 'مجدولة';
-      case SessionStatus.Completed: return 'مكتملة';
-      case SessionStatus.Postponed: return 'مؤجلة';
-      case SessionStatus.Cancelled: return 'ملغاة';
-      default: return 'غير معروف';
+      case SessionStatus.Scheduled: return this.translate.instant('SESSIONS.SCHEDULED');
+      case SessionStatus.Completed: return this.translate.instant('SESSIONS.COMPLETED');
+      case SessionStatus.Postponed: return this.translate.instant('SESSIONS.POSTPONED');
+      case SessionStatus.Cancelled: return this.translate.instant('SESSIONS.CANCELLED');
+      default: return 'Unknown';
     }
   }
 }

@@ -27,6 +27,7 @@ public class FinanceService : IFinanceService
         {
             TotalInvoiced = totalInvoiced,
             TotalPaid = totalPaid,
+            TotalRemaining = totalInvoiced - totalPaid,
             UnpaidInvoicesCount = unpaidCount,
             OverdueInvoicesCount = overdueCount
         };
@@ -54,6 +55,7 @@ public class FinanceService : IFinanceService
         {
             TotalInvoiced = totalInvoiced,
             TotalPaid = totalPaid,
+            TotalRemaining = totalInvoiced - totalPaid,
             UnpaidInvoicesCount = unpaidCount,
             OverdueInvoicesCount = overdueCount
         };

@@ -10,9 +10,11 @@ import { TableModule } from 'primeng/table';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { TranslateService, TranslateModule } from '@ngx-translate/core';
+import { AppStateService } from '../../../core/services/app-state.service';
 import { CaseService, CaseDetailDto, CaseStatus } from '../../../core/services/case.service';
 import { SessionService, SessionListDto, SessionStatus, SessionDetailDto } from '../../../core/services/session.service';
-import { FinanceService, InvoiceListDto, PaymentListDto, FinancialSummaryDto, InvoiceStatus } from '../../../core/services/finance.service';
+import { FinanceService, InvoiceListDto, PaymentListDto, FinancialSummaryDto, InvoiceStatus, PaymentMethod } from '../../../core/services/finance.service';
 import { DocumentService, DocumentDto, DocumentCategory } from '../../../core/services/document.service';
 import { CaseDialog } from '../case-dialog/case-dialog';
 import { SessionDialog } from '../../sessions/session-dialog/session-dialog';
@@ -34,6 +36,7 @@ import { DocumentUploadDialog } from '../document-upload-dialog/document-upload-
     TableModule,
     ConfirmDialogModule,
     TooltipModule,
+    TranslateModule,
     CaseDialog,
     SessionDialog,
     InvoiceDialog,
@@ -52,6 +55,8 @@ export class CaseDetailsPage implements OnInit {
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
   private cdr = inject(ChangeDetectorRef);
+  private translate = inject(TranslateService);
+  public appState = inject(AppStateService);
 
   caseId = signal<string | null>(null);
   case = signal<CaseDetailDto | null>(null);
@@ -98,7 +103,11 @@ export class CaseDetailsPage implements OnInit {
       this.case.set(data);
     } catch (error) {
       console.error('Error loading case details', error);
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في تحميل تفاصيل القضية' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: this.translate.instant('CASES.DETAILS_ERROR') 
+      });
     } finally {
       this.loading.set(false);
       this.cdr.detectChanges();
@@ -158,12 +167,20 @@ export class CaseDetailsPage implements OnInit {
     try {
       if (caseData.id) {
         await this.caseService.updateCase(caseData.id, caseData);
-        this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم تحديث القضية بنجاح' });
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: this.translate.instant('COMMON.SUCCESS'), 
+          detail: this.translate.instant('CASES.UPDATE_SUCCESS') 
+        });
         if (this.caseId()) await this.loadCaseDetails(this.caseId()!);
       }
       this.displayDialog.set(false);
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في حفظ التغييرات' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: this.translate.instant('CASES.SAVE_ERROR') 
+      });
     }
   }
 
@@ -179,24 +196,36 @@ export class CaseDetailsPage implements OnInit {
       this.selectedSession.set(fullSession);
       this.displaySessionDialog.set(true);
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في تحميل تفاصيل الجلسة' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: this.translate.instant('SESSIONS.DETAILS_ERROR') 
+      });
     }
   }
 
   deleteSession(sessionItem: SessionListDto) {
     this.confirmationService.confirm({
-      message: `هل أنت متأكد من حذف جلسة "${sessionItem.title}"؟`,
-      header: 'تأكيد الحذف',
+      message: this.translate.instant('SESSIONS.DELETE_CONFIRM', { title: sessionItem.title }),
+      header: this.translate.instant('CASES.DELETE_CONFIRM_TITLE'),
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'نعم، احذف',
-      rejectLabel: 'إلغاء',
+      acceptLabel: this.translate.instant('CASES.DELETE_ACCEPT'),
+      rejectLabel: this.translate.instant('COMMON.CANCEL'),
       accept: async () => {
         try {
           await this.sessionService.deleteSession(sessionItem.id);
-          this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم حذف الجلسة بنجاح' });
+          this.messageService.add({ 
+            severity: 'success', 
+            summary: this.translate.instant('COMMON.SUCCESS'), 
+            detail: this.translate.instant('SESSIONS.DELETE_SUCCESS') 
+          });
           if (this.caseId()) await this.loadSessions(this.caseId()!);
         } catch (error) {
-          this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في حذف الجلسة' });
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: this.translate.instant('COMMON.ERROR'), 
+            detail: this.translate.instant('SESSIONS.DELETE_ERROR') 
+          });
         }
       }
     });
@@ -206,16 +235,28 @@ export class CaseDetailsPage implements OnInit {
     try {
       if (sessionData.id) {
         await this.sessionService.updateSession(sessionData.id, sessionData);
-        this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم تحديث الجلسة بنجاح' });
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: this.translate.instant('COMMON.SUCCESS'), 
+          detail: this.translate.instant('SESSIONS.UPDATE_SUCCESS') 
+        });
       } else {
         if (!sessionData.caseId && this.caseId()) sessionData.caseId = this.caseId();
         await this.sessionService.createSession(sessionData);
-        this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم إضافة الجلسة بنجاح' });
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: this.translate.instant('COMMON.SUCCESS'), 
+          detail: this.translate.instant('SESSIONS.CREATE_SUCCESS') 
+        });
       }
       this.displaySessionDialog.set(false);
       if (this.caseId()) await this.loadSessions(this.caseId()!);
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في حفظ الجلسة' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: this.translate.instant('SESSIONS.SAVE_ERROR') 
+      });
     }
   }
 
@@ -230,19 +271,41 @@ export class CaseDetailsPage implements OnInit {
     this.displayInvoiceDialog.set(true);
   }
 
-  openNewPayment() {
+  async openNewPayment() {
+    const id = this.caseId();
+    if (id) {
+      await this.loadFinanceData(id);
+    }
     this.displayPaymentDialog.set(true);
   }
 
   async onInvoiceSave(data: any) {
     try {
       if (!data.caseId && this.caseId()) data.caseId = this.caseId();
-      await this.financeService.createInvoice(data);
-      this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم إضافة الفاتورة بنجاح' });
+      
+      if (data.id) {
+        await this.financeService.updateInvoice(data.id, data);
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: this.translate.instant('COMMON.SUCCESS'), 
+          detail: this.translate.instant('CASES.UPDATE_SUCCESS') 
+        });
+      } else {
+        await this.financeService.createInvoice(data);
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: this.translate.instant('COMMON.SUCCESS'), 
+          detail: this.translate.instant('CASES.CREATE_SUCCESS') 
+        });
+      }
       this.displayInvoiceDialog.set(false);
       if (this.caseId()) await this.loadFinanceData(this.caseId()!);
     } catch (error: any) {
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: error.message || 'فشل في حفظ الفاتورة' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: error.message || this.translate.instant('CASES.SAVE_ERROR') 
+      });
     }
   }
 
@@ -250,11 +313,19 @@ export class CaseDetailsPage implements OnInit {
     try {
       if (!data.caseId && this.caseId()) data.caseId = this.caseId();
       await this.financeService.createPayment(data);
-      this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم تسجيل الدفعة بنجاح' });
+      this.messageService.add({ 
+        severity: 'success', 
+        summary: this.translate.instant('COMMON.SUCCESS'), 
+        detail: this.translate.instant('FINANCE.CREATE_SUCCESS') || 'Success' 
+      });
       this.displayPaymentDialog.set(false);
       if (this.caseId()) await this.loadFinanceData(this.caseId()!);
     } catch (error: any) {
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: error.message || 'فشل في تسجيل الدفعة' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: error.message || this.translate.instant('CASES.SAVE_ERROR') 
+      });
     }
   }
 
@@ -264,7 +335,11 @@ export class CaseDetailsPage implements OnInit {
   }
 
   async onUploadSuccess() {
-    this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم رفع المستند بنجاح' });
+    this.messageService.add({ 
+      severity: 'success', 
+      summary: this.translate.instant('COMMON.SUCCESS'), 
+      detail: this.translate.instant('CASES.UPLOAD_SUCCESS') || 'Document uploaded'
+    });
     if (this.caseId()) await this.loadDocuments(this.caseId()!);
   }
 
@@ -272,24 +347,36 @@ export class CaseDetailsPage implements OnInit {
     try {
       await this.documentService.downloadDocument(doc.id, doc.originalFileName);
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في تحميل الملف' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: this.translate.instant('CASES.DOWNLOAD_ERROR') || 'Download failed'
+      });
     }
   }
 
   deleteDocument(doc: DocumentDto) {
     this.confirmationService.confirm({
-      message: `هل أنت متأكد من حذف المستند "${doc.originalFileName}"؟`,
-      header: 'تأكيد الحذف',
+      message: this.translate.instant('CASES.DELETE_CONFIRM_MESSAGE', { caseNumber: doc.originalFileName }),
+      header: this.translate.instant('CASES.DELETE_CONFIRM_TITLE'),
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'نعم، احذف',
-      rejectLabel: 'إلغاء',
+      acceptLabel: this.translate.instant('CASES.DELETE_ACCEPT'),
+      rejectLabel: this.translate.instant('COMMON.CANCEL'),
       accept: async () => {
         try {
           await this.documentService.deleteDocument(doc.id);
-          this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم حذف المستند بنجاح' });
+          this.messageService.add({ 
+            severity: 'success', 
+            summary: this.translate.instant('COMMON.SUCCESS'), 
+            detail: this.translate.instant('CASES.DELETE_SUCCESS') 
+          });
           if (this.caseId()) await this.loadDocuments(this.caseId()!);
         } catch (error) {
-          this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في حذف المستند' });
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: this.translate.instant('COMMON.ERROR'), 
+            detail: this.translate.instant('CASES.DELETE_ERROR') 
+          });
         }
       }
     });
@@ -307,10 +394,10 @@ export class CaseDetailsPage implements OnInit {
 
   getStatusLabel(status: CaseStatus): string {
     switch (status) {
-      case CaseStatus.Open: return 'مفتوحة';
-      case CaseStatus.Pending: return 'قيد الانتظار';
-      case CaseStatus.Closed: return 'مغلقة';
-      default: return 'غير معروف';
+      case CaseStatus.Open: return this.translate.instant('CASES.OPEN');
+      case CaseStatus.Pending: return this.translate.instant('CASES.PENDING');
+      case CaseStatus.Closed: return this.translate.instant('CASES.CLOSED');
+      default: return this.translate.instant('COMMON.UNKNOWN');
     }
   }
 
@@ -326,11 +413,11 @@ export class CaseDetailsPage implements OnInit {
 
   getSessionStatusLabel(status: SessionStatus): string {
     switch (status) {
-      case SessionStatus.Scheduled: return 'مجدولة';
-      case SessionStatus.Completed: return 'مكتملة';
-      case SessionStatus.Postponed: return 'مؤجلة';
-      case SessionStatus.Cancelled: return 'ملغاة';
-      default: return 'غير معروف';
+      case SessionStatus.Scheduled: return this.translate.instant('SESSIONS.SCHEDULED');
+      case SessionStatus.Completed: return this.translate.instant('SESSIONS.COMPLETED');
+      case SessionStatus.Postponed: return this.translate.instant('SESSIONS.POSTPONED');
+      case SessionStatus.Cancelled: return this.translate.instant('SESSIONS.CANCELLED');
+      default: return this.translate.instant('COMMON.UNKNOWN');
     }
   }
 
@@ -347,23 +434,33 @@ export class CaseDetailsPage implements OnInit {
 
   getInvoiceStatusLabel(status: InvoiceStatus): string {
     switch (status) {
-      case InvoiceStatus.Paid: return 'مدفوعة';
-      case InvoiceStatus.PartiallyPaid: return 'مدفوعة جزئياً';
-      case InvoiceStatus.Unpaid: return 'غير مدفوعة';
-      case InvoiceStatus.Overdue: return 'متأخرة';
-      case InvoiceStatus.Cancelled: return 'ملغاة';
-      default: return 'غير معروف';
+      case InvoiceStatus.Paid: return this.translate.instant('FINANCE.STATUS_LABELS.PAID');
+      case InvoiceStatus.PartiallyPaid: return this.translate.instant('FINANCE.STATUS_LABELS.PARTIAL');
+      case InvoiceStatus.Unpaid: return this.translate.instant('FINANCE.STATUS_LABELS.UNPAID');
+      case InvoiceStatus.Overdue: return this.translate.instant('FINANCE.STATUS_LABELS.OVERDUE');
+      case InvoiceStatus.Cancelled: return this.translate.instant('FINANCE.STATUS_LABELS.CANCELLED');
+      default: return this.translate.instant('COMMON.UNKNOWN');
     }
   }
 
   getDocCategoryLabel(category: DocumentCategory): string {
     switch (category) {
-      case DocumentCategory.Contract: return 'عقد';
-      case DocumentCategory.CourtDocument: return 'وثيقة محكمة';
-      case DocumentCategory.Evidence: return 'دليل';
-      case DocumentCategory.Invoice: return 'فاتورة';
-      case DocumentCategory.Other: return 'أخرى';
-      default: return 'أخرى';
+      case DocumentCategory.Contract: return this.translate.instant('DOCUMENTS.CONTRACT');
+      case DocumentCategory.CourtDocument: return this.translate.instant('DOCUMENTS.COURT');
+      case DocumentCategory.Evidence: return this.translate.instant('DOCUMENTS.EVIDENCE');
+      case DocumentCategory.Invoice: return this.translate.instant('DOCUMENTS.INVOICE');
+      case DocumentCategory.Other: return this.translate.instant('DOCUMENTS.OTHER');
+      default: return this.translate.instant('DOCUMENTS.OTHER');
+    }
+  }
+
+  getPaymentMethodLabel(method: PaymentMethod): string {
+    switch (method) {
+      case PaymentMethod.Cash: return this.translate.instant('FINANCE.METHODS.CASH');
+      case PaymentMethod.BankTransfer: return this.translate.instant('FINANCE.METHODS.BANK');
+      case PaymentMethod.CreditCard: return this.translate.instant('FINANCE.METHODS.CARD');
+      case PaymentMethod.Check: return this.translate.instant('FINANCE.METHODS.CHECK');
+      default: return this.translate.instant('FINANCE.METHODS.OTHER');
     }
   }
 

@@ -1,15 +1,14 @@
-<div class="p-6" dir="rtl">
+<div class="p-6">
     <p-toast></p-toast>
     
     <!-- Header -->
     <div class="flex justify-between items-center mb-8">
         <div>
-            <h1 class="text-2xl font-bold text-slate-800">الإدارة المالية</h1>
-            <p class="text-slate-500">متابعة الفواتير والمدفوعات والمستحقات</p>
+            <h1 class="text-2xl font-bold text-slate-800">{{ 'FINANCE.TITLE' | translate }}</h1>
         </div>
         <div class="flex gap-2">
-            <button pButton label="فاتورة جديدة" icon="pi pi-plus" class="p-button-primary shadow-md" (click)="openNewInvoice()"></button>
-            <button pButton label="تسجيل دفعة" icon="pi pi-money-bill" class="p-button-success shadow-md" (click)="openNewPayment()"></button>
+            <button pButton [label]="'FINANCE.ADD_INVOICE' | translate" icon="pi pi-plus" class="p-button-primary shadow-md" (click)="openNewInvoice()"></button>
+            <button pButton [label]="'FINANCE.ADD_PAYMENT' | translate" icon="pi pi-money-bill" class="p-button-success shadow-md" (click)="openNewPayment()"></button>
         </div>
     </div>
 
@@ -21,7 +20,7 @@
                 <i class="pi pi-file-o text-xl"></i>
             </div>
             <div>
-                <p class="text-sm text-slate-500 font-medium">إجمالي المطلوبات</p>
+                <p class="text-sm text-slate-500 font-medium">{{ 'FINANCE.TOTAL_INVOICED' | translate }}</p>
                 <h3 class="text-xl font-bold text-slate-800">{{ (summary()?.totalInvoiced || 0) | currency:'EGP':'symbol-narrow':'1.0-2' }}</h3>
             </div>
         </div>
@@ -32,7 +31,7 @@
                 <i class="pi pi-check-circle text-xl"></i>
             </div>
             <div>
-                <p class="text-sm text-slate-500 font-medium">إجمالي المحصل</p>
+                <p class="text-sm text-slate-500 font-medium">{{ 'FINANCE.TOTAL_PAID' | translate }}</p>
                 <h3 class="text-xl font-bold text-slate-800">{{ (summary()?.totalPaid || 0) | currency:'EGP':'symbol-narrow':'1.0-2' }}</h3>
             </div>
         </div>
@@ -43,7 +42,7 @@
                 <i class="pi pi-clock text-xl"></i>
             </div>
             <div>
-                <p class="text-sm text-slate-500 font-medium">المتبقي</p>
+                <p class="text-sm text-slate-500 font-medium">{{ 'FINANCE.REMAINING' | translate }}</p>
                 <h3 class="text-xl font-bold text-slate-800 text-orange-600">{{ (summary()?.totalRemaining || 0) | currency:'EGP':'symbol-narrow':'1.0-2' }}</h3>
             </div>
         </div>
@@ -54,47 +53,62 @@
                 <i class="pi pi-exclamation-circle text-xl"></i>
             </div>
             <div>
-                <p class="text-sm text-slate-500 font-medium">فواتير متأخرة</p>
+                <p class="text-sm text-slate-500 font-medium">{{ 'FINANCE.OVERDUE' | translate }}</p>
                 <h3 class="text-xl font-bold text-slate-800 text-red-600">{{ summary()?.overdueInvoicesCount || 0 }}</h3>
             </div>
         </div>
     </div>
 
     <!-- Invoices Table -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm">
         <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-            <h2 class="text-lg font-bold text-slate-800">قائمة الفواتير</h2>
+            <h2 class="text-lg font-bold text-slate-800">{{ 'FINANCE.INVOICES' | translate }}</h2>
             <div class="flex gap-2">
+                <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
+                    <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+                    <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
+                           [placeholder]="'COMMON.SEARCH' | translate" class="w-full sm:w-auto p-inputtext-sm" />
+                </p-iconField>
                 <button pButton icon="pi pi-filter" class="p-button-text p-button-secondary"></button>
             </div>
         </div>
         
-        <p-table [value]="invoices()" [loading]="loading()" [rows]="10" [paginator]="true" 
-                 styleClass="p-datatable-sm" responsiveLayout="scroll">
+        <p-table #dt [value]="invoices()" [loading]="loading()" [rows]="10" [paginator]="true" 
+                 styleClass="p-datatable-sm" dataKey="id" 
+                 [globalFilterFields]="['invoiceNumber', 'caseNumber', 'caseTitle', 'title']"
+                 (onFilter)="cdr.detectChanges()"
+                 rowExpandMode="single"
+                 (onRowExpand)="onRowExpand($event)">
             <ng-template pTemplate="header">
                 <tr class="bg-slate-50 text-slate-700">
-                    <th class="p-4">رقم الفاتورة</th>
-                    <th class="p-4">القضية</th>
-                    <th class="p-4">العنوان</th>
-                    <th class="p-4 text-center">المبلغ</th>
-                    <th class="p-4 text-center">المسدد</th>
-                    <th class="p-4 text-center">المتبقي</th>
-                    <th class="p-4 text-center">تاريخ الاستحقاق</th>
-                    <th class="p-4">الحالة</th>
-                    <th class="p-4 text-center">الإجراءات</th>
+                    <th style="width: 3rem"></th>
+                    <th class="p-4">{{ 'FINANCE.INVOICE_NUMBER' | translate }}</th>
+                    <th class="p-4">{{ 'CASES.CLIENT' | translate }}</th>
+                    <th class="p-4">{{ 'COMMON.TITLE' | translate }}</th>
+                    <th class="p-4 text-center">{{ 'FINANCE.AMOUNT' | translate }}</th>
+                    <th class="p-4 text-center">{{ 'FINANCE.PAID' | translate }}</th>
+                    <th class="p-4 text-center">{{ 'FINANCE.REMAINING' | translate }}</th>
+                    <th class="p-4 text-center">{{ 'COMMON.DATE' | translate }}</th>
+                    <th class="p-4">{{ 'CASES.STATUS' | translate }}</th>
+                    <th class="p-4 text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
                 </tr>
             </ng-template>
-            <ng-template pTemplate="body" let-inv>
+            <ng-template pTemplate="body" let-inv let-expanded="expanded">
                 <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="p-4">
+                        <button type="button" pButton pRipple [pRowToggler]="inv" 
+                                class="p-button-text p-button-rounded p-button-sm p-button-plain" 
+                                [icon]="dt.isRowExpanded(inv) ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+                    </td>
                     <td class="p-4 font-mono font-bold text-blue-600">{{ inv.invoiceNumber }}</td>
                     <td class="p-4 text-sm">
                         <div class="font-bold text-slate-700">{{ inv.caseNumber }}</div>
                         <div class="text-xs text-slate-400">{{ inv.caseTitle }}</div>
                     </td>
                     <td class="p-4">{{ inv.title }}</td>
-                    <td class="p-4 text-center font-bold">{{ inv.amount | number:'1.0-2' }}</td>
-                    <td class="p-4 text-center text-green-600 font-bold">{{ inv.paidAmount | number:'1.0-2' }}</td>
-                    <td class="p-4 text-center text-orange-600 font-bold">{{ inv.remainingAmount | number:'1.0-2' }}</td>
+                    <td class="p-4 text-center font-bold">{{ inv.amount | number:'1.0-0' }}</td>
+                    <td class="p-4 text-center text-green-600 font-bold">{{ inv.paidAmount | number:'1.0-0' }}</td>
+                    <td class="p-4 text-center text-orange-600 font-bold">{{ inv.remainingAmount | number:'1.0-0' }}</td>
                     <td class="p-4 text-center">
                         <span [class.text-red-500]="inv.status === 3">{{ inv.dueDate | date:'dd/MM/yyyy' }}</span>
                     </td>
@@ -103,17 +117,70 @@
                     </td>
                     <td class="p-4 text-center">
                         <div class="flex justify-center gap-1">
-                            <button pButton icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" pTooltip="تعديل" (click)="editInvoice(inv)"></button>
+                            <button pButton icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" 
+                                    [pTooltip]="'COMMON.EDIT' | translate" (click)="$event.stopPropagation(); editInvoice(inv)"></button>
+                        </div>
+                    </td>
+                </tr>
+                <!-- Sub-table for Payments (Matching main table style) -->
+                <tr *ngIf="dt.isRowExpanded(inv)" class="bg-slate-50/50">
+                    <td colspan="10" class="p-0">
+                        <div class="px-16 py-4">
+                            <div class="bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="bg-slate-50 text-slate-700 border-b border-slate-200">
+                                            <th class="p-3 text-left w-12"></th>
+                                            <th class="p-3 text-left font-bold">{{ 'COMMON.DATE' | translate }}</th>
+                                            <th class="p-3 text-left font-bold">{{ 'FINANCE.PAYMENT_METHOD' | translate }}</th>
+                                            <th class="p-3 text-left font-bold">{{ 'FINANCE.NOTES' | translate }}</th>
+                                            <th class="p-3 text-right font-bold w-32">{{ 'FINANCE.AMOUNT' | translate }}</th>
+                                            <th class="p-3 w-10"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (inv.loadingPayments) {
+                                            <tr>
+                                                <td colspan="6" class="p-8 text-center text-slate-400 italic">
+                                                    <i class="pi pi-spin pi-spinner mr-2"></i> {{ 'COMMON.LOADING' | translate }}...
+                                                </td>
+                                            </tr>
+                                        } @else if (inv.payments && inv.payments.length > 0) {
+                                            @for (pay of inv.payments; track pay.id) {
+                                                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors last:border-0">
+                                                    <td class="p-3 text-center">
+                                                        <i class="pi pi-corner-down-right text-[10px] text-blue-400"></i>
+                                                    </td>
+                                                    <td class="p-3 text-slate-600 font-medium">{{ pay.paymentDate | date:'dd/MM/yyyy' }}</td>
+                                                    <td class="p-3">
+                                                        <p-tag [value]="getPaymentMethodLabel(pay.method)" severity="secondary" styleClass="text-[10px] uppercase"></p-tag>
+                                                    </td>
+                                                    <td class="p-3 text-slate-400 italic text-xs">{{ pay.notes || '-' }}</td>
+                                                    <td class="p-3 text-right font-bold text-green-600">{{ pay.amount | number:'1.0-0' }}</td>
+                                                    <td class="p-3"></td>
+                                                </tr>
+                                            }
+                                        } @else {
+                                            <tr>
+                                                <td colspan="6" class="p-8 text-center text-slate-400 italic">
+                                                    {{ 'DASHBOARD.NO_RECORDS_FOUND' | translate }}
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </td>
                 </tr>
             </ng-template>
+
             <ng-template pTemplate="emptymessage">
                 <tr>
-                    <td colspan="9" class="p-12 text-center text-slate-500">
+                    <td colspan="10" class="p-12 text-center text-slate-500">
                         <div class="flex flex-col items-center gap-3">
                             <i class="pi pi-wallet text-4xl text-slate-200"></i>
-                            <p>لم يتم العثور على أي فواتير حالياً.</p>
+                            <p>{{ 'DASHBOARD.NO_RECORDS_FOUND' | translate }}</p>
                         </div>
                     </td>
                 </tr>
@@ -123,11 +190,10 @@
 
     <!-- Invoice Dialog -->
     <app-invoice-dialog [(visible)]="displayInvoiceDialog" 
-                        [invoice]="selectedInvoice" 
+                        [invoice]="selectedInvoice()" 
                         (onSave)="onInvoiceSave($event)">
     </app-invoice-dialog>
 
-    <!-- Payment Dialog -->
     <app-payment-dialog [(visible)]="displayPaymentDialog" 
                         (onSave)="onPaymentSave($event)">
     </app-payment-dialog>

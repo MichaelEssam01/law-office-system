@@ -1,4 +1,4 @@
-<p-dialog [header]="case ? 'تعديل قضية' : 'إضافة قضية جديدة'" 
+<p-dialog [header]="(case ? 'CASES.EDIT_CASE' : 'CASES.ADD_CASE_NEW') | translate" 
           [(visible)]="visible" 
           [modal]="true" 
           [style]="{ width: '600px' }" 
@@ -6,65 +6,67 @@
           [resizable]="false"
           (onHide)="close()">
     
-    <form [formGroup]="caseForm" class="flex flex-col gap-4 p-4" dir="rtl">
-        <div class="grid grid-cols-2 gap-4">
+    <form [formGroup]="caseForm" class="flex flex-col gap-4 p-4" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="flex flex-col gap-2">
-                <label for="caseNumber" class="font-semibold text-slate-700">رقم القضية</label>
-                <input pInputText id="caseNumber" formControlName="caseNumber" placeholder="مثلاً: CASE-2024-001" />
+                <label for="status" class="font-semibold text-slate-700">{{ 'CASES.STATUS' | translate }}</label>
+                <p-select id="status" [options]="statuses()" optionValue="value" formControlName="status" [placeholder]="'CASES.SELECT_STATUS' | translate" styleClass="w-full" appendTo="body">
+                    <ng-template pTemplate="selectedItem" let-selectedOption>
+                        {{ selectedOption?.labelKey | translate }}
+                    </ng-template>
+                    <ng-template pTemplate="item" let-option>
+                        {{ option?.labelKey | translate }}
+                    </ng-template>
+                </p-select>
             </div>
-            
+
             <div class="flex flex-col gap-2">
-                <label for="status" class="font-semibold text-slate-700">الحالة</label>
-                <p-select id="status" [options]="statuses" optionLabel="label" optionValue="value" formControlName="status" placeholder="اختر الحالة" styleClass="w-full"></p-select>
+                <label for="startDate" class="font-semibold text-slate-700">{{ 'CASES.START_DATE' | translate }}</label>
+                <p-datepicker id="startDate" formControlName="startDate" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full" appendTo="body"></p-datepicker>
             </div>
+        </div>
+        
+        <div class="flex flex-col gap-2">
+            <label for="title" class="font-semibold text-slate-700">{{ 'CASES.TITLE_LABEL' | translate }}</label>
+            <input pInputText id="title" formControlName="title" [placeholder]="'CASES.TITLE_PLACEHOLDER' | translate" />
         </div>
 
         <div class="flex flex-col gap-2">
-            <label for="title" class="font-semibold text-slate-700">عنوان القضية</label>
-            <input pInputText id="title" formControlName="title" placeholder="أدخل عنواناً مختصرًا للقضية" />
+            <label for="description" class="font-semibold text-slate-700">{{ 'COMMON.DESCRIPTION' | translate }}</label>
+            <textarea pTextarea id="description" formControlName="description" rows="3" [placeholder]="'CASES.DESCRIPTION_PLACEHOLDER' | translate"></textarea>
         </div>
 
-        <div class="flex flex-col gap-2">
-            <label for="description" class="font-semibold text-slate-700">الوصف</label>
-            <textarea pTextarea id="description" formControlName="description" rows="3" placeholder="تفاصيل القضية..."></textarea>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="flex flex-col gap-2">
-                <label for="clientId" class="font-semibold text-slate-700">الموكل</label>
+                <label for="clientId" class="font-semibold text-slate-700">{{ 'CASES.CLIENT' | translate }}</label>
                 <p-select id="clientId" [options]="clients()" optionLabel="fullName" optionValue="id" 
-                            formControlName="clientId" placeholder="اختر الموكل" [filter]="true" styleClass="w-full"></p-select>
+                            formControlName="clientId" [placeholder]="'CASES.SELECT_CLIENT' | translate" [filter]="true" styleClass="w-full" appendTo="body"></p-select>
             </div>
             
             <div class="flex flex-col gap-2">
-                <label for="assignedLawyerId" class="font-semibold text-slate-700">المحامي المسؤول</label>
+                <label for="assignedLawyerId" class="font-semibold text-slate-700">{{ 'CASES.LAWYER_ASSIGNED' | translate }}</label>
                 <p-select id="assignedLawyerId" [options]="lawyers()" optionLabel="fullName" optionValue="id" 
-                            formControlName="assignedLawyerId" placeholder="اختر المحامي" styleClass="w-full"></p-select>
+                            formControlName="assignedLawyerId" [placeholder]="'CASES.SELECT_LAWYER' | translate" styleClass="w-full" appendTo="body"></p-select>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        @if (isClosedStatus()) {
             <div class="flex flex-col gap-2">
-                <label for="startDate" class="font-semibold text-slate-700">تاريخ البدء</label>
-                <p-datepicker id="startDate" formControlName="startDate" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full"></p-datepicker>
+                <label for="closedDate" class="font-semibold text-slate-700">{{ 'CASES.CLOSE_DATE' | translate }}</label>
+                <p-datepicker id="closedDate" formControlName="closedDate" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full" appendTo="body"></p-datepicker>
             </div>
-            
-            <div *ngIf="isClosedStatus()" class="flex flex-col gap-2">
-                <label for="closedDate" class="font-semibold text-slate-700">تاريخ الإغلاق</label>
-                <p-datepicker id="closedDate" formControlName="closedDate" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full"></p-datepicker>
-            </div>
-        </div>
+        }
 
         <div class="flex flex-col gap-2">
-            <label for="notes" class="font-semibold text-slate-700">ملاحظات إضافية</label>
-            <textarea pTextarea id="notes" formControlName="notes" rows="2" placeholder="أي ملاحظات أخرى..."></textarea>
+            <label for="notes" class="font-semibold text-slate-700">{{ 'CASES.NOTES_LABEL' | translate }}</label>
+            <textarea pTextarea id="notes" formControlName="notes" rows="2" [placeholder]="'CASES.NOTES_PLACEHOLDER' | translate"></textarea>
         </div>
     </form>
 
     <ng-template pTemplate="footer">
         <div class="flex justify-start gap-2 p-4">
-            <button pButton label="إلغاء" class="p-button-text p-button-secondary" (click)="close()"></button>
-            <button pButton label="حفظ" class="p-button-primary shadow-md px-6" [disabled]="caseForm.invalid" (click)="save()"></button>
+            <button pButton [label]="'COMMON.CANCEL' | translate" class="p-button-text p-button-secondary" (click)="close()"></button>
+            <button pButton [label]="'COMMON.SAVE' | translate" class="p-button-primary shadow-md px-6" [disabled]="caseForm.invalid" (click)="save()"></button>
         </div>
     </ng-template>
 </p-dialog>

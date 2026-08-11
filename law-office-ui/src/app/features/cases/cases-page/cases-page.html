@@ -1,52 +1,58 @@
-<div class="p-6" dir="rtl">
+<div class="p-6">
     <p-toast></p-toast>
     <p-confirmDialog></p-confirmDialog>
     
     <!-- Header Area -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-slate-800">إدارة القضايا</h1>
-            <p class="text-slate-500">عرض وإدارة القضايا القانونية والموكلين</p>
+            <h1 class="text-2xl font-bold text-slate-800">{{ 'CASES.TITLE' | translate }}</h1>
         </div>
-        <button pButton label="قضية جديدة" icon="pi pi-plus" class="p-button-primary shadow-md" (click)="openNew()"></button>
+        <button pButton [label]="'CASES.ADD_CASE' | translate" icon="pi pi-plus" class="p-button-primary shadow-md" (click)="openNew()"></button>
     </div>
 
     <!-- Filters Area -->
     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div class="flex flex-col gap-2">
-                <label class="text-xs font-bold text-slate-500">البحث</label>
-                <p-iconField iconPosition="left">
+                <label class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
+                <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
                     <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
-                    <input pInputText type="text" [(ngModel)]="searchTerm" (ngModelChange)="dt.filterGlobal($event, 'contains')"
-                           placeholder="رقم القضية، العنوان..." class="w-full rounded-lg border-slate-200" />
+                    <input pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event); dt.filterGlobal($event, 'contains')"
+                           [placeholder]="'COMMON.SEARCH' | translate" class="w-full rounded-lg border-slate-200" />
                 </p-iconField>
             </div>
             
             <div class="flex flex-col gap-2">
-                <label class="text-xs font-bold text-slate-500">الحالة</label>
-                <p-select [options]="statuses" [(ngModel)]="selectedStatus" (onChange)="onFilterChange()"
-                          optionLabel="label" optionValue="value" placeholder="كل الحالات" 
-                          [showClear]="true" styleClass="w-full rounded-lg"></p-select>
+                <label class="text-xs font-bold text-slate-500">{{ 'CASES.STATUS' | translate }}</label>
+                <p-select [options]="statuses()" [ngModel]="selectedStatus()" (ngModelChange)="selectedStatus.set($event); onFilterChange()"
+                          optionValue="value" [placeholder]="'CASES.ALL_STATUSES' | translate" 
+                          [showClear]="true" styleClass="w-full rounded-lg">
+                    <ng-template pTemplate="selectedItem" let-selectedOption>
+                        {{ selectedOption?.labelKey | translate }}
+                    </ng-template>
+                    <ng-template pTemplate="item" let-option>
+                        {{ option?.labelKey | translate }}
+                    </ng-template>
+                </p-select>
             </div>
 
             <div class="flex flex-col gap-2">
-                <label class="text-xs font-bold text-slate-500">الموكل</label>
-                <p-select [options]="clients()" [(ngModel)]="selectedClient" (onChange)="onFilterChange()"
-                          optionLabel="fullName" optionValue="id" placeholder="كل الموكلين" 
+                <label class="text-xs font-bold text-slate-500">{{ 'CASES.CLIENT' | translate }}</label>
+                <p-select [options]="clients()" [ngModel]="selectedClient()" (ngModelChange)="selectedClient.set($event); onFilterChange()"
+                          optionLabel="fullName" optionValue="id" [placeholder]="'CASES.ALL_CLIENTS' | translate" 
                           [showClear]="true" [filter]="true" styleClass="w-full rounded-lg"></p-select>
             </div>
 
             <div class="flex flex-col gap-2">
                 <div class="flex gap-2">
                     <div class="flex-1 flex flex-col gap-2">
-                        <label class="text-xs font-bold text-slate-500">المحامي</label>
-                        <p-select [options]="lawyers()" [(ngModel)]="selectedLawyer" (onChange)="onFilterChange()"
-                                  optionLabel="fullName" optionValue="id" placeholder="كل المحامين" 
+                        <label class="text-xs font-bold text-slate-500">{{ 'CASES.LAWYER' | translate }}</label>
+                        <p-select [options]="lawyers()" [ngModel]="selectedLawyer()" (ngModelChange)="selectedLawyer.set($event); onFilterChange()"
+                                  optionLabel="fullName" optionValue="id" [placeholder]="'CASES.ALL_LAWYERS' | translate" 
                                   [showClear]="true" styleClass="w-full rounded-lg"></p-select>
                     </div>
                     <button pButton icon="pi pi-filter-slash" class="p-button-outlined p-button-secondary p-button-sm self-end h-[42px]" 
-                            (click)="resetFilters()" pTooltip="إعادة تعيين"></button>
+                            (click)="resetFilters()" [pTooltip]="'CASES.RESET_FILTERS' | translate"></button>
                 </div>
             </div>
         </div>
@@ -54,20 +60,20 @@
 
     <!-- Table Card -->
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <p-table #dt [value]="cases()" [loading]="loading()" [rows]="10" [paginator]="true" 
-                 [globalFilterFields]="['caseNumber', 'title', 'clientName']"
-                 styleClass="p-datatable-sm" [rowHover]="true"
-                 responsiveLayout="scroll">
+        <p-table #dt [value]="cases()" [loading]="loading()" [paginator]="true" [rows]="10"
+                 [globalFilterFields]="['caseNumber', 'title', 'clientName', 'lawyerName']"
+                 (onFilter)="cdr.detectChanges()"
+                 styleClass="p-datatable-sm shadow-sm rounded-lg overflow-hidden" [rowHover]="true">
             
             <ng-template pTemplate="header">
                 <tr class="bg-slate-50 text-slate-700">
-                    <th pSortableColumn="caseNumber" class="p-4">رقم القضية <p-sortIcon field="caseNumber"></p-sortIcon></th>
-                    <th pSortableColumn="title" class="p-4">عنوان القضية <p-sortIcon field="title"></p-sortIcon></th>
-                    <th pSortableColumn="clientName" class="p-4">الموكل <p-sortIcon field="clientName"></p-sortIcon></th>
-                    <th pSortableColumn="lawyerName" class="p-4">المحامي المسؤول <p-sortIcon field="lawyerName"></p-sortIcon></th>
-                    <th pSortableColumn="status" class="p-4">الحالة <p-sortIcon field="status"></p-sortIcon></th>
-                    <th pSortableColumn="startDate" class="p-4 text-center">تاريخ البدء <p-sortIcon field="startDate"></p-sortIcon></th>
-                    <th class="p-4 text-center">الإجراءات</th>
+                    <th pSortableColumn="caseNumber" class="p-4">{{ 'CASES.CASE_NUMBER' | translate }} <p-sortIcon field="caseNumber"></p-sortIcon></th>
+                    <th pSortableColumn="title" class="p-4">{{ 'CASES.TITLE' | translate }} <p-sortIcon field="title"></p-sortIcon></th>
+                    <th pSortableColumn="clientName" class="p-4">{{ 'CASES.CLIENT' | translate }} <p-sortIcon field="clientName"></p-sortIcon></th>
+                    <th pSortableColumn="lawyerName" class="p-4">{{ 'CASES.LAWYER' | translate }} <p-sortIcon field="lawyerName"></p-sortIcon></th>
+                    <th pSortableColumn="status" class="p-4">{{ 'CASES.STATUS' | translate }} <p-sortIcon field="status"></p-sortIcon></th>
+                    <th pSortableColumn="startDate" class="p-4 text-center">{{ 'COMMON.DATE' | translate }} <p-sortIcon field="startDate"></p-sortIcon></th>
+                    <th class="p-4 text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
                 </tr>
             </ng-template>
 
@@ -107,7 +113,7 @@
                     <td colspan="7" class="p-12 text-center text-slate-500">
                         <div class="flex flex-col items-center gap-3">
                             <i class="pi pi-inbox text-4xl text-slate-200"></i>
-                            <p>لم يتم العثور على قضايا تطابق البحث.</p>
+                            <p>{{ 'DASHBOARD.NO_RECORDS_FOUND' | translate }}</p>
                         </div>
                     </td>
                 </tr>

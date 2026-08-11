@@ -7,13 +7,14 @@ public class InvoiceListDto
 {
     public Guid Id { get; set; }
     public Guid CaseId { get; set; }
+    public Guid ClientId { get; set; }
     public string CaseNumber { get; set; } = string.Empty;
     public string CaseTitle { get; set; } = string.Empty;
     public string InvoiceNumber { get; set; } = string.Empty;
     public string Title { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public decimal PaidAmount { get; set; }
-    public decimal RemainingAmount => Amount - PaidAmount;
+    public decimal RemainingAmount { get; set; }
     public DateTime DueDate { get; set; }
     public InvoiceStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
@@ -28,7 +29,7 @@ public class InvoiceDetailDto : InvoiceListDto
 public class CreateInvoiceDto
 {
     public Guid CaseId { get; set; }
-    public string InvoiceNumber { get; set; } = string.Empty;
+    public string? InvoiceNumber { get; set; }
     public string Title { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public DateTime DueDate { get; set; }
@@ -81,7 +82,7 @@ public class FinancialSummaryDto
 {
     public decimal TotalInvoiced { get; set; }
     public decimal TotalPaid { get; set; }
-    public decimal TotalRemaining => TotalInvoiced - TotalPaid;
+    public decimal TotalRemaining { get; set; }
     public int UnpaidInvoicesCount { get; set; }
     public int OverdueInvoicesCount { get; set; }
 }

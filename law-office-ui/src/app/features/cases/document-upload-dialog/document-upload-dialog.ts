@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, signal, model } from '@angular/core';
+import { Component, Output, EventEmitter, inject, signal, model, input, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -7,6 +7,8 @@ import { SelectModule } from 'primeng/select';
 import { TextareaModule } from 'primeng/textarea';
 import { FileUploadModule, FileUploadHandlerEvent } from 'primeng/fileupload';
 import { DocumentService, DocumentCategory } from '../../../core/services/document.service';
+import { AppStateService } from '../../../core/services/app-state.service';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-document-upload-dialog',
@@ -19,29 +21,26 @@ import { DocumentService, DocumentCategory } from '../../../core/services/docume
     ButtonModule,
     SelectModule,
     TextareaModule,
-    FileUploadModule
+    FileUploadModule,
+    TranslateModule
   ],
   templateUrl: './document-upload-dialog.html'
 })
 export class DocumentUploadDialog {
   private fb = inject(FormBuilder);
   private documentService = inject(DocumentService);
+  private translate = inject(TranslateService);
+  public appState = inject(AppStateService);
 
   visible = model<boolean>(false);
-  @Input() caseId = signal<string | null>(null);
+  caseId = input<string | null>(null);
   @Output() onUpload = new EventEmitter<void>();
 
   uploadForm: FormGroup;
   uploading = signal(false);
   selectedFile: File | null = null;
 
-  categories = [
-    { label: 'عقد', value: DocumentCategory.Contract },
-    { label: 'وثيقة محكمة', value: DocumentCategory.CourtDocument },
-    { label: 'دليل', value: DocumentCategory.Evidence },
-    { label: 'فاتورة', value: DocumentCategory.Invoice },
-    { label: 'أخرى', value: DocumentCategory.Other }
-  ];
+  categories: any[] = [];
 
   allowedTypes = ".pdf,.doc,.docx,.jpg,.jpeg,.png";
   maxSize = 10000000; // 10MB
@@ -51,6 +50,24 @@ export class DocumentUploadDialog {
       category: [DocumentCategory.Other, Validators.required],
       description: ['']
     });
+
+    this.updateCategoryLabels();
+    
+    // Update labels when language changes
+    effect(() => {
+      this.appState.currentLang();
+      this.updateCategoryLabels();
+    });
+  }
+
+  updateCategoryLabels() {
+    this.categories = [
+      { label: this.translate.instant('DOCUMENTS.CONTRACT'), value: DocumentCategory.Contract },
+      { label: this.translate.instant('DOCUMENTS.COURT'), value: DocumentCategory.CourtDocument },
+      { label: this.translate.instant('DOCUMENTS.EVIDENCE'), value: DocumentCategory.Evidence },
+      { label: this.translate.instant('DOCUMENTS.INVOICE'), value: DocumentCategory.Invoice },
+      { label: this.translate.instant('DOCUMENTS.OTHER'), value: DocumentCategory.Other }
+    ];
   }
 
   onFileSelect(event: any) {

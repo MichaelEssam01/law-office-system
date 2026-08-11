@@ -1,9 +1,13 @@
 using LawOffice.Application.DTOs.Clients;
 using LawOffice.Application.Interfaces.Services;
+using LawOffice.Application.Common.Security;
 using Microsoft.AspNetCore.Mvc;
+
+using Microsoft.AspNetCore.Authorization;
 
 namespace LawOffice.API.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ClientsController : ControllerBase
@@ -15,6 +19,7 @@ public class ClientsController : ControllerBase
         _clientService = clientService;
     }
 
+    [Authorize(Policy = Permissions.Clients.View)]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ClientDto>>> GetAll()
     {
@@ -22,6 +27,7 @@ public class ClientsController : ControllerBase
         return Ok(clients);
     }
 
+    [Authorize(Policy = Permissions.Clients.View)]
     [HttpGet("{id:guid}")]
     public async Task<ActionResult<ClientDto>> GetById(Guid id)
     {
@@ -30,13 +36,22 @@ public class ClientsController : ControllerBase
         return Ok(client);
     }
 
+    [Authorize(Policy = Permissions.Clients.Create)]
     [HttpPost]
     public async Task<ActionResult<ClientDto>> Create([FromBody] CreateClientDto createDto)
     {
-        var client = await _clientService.CreateClientAsync(createDto);
-        return CreatedAtAction(nameof(GetById), new { id = client.Id }, client);
+        try
+        {
+            var client = await _clientService.CreateClientAsync(createDto);
+            return CreatedAtAction(nameof(GetById), new { id = client.Id }, client);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
+    [Authorize(Policy = Permissions.Clients.Update)]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateClientDto updateDto)
     {
@@ -49,8 +64,13 @@ public class ClientsController : ControllerBase
         {
             return NotFound();
         }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
     }
 
+    [Authorize(Policy = Permissions.Clients.Delete)]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {

@@ -1,246 +1,264 @@
-<div class="p-6" dir="rtl" *ngIf="case() as c">
-    <p-toast></p-toast>
-    <p-confirmDialog></p-confirmDialog>
-    
-    <!-- Breadcrumbs / Back -->
-    <div class="mb-4">
-        <button pButton icon="pi pi-arrow-right" label="العودة للقضايا" 
-                class="p-button-text p-button-secondary p-button-sm" 
-                routerLink="/cases"></button>
-    </div>
+@if (case(); as c) {
+    <div class="p-6" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
+        <p-toast></p-toast>
+        <p-confirmDialog></p-confirmDialog>
+        
+        <!-- Breadcrumbs / Back -->
+        <div class="mb-4">
+            <button pButton icon="pi pi-arrow-right" [label]="'CASES.BACK_TO_CASES' | translate" 
+                    class="p-button-text p-button-secondary p-button-sm" 
+                    routerLink="/cases"></button>
+        </div>
 
-    <!-- Header Section -->
-    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-                <div class="flex items-center gap-3 mb-2">
-                    <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg font-mono font-bold text-sm">
-                        {{ c.caseNumber }}
-                    </span>
-                    <p-tag [value]="getStatusLabel(c.status)" [severity]="getStatusSeverity(c.status)"></p-tag>
-                </div>
-                <h1 class="text-3xl font-bold text-slate-800">{{ c.title }}</h1>
-                <div class="flex items-center gap-4 mt-3 text-slate-600">
-                    <div class="flex items-center gap-2">
-                        <i class="pi pi-user text-blue-400"></i>
-                        <span class="font-medium">{{ c.clientName }}</span>
+        <!-- Header Section -->
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="px-3 py-1 bg-blue-50 text-blue-600 rounded-lg font-mono font-bold text-sm">
+                            {{ c.caseNumber }}
+                        </span>
+                        <p-tag [value]="getStatusLabel(c.status)" [severity]="getStatusSeverity(c.status)"></p-tag>
                     </div>
-                    <div class="flex items-center gap-2 border-r pr-4 border-slate-200">
-                        <i class="pi pi-id-card text-slate-400"></i>
-                        <span>المحامي: {{ c.lawyerName }}</span>
+                    <h1 class="text-3xl font-bold text-slate-800">{{ c.title }}</h1>
+                    <div class="flex items-center gap-4 mt-3 text-slate-600">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-user text-blue-400"></i>
+                            <span class="font-medium">{{ c.clientName }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 border-r pr-4 border-slate-200">
+                            <i class="pi pi-id-card text-slate-400"></i>
+                            <span>{{ 'CASES.LAWYER' | translate }}: {{ c.lawyerName }}</span>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="flex flex-wrap gap-2">
-                <button pButton label="تعديل القضية" icon="pi pi-pencil" class="p-button-outlined p-button-secondary" (click)="editCase()"></button>
-                <button pButton label="جلسة جديدة" icon="pi pi-calendar-plus" class="p-button-primary shadow-md" (click)="openNewSession()"></button>
+                <div class="flex flex-wrap gap-2">
+                    <button pButton [label]="'CASES.EDIT_CASE' | translate" icon="pi pi-pencil" class="p-button-outlined p-button-secondary" (click)="editCase()"></button>
+                    <button pButton [label]="'SESSIONS.ADD_SESSION' | translate" icon="pi pi-calendar-plus" class="p-button-primary shadow-md" (click)="openNewSession()"></button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Main Content Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Overview Column -->
-        <div class="lg:col-span-2 flex flex-col gap-6">
-            <!-- Tabs Section -->
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
-                <p-tabs [value]="0">
-                    <p-tablist>
-                        <p-tab [value]="0"><i class="pi pi-calendar ml-2"></i>الجلسات</p-tab>
-                        <p-tab [value]="1"><i class="pi pi-file ml-2"></i>المستندات</p-tab>
-                        <p-tab [value]="2"><i class="pi pi-wallet ml-2"></i>المالية</p-tab>
-                    </p-tablist>
-                    <p-tabpanels>
-                        <!-- Sessions Tab -->
-                        <p-tabpanel [value]="0">
-                            <div class="p-4">
-                                <div class="flex justify-between items-center mb-4">
-                                    <h3 class="text-lg font-bold text-slate-700">سجل الجلسات</h3>
-                                    <button pButton label="إضافة جلسة" icon="pi pi-plus" class="p-button-text p-button-sm" (click)="openNewSession()"></button>
-                                </div>
-                                <p-table [value]="sessions()" [loading]="sessionsLoading()" styleClass="p-datatable-sm">
-                                    <ng-template pTemplate="header">
-                                        <tr class="bg-slate-50 text-slate-700">
-                                            <th class="p-3">الجلسة</th>
-                                            <th class="p-3 text-center">التاريخ</th>
-                                            <th class="p-3">المكان</th>
-                                            <th class="p-3">الحالة</th>
-                                            <th class="p-3 text-center">الإجراءات</th>
-                                        </tr>
-                                    </ng-template>
-                                    <ng-template pTemplate="body" let-s>
-                                        <tr class="border-b border-slate-100">
-                                            <td class="p-3 font-medium text-slate-800">{{ s.title }}</td>
-                                            <td class="p-3 text-center">{{ s.scheduledAt | date:'dd/MM/yyyy' }}</td>
-                                            <td class="p-3 text-sm">{{ s.courtName }}</td>
-                                            <td class="p-3"><p-tag [value]="getSessionStatusLabel(s.status)" [severity]="getSessionStatusSeverity(s.status)" styleClass="text-xs"></p-tag></td>
-                                            <td class="p-3 text-center">
-                                                <button pButton icon="pi pi-pencil" class="p-button-text p-button-secondary p-button-xs" (click)="editSession(s)"></button>
-                                                <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-xs" (click)="deleteSession(s)"></button>
-                                            </td>
-                                        </tr>
-                                    </ng-template>
-                                </p-table>
-                            </div>
-                        </p-tabpanel>
-                        
-                        <!-- Documents Tab -->
-                        <p-tabpanel [value]="1">
-                            <div class="p-4">
-                                <div class="flex justify-between items-center mb-4">
-                                    <h3 class="text-lg font-bold text-slate-700">ملفات القضية</h3>
-                                    <button pButton label="رفع ملف" icon="pi pi-upload" class="p-button-text p-button-sm" (click)="openUploadDialog()"></button>
-                                </div>
-                                
-                                <p-table [value]="documents()" [loading]="docsLoading()" styleClass="p-datatable-sm" [rowHover]="true">
-                                    <ng-template pTemplate="header">
-                                        <tr class="bg-slate-50 text-slate-700">
-                                            <th class="p-3">اسم الملف</th>
-                                            <th class="p-3">التصنيف</th>
-                                            <th class="p-3 text-center">الحجم</th>
-                                            <th class="p-3 text-center">تاريخ الرفع</th>
-                                            <th class="p-3 text-center">الإجراءات</th>
-                                        </tr>
-                                    </ng-template>
-                                    <ng-template pTemplate="body" let-doc>
-                                        <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                                            <td class="p-3">
-                                                <div class="flex items-center gap-2">
-                                                    <i class="pi pi-file text-blue-400"></i>
-                                                    <span class="font-medium text-slate-800">{{ doc.originalFileName }}</span>
-                                                </div>
-                                            </td>
-                                            <td class="p-3 text-sm">
-                                                <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600">{{ getDocCategoryLabel(doc.category) }}</span>
-                                            </td>
-                                            <td class="p-3 text-center text-xs text-slate-500">{{ formatSize(doc.fileSize) }}</td>
-                                            <td class="p-3 text-center text-xs">{{ doc.uploadedAt | date:'dd/MM/yyyy' }}</td>
-                                            <td class="p-3 text-center">
-                                                <div class="flex justify-center gap-1">
-                                                    <button pButton icon="pi pi-download" class="p-button-text p-button-info p-button-xs" pTooltip="تحميل" (click)="downloadDocument(doc)"></button>
-                                                    <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-xs" pTooltip="حذف" (click)="deleteDocument(doc)"></button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </ng-template>
-                                    <ng-template pTemplate="emptymessage">
-                                        <tr>
-                                            <td colspan="5" class="p-12 text-center text-slate-400">
-                                                <i class="pi pi-folder-open text-4xl mb-2 block"></i>
-                                                <p>لا توجد مستندات لهذه القضية بعد.</p>
-                                            </td>
-                                        </tr>
-                                    </ng-template>
-                                </p-table>
-                            </div>
-                        </p-tabpanel>
-
-                        <!-- Finance Tab -->
-                        <p-tabpanel [value]="2">
-                            <div class="p-4 flex flex-col gap-6">
-                                <!-- Finance Summary -->
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                    <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
-                                        <p class="text-xs text-blue-500 font-bold mb-1 uppercase">إجمالي الأتعاب</p>
-                                        <h4 class="text-xl font-bold text-blue-900">{{ (financeSummary()?.totalInvoiced || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h4>
-                                    </div>
-                                    <div class="p-4 bg-green-50 rounded-xl border border-green-100">
-                                        <p class="text-xs text-green-500 font-bold mb-1 uppercase">إجمالي المسدد</p>
-                                        <h4 class="text-xl font-bold text-green-900 text-green-600">{{ (financeSummary()?.totalPaid || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h4>
-                                    </div>
-                                    <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
-                                        <p class="text-xs text-orange-500 font-bold mb-1 uppercase">المتبقي</p>
-                                        <h4 class="text-xl font-bold text-orange-900 text-orange-600">{{ (financeSummary()?.totalRemaining || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h4>
-                                    </div>
-                                </div>
-
-                                <!-- Invoices -->
-                                <div>
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Overview Column -->
+            <div class="lg:col-span-2 flex flex-col gap-6">
+                <!-- Tabs Section -->
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden min-h-[400px]">
+                    <p-tabs [value]="0">
+                        <p-tablist>
+                            <p-tab [value]="0"><i class="pi pi-calendar me-2"></i>{{ 'CASES.SESSIONS_TAB' | translate }}</p-tab>
+                            <p-tab [value]="1"><i class="pi pi-file me-2"></i>{{ 'CASES.DOCUMENTS_TAB' | translate }}</p-tab>
+                            <p-tab [value]="2"><i class="pi pi-wallet me-2"></i>{{ 'CASES.FINANCE_TAB' | translate }}</p-tab>
+                        </p-tablist>
+                        <p-tabpanels>
+                            <!-- Sessions Tab -->
+                            <p-tabpanel [value]="0">
+                                <div class="p-4">
                                     <div class="flex justify-between items-center mb-4">
-                                        <h3 class="text-lg font-bold text-slate-700 underline decoration-blue-200">الفواتير والمطالبات</h3>
-                                        <button pButton label="إضافة فاتورة" icon="pi pi-plus" class="p-button-text p-button-sm" (click)="openNewInvoice()"></button>
+                                        <h3 class="text-lg font-bold text-slate-700">{{ 'SESSIONS.TITLE' | translate }}</h3>
+                                        <button pButton [label]="'COMMON.ADD' | translate" icon="pi pi-plus" class="p-button-text p-button-sm" (click)="openNewSession()"></button>
                                     </div>
-                                    <p-table [value]="caseInvoices()" [loading]="financeLoading()" styleClass="p-datatable-sm">
+                                    <p-table [value]="sessions()" [loading]="sessionsLoading()" styleClass="p-datatable-sm">
                                         <ng-template pTemplate="header">
                                             <tr class="bg-slate-50 text-slate-700">
-                                                <th class="p-3">رقم الفاتورة</th>
-                                                <th class="p-3">العنوان</th>
-                                                <th class="p-3 text-center">المبلغ</th>
-                                                <th class="p-3 text-center">الحالة</th>
-                                                <th class="p-3 text-center">الإجراءات</th>
+                                                <th class="p-3">{{ 'SESSIONS.SESSION_TITLE' | translate }}</th>
+                                                <th class="p-3 text-center">{{ 'COMMON.DATE' | translate }}</th>
+                                                <th class="p-3">{{ 'SESSIONS.LOCATION' | translate }}</th>
+                                                <th class="p-3">{{ 'SESSIONS.STATUS' | translate }}</th>
+                                                <th class="p-3 text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
                                             </tr>
                                         </ng-template>
-                                        <ng-template pTemplate="body" let-inv>
+                                        <ng-template pTemplate="body" let-s>
                                             <tr class="border-b border-slate-100">
-                                                <td class="p-3 font-mono font-bold text-blue-600">{{ inv.invoiceNumber }}</td>
-                                                <td class="p-3 text-sm">{{ inv.title }}</td>
-                                                <td class="p-3 text-center font-bold">{{ inv.amount | number }}</td>
+                                                <td class="p-3 font-medium text-slate-800">{{ s.title }}</td>
+                                                <td class="p-3 text-center">{{ s.scheduledAt | date:'dd/MM/yyyy' }}</td>
+                                                <td class="p-3 text-sm">{{ s.courtName }}</td>
+                                                <td class="p-3"><p-tag [value]="getSessionStatusLabel(s.status)" [severity]="getSessionStatusSeverity(s.status)" styleClass="text-xs"></p-tag></td>
                                                 <td class="p-3 text-center">
-                                                    <p-tag [value]="getInvoiceStatusLabel(inv.status)" [severity]="getInvoiceStatusSeverity(inv.status)" styleClass="text-[10px]"></p-tag>
-                                                </td>
-                                                <td class="p-3 text-center">
-                                                    <button pButton icon="pi pi-pencil" class="p-button-text p-button-secondary p-button-xs" (click)="editInvoice(inv)"></button>
+                                                    <button pButton icon="pi pi-pencil" class="p-button-text p-button-secondary p-button-xs" (click)="editSession(s)"></button>
+                                                    <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-xs" (click)="deleteSession(s)"></button>
                                                 </td>
                                             </tr>
                                         </ng-template>
                                     </p-table>
                                 </div>
-
-                                <!-- Payments -->
-                                <div>
+                            </p-tabpanel>
+                            
+                            <!-- Documents Tab -->
+                            <p-tabpanel [value]="1">
+                                <div class="p-4">
                                     <div class="flex justify-between items-center mb-4">
-                                        <h3 class="text-lg font-bold text-slate-700 underline decoration-green-200">سجل المدفوعات</h3>
-                                        <button pButton label="تسجيل دفعة" icon="pi pi-money-bill" class="p-button-text p-button-success p-button-sm" (click)="openNewPayment()"></button>
+                                        <h3 class="text-lg font-bold text-slate-700">{{ 'CASES.DOCUMENTS_TAB' | translate }}</h3>
+                                        <button pButton [label]="'CASES.UPLOAD_FILE' | translate" icon="pi pi-upload" class="p-button-text p-button-sm" (click)="openUploadDialog()"></button>
                                     </div>
-                                    <p-table [value]="casePayments()" [loading]="financeLoading()" styleClass="p-datatable-sm">
+                                    
+                                    <p-table [value]="documents()" [loading]="docsLoading()" styleClass="p-datatable-sm" [rowHover]="true">
                                         <ng-template pTemplate="header">
                                             <tr class="bg-slate-50 text-slate-700">
-                                                <th class="p-3">التاريخ</th>
-                                                <th class="p-3">الطريقة</th>
-                                                <th class="p-3 text-center">المبلغ</th>
-                                                <th class="p-3">ملاحظات</th>
+                                                <th class="p-3">{{ 'COMMON.FILE_NAME' | translate }}</th>
+                                                <th class="p-3">{{ 'COMMON.CATEGORY' | translate }}</th>
+                                                <th class="p-3 text-center">{{ 'COMMON.SIZE' | translate }}</th>
+                                                <th class="p-3 text-center">{{ 'COMMON.DATE' | translate }}</th>
+                                                <th class="p-3 text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
                                             </tr>
                                         </ng-template>
-                                        <ng-template pTemplate="body" let-pay>
-                                            <tr class="border-b border-slate-100">
-                                                <td class="p-3 text-sm">{{ pay.paymentDate | date:'dd/MM/yyyy' }}</td>
-                                                <td class="p-3 text-xs">
-                                                    <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600">{{ pay.method === 0 ? 'نقدي' : pay.method === 1 ? 'تحويل' : 'أخرى' }}</span>
+                                        <ng-template pTemplate="body" let-doc>
+                                            <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                                <td class="p-3">
+                                                    <div class="flex items-center gap-2">
+                                                        <i class="pi pi-file text-blue-400"></i>
+                                                        <span class="font-medium text-slate-800">{{ doc.originalFileName }}</span>
+                                                    </div>
                                                 </td>
-                                                <td class="p-3 text-center font-bold text-green-600">{{ pay.amount | number }}</td>
-                                                <td class="p-3 text-xs text-slate-400 italic">{{ pay.notes || '-' }}</td>
+                                                <td class="p-3 text-sm">
+                                                    <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600">{{ getDocCategoryLabel(doc.category) }}</span>
+                                                </td>
+                                                <td class="p-3 text-center text-xs text-slate-500">{{ formatSize(doc.fileSize) }}</td>
+                                                <td class="p-3 text-center text-xs">{{ doc.uploadedAt | date:'dd/MM/yyyy' }}</td>
+                                                <td class="p-3 text-center">
+                                                    <div class="flex justify-center gap-1">
+                                                        <button pButton icon="pi pi-download" class="p-button-text p-button-info p-button-xs" [pTooltip]="'COMMON.DOWNLOAD' | translate" (click)="downloadDocument(doc)"></button>
+                                                        <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-xs" [pTooltip]="'COMMON.DELETE' | translate" (click)="deleteDocument(doc)"></button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </ng-template>
+                                        <ng-template pTemplate="emptymessage">
+                                            <tr>
+                                                <td colspan="5" class="p-12 text-center text-slate-400">
+                                                    <i class="pi pi-folder-open text-4xl mb-2 block"></i>
+                                                    <p>{{ 'CASES.NO_DOCUMENTS' | translate }}</p>
+                                                </td>
                                             </tr>
                                         </ng-template>
                                     </p-table>
                                 </div>
-                            </div>
-                        </p-tabpanel>
-                    </p-tabpanels>
-                </p-tabs>
+                            </p-tabpanel>
+
+                            <!-- Finance Tab -->
+                            <p-tabpanel [value]="2">
+                                <div class="p-4 flex flex-col gap-6">
+                                    <!-- Finance Summary -->
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div class="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                                            <p class="text-xs text-blue-500 font-bold mb-1 uppercase">{{ 'CASES.TOTAL_FEES' | translate }}</p>
+                                            <h4 class="text-xl font-bold text-blue-900">{{ (financeSummary()?.totalInvoiced || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h4>
+                                        </div>
+                                        <div class="p-4 bg-green-50 rounded-xl border border-green-100">
+                                            <p class="text-xs text-green-500 font-bold mb-1 uppercase">{{ 'CASES.TOTAL_PAID' | translate }}</p>
+                                            <h4 class="text-xl font-bold text-green-900 text-green-600">{{ (financeSummary()?.totalPaid || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h4>
+                                        </div>
+                                        <div class="p-4 bg-orange-50 rounded-xl border border-orange-100">
+                                            <p class="text-xs text-orange-500 font-bold mb-1 uppercase">{{ 'CASES.REMAINING' | translate }}</p>
+                                            <h4 class="text-xl font-bold text-orange-900 text-orange-600">{{ (financeSummary()?.totalRemaining || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h4>
+                                        </div>
+                                    </div>
+
+                                    <!-- Invoices -->
+                                    <div>
+                                        <div class="flex justify-between items-center mb-4">
+                                            <h3 class="text-lg font-bold text-slate-700 underline decoration-blue-200">{{ 'FINANCE.INVOICES' | translate }}</h3>
+                                            <button pButton [label]="'COMMON.ADD' | translate" icon="pi pi-plus" class="p-button-text p-button-sm" (click)="openNewInvoice()"></button>
+                                        </div>
+                                        <p-table [value]="caseInvoices()" [loading]="financeLoading()" styleClass="p-datatable-sm">
+                                            <ng-template pTemplate="header">
+                                                <tr class="bg-slate-50 text-slate-700">
+                                                    <th class="p-3">{{ 'FINANCE.INVOICE_NUMBER' | translate }}</th>
+                                                    <th class="p-3">{{ 'FINANCE.INVOICE_TITLE' | translate }}</th>
+                                                    <th class="p-3 text-center">{{ 'FINANCE.AMOUNT' | translate }}</th>
+                                                    <th class="p-3 text-center text-orange-600">{{ 'FINANCE.REMAINING' | translate }}</th>
+                                                    <th class="p-3 text-center">{{ 'FINANCE.STATUS' | translate }}</th>
+                                                    <th class="p-3 text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
+                                                </tr>
+                                            </ng-template>
+                                            <ng-template pTemplate="body" let-inv>
+                                                <tr class="border-b border-slate-100">
+                                                    <td class="p-3 font-mono font-bold text-blue-600">{{ inv.invoiceNumber }}</td>
+                                                    <td class="p-3 text-sm">{{ inv.title }}</td>
+                                                    <td class="p-3 text-center font-bold text-slate-500">{{ inv.amount | number }}</td>
+                                                    <td class="p-3 text-center font-bold text-orange-600">
+                                                        {{ (inv.remainingAmount ?? (inv.amount - inv.paidAmount)) | number }}
+                                                    </td>
+                                                    <td class="p-3 text-center">
+                                                        <p-tag [value]="getInvoiceStatusLabel(inv.status)" [severity]="getInvoiceStatusSeverity(inv.status)" styleClass="text-[10px]"></p-tag>
+                                                    </td>
+                                                    <td class="p-3 text-center">
+                                                        <button pButton icon="pi pi-pencil" class="p-button-text p-button-secondary p-button-xs" (click)="editInvoice(inv)"></button>
+                                                    </td>
+                                                </tr>
+                                            </ng-template>
+                                        </p-table>
+                                    </div>
+
+                                    <!-- Payments -->
+                                    <div>
+                                        <div class="flex justify-between items-center mb-4">
+                                            <h3 class="text-lg font-bold text-slate-700 underline decoration-green-200">{{ 'FINANCE.PAYMENTS' | translate }}</h3>
+                                            <button pButton [label]="'COMMON.ADD' | translate" icon="pi pi-money-bill" class="p-button-text p-button-success p-button-sm" (click)="openNewPayment()"></button>
+                                        </div>
+                                        <p-table [value]="casePayments()" [loading]="financeLoading()" styleClass="p-datatable-sm">
+                                            <ng-template pTemplate="header">
+                                                <tr class="bg-slate-50 text-slate-700">
+                                                    <th class="p-3">{{ 'FINANCE.PAYMENT_DATE' | translate }}</th>
+                                                    <th class="p-3">{{ 'FINANCE.PAYMENT_METHOD' | translate }}</th>
+                                                    <th class="p-3 text-center">{{ 'FINANCE.AMOUNT' | translate }}</th>
+                                                    <th class="p-3">{{ 'FINANCE.NOTES' | translate }}</th>
+                                                </tr>
+                                            </ng-template>
+                                            <ng-template pTemplate="body" let-pay>
+                                                <tr class="border-b border-slate-100">
+                                                    <td class="p-3 text-sm">{{ pay.paymentDate | date:'dd/MM/yyyy' }}</td>
+                                                    <td class="p-3 text-xs">
+                                                        <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600">{{ getPaymentMethodLabel(pay.method) }}</span>
+                                                    </td>
+                                                    <td class="p-3 text-center font-bold text-green-600">{{ pay.amount | number }}</td>
+                                                    <td class="p-3 text-xs text-slate-400 italic">{{ pay.notes || '-' }}</td>
+                                                </tr>
+                                            </ng-template>
+                                        </p-table>
+                                    </div>
+                                </div>
+                            </p-tabpanel>
+                        </p-tabpanels>
+                    </p-tabs>
+                </div>
+            </div>
+
+            <!-- Sidebar Column -->
+            <div class="flex flex-col gap-6">
+                <!-- Case Description & Notes (Simplified) -->
+                <p-card [header]="'CASES.CASE_DETAILS_TITLE' | translate" styleClass="shadow-sm border border-slate-200 rounded-xl">
+                    <div class="text-slate-700 leading-relaxed whitespace-pre-wrap">{{ c.description || ('COMMON.NO_DATA' | translate) }}</div>
+                    <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-400">{{ 'CASES.START_DATE' | translate }}:</span><span>{{ c.startDate | date:'dd/MM/yyyy' }}</span></div>
+                    </div>
+                </p-card>
             </div>
         </div>
 
-        <!-- Sidebar Column -->
-        <div class="flex flex-col gap-6">
-            <!-- Case Description & Notes (Simplified) -->
-            <p-card header="تفاصيل القضية" styleClass="shadow-sm border border-slate-200 rounded-xl">
-                <div class="text-slate-700 leading-relaxed whitespace-pre-wrap">{{ c.description || 'لا يوجد وصف.' }}</div>
-                <div class="mt-4 pt-4 border-t border-slate-100 flex flex-col gap-2 text-sm">
-                    <div class="flex justify-between"><span class="text-slate-400">تاريخ البدء:</span><span>{{ c.startDate | date:'dd/MM/yyyy' }}</span></div>
-                </div>
-            </p-card>
-        </div>
+        <!-- Dialogs -->
+        <app-case-dialog [case]="case()" [visible]="displayDialog()" (visibleChange)="displayDialog.set($event)" (onSave)="onSave($event)"></app-case-dialog>
+        <app-session-dialog [(visible)]="displaySessionDialog" 
+                            [session]="selectedSession()" 
+                            [caseId]="caseId()"
+                            (onSave)="onSessionSave($event)">
+        </app-session-dialog>
+        <app-invoice-dialog [(visible)]="displayInvoiceDialog" 
+                            [invoice]="selectedInvoiceForEdit()" 
+                            [caseId]="caseId()"
+                            (onSave)="onInvoiceSave($event)">
+        </app-invoice-dialog>
+        
+        <app-payment-dialog [(visible)]="displayPaymentDialog" 
+                            [caseId]="caseId()"
+                            (onSave)="onPaymentSave($event)">
+        </app-payment-dialog>
+        
+        <app-document-upload-dialog [(visible)]="displayUploadDialog" 
+                                    [caseId]="caseId()" 
+                                    (onUpload)="onUploadSuccess()">
+        </app-document-upload-dialog>
     </div>
-
-    <!-- Dialogs -->
-    <app-case-dialog [case]="case()" [visible]="displayDialog()" (visibleChange)="displayDialog.set($event)" (onSave)="onSave($event)"></app-case-dialog>
-    <app-session-dialog [(visible)]="displaySessionDialog" [session]="selectedSession" (onSave)="onSessionSave($event)"></app-session-dialog>
-    <app-invoice-dialog [(visible)]="displayInvoiceDialog" [invoice]="selectedInvoiceForEdit" (onSave)="onInvoiceSave($event)"></app-invoice-dialog>
-    <app-payment-dialog [(visible)]="displayPaymentDialog" (onSave)="onPaymentSave($event)"></app-payment-dialog>
-    
-    <app-document-upload-dialog [(visible)]="displayUploadDialog" 
-                                [caseId]="caseId" 
-                                (onUpload)="onUploadSuccess()">
-    </app-document-upload-dialog>
-</div>
+}

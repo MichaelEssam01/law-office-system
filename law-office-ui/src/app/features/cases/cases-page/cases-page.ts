@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal, ChangeDetectorRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -11,10 +11,14 @@ import { InputIconModule } from 'primeng/inputicon';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { SelectModule } from 'primeng/select';
+import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { CaseService, CaseListDto, CaseStatus, CaseDetailDto } from '../../../core/services/case.service';
 import { ClientService, Client } from '../../../core/services/client';
 import { CaseDialog } from '../case-dialog/case-dialog';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { AppStateService } from '../../../core/services/app-state.service';
+import { UserManagementService } from '../../../core/services/user-management.service';
 
 @Component({
   selector: 'app-cases-page',
@@ -32,7 +36,9 @@ import { CaseDialog } from '../case-dialog/case-dialog';
     ToastModule,
     ConfirmDialogModule,
     SelectModule,
-    CaseDialog
+    CaseDialog,
+    TranslateModule,
+    TooltipModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './cases-page.html'
@@ -42,7 +48,10 @@ export class CasesPage implements OnInit {
   private clientService = inject(ClientService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
-  private cdr = inject(ChangeDetectorRef);
+  private translate = inject(TranslateService);
+  public appState = inject(AppStateService);
+  public cdr = inject(ChangeDetectorRef);
+  private userService = inject(UserManagementService);
 
   cases = signal<CaseListDto[]>([]);
   loading = signal(true);
@@ -56,18 +65,28 @@ export class CasesPage implements OnInit {
   selectedClient = signal<string | null>(null);
   selectedLawyer = signal<string | null>(null);
 
+  statuses = signal<any[]>([]);
   clients = signal<Client[]>([]);
-  lawyers = signal<any[]>([
-    { fullName: 'المحامي المسؤول (Admin)', id: '00000000-0000-0000-0000-000000000000' }
-  ]);
-  
-  statuses = [
-    { label: 'مفتوحة', value: '0' },
-    { label: 'قيد الانتظار', value: '1' },
-    { label: 'مغلقة', value: '2' }
-  ];
+  lawyers = signal<any[]>([]);
+
+  constructor() {
+    effect(() => {
+      // Trigger update when language changes
+      const lang = this.appState.currentLang();
+      this.updateStatusLabels();
+    });
+  }
+
+  updateStatusLabels() {
+    this.statuses.set([
+      { labelKey: 'CASES.OPEN', value: '0' },
+      { labelKey: 'CASES.PENDING', value: '1' },
+      { labelKey: 'CASES.CLOSED', value: '2' }
+    ]);
+  }
 
   async ngOnInit() {
+    this.updateStatusLabels();
     await Promise.all([
       this.loadCases(),
       this.loadFilterData()
@@ -77,6 +96,8 @@ export class CasesPage implements OnInit {
   async loadFilterData() {
     try {
       this.clients.set(await this.clientService.getClients());
+      const allLawyers = await this.userService.getLawyers();
+      this.lawyers.set(allLawyers);
     } catch (error) {
       console.error('Error loading filter data', error);
     }
@@ -94,7 +115,11 @@ export class CasesPage implements OnInit {
       this.cases.set(data);
     } catch (error) {
       console.error('Error loading cases', error);
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في تحميل القضايا' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: this.translate.instant('CASES.LOAD_ERROR') 
+      });
     } finally {
       this.loading.set(false);
       this.cdr.detectChanges();
@@ -124,24 +149,36 @@ export class CasesPage implements OnInit {
       this.selectedCase.set(fullCase);
       this.displayDialog.set(true);
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في تحميل تفاصيل القضية' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: this.translate.instant('CASES.DETAILS_ERROR') 
+      });
     }
   }
 
   deleteCase(caseItem: CaseListDto) {
     this.confirmationService.confirm({
-      message: `هل أنت متأكد من حذف القضية رقم ${caseItem.caseNumber}؟`,
-      header: 'تأكيد الحذف',
+      message: this.translate.instant('CASES.DELETE_CONFIRM_MESSAGE', { caseNumber: caseItem.caseNumber }),
+      header: this.translate.instant('CASES.DELETE_CONFIRM_TITLE'),
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'نعم، احذف',
-      rejectLabel: 'إلغاء',
+      acceptLabel: this.translate.instant('CASES.DELETE_ACCEPT'),
+      rejectLabel: this.translate.instant('CASES.DELETE_REJECT'),
       accept: async () => {
         try {
           await this.caseService.deleteCase(caseItem.id);
-          this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم حذف القضية بنجاح' });
+          this.messageService.add({ 
+            severity: 'success', 
+            summary: this.translate.instant('COMMON.SUCCESS'), 
+            detail: this.translate.instant('CASES.DELETE_SUCCESS') 
+          });
           await this.loadCases();
         } catch (error) {
-          this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في حذف القضية' });
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: this.translate.instant('COMMON.ERROR'), 
+            detail: this.translate.instant('CASES.DELETE_ERROR') 
+          });
         }
       }
     });
@@ -151,15 +188,27 @@ export class CasesPage implements OnInit {
     try {
       if (caseData.id) {
         await this.caseService.updateCase(caseData.id, caseData);
-        this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم تحديث القضية بنجاح' });
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: this.translate.instant('COMMON.SUCCESS'), 
+          detail: this.translate.instant('CASES.UPDATE_SUCCESS') 
+        });
       } else {
         await this.caseService.createCase(caseData);
-        this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم إضافة القضية بنجاح' });
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: this.translate.instant('COMMON.SUCCESS'), 
+          detail: this.translate.instant('CASES.CREATE_SUCCESS') 
+        });
       }
       this.displayDialog.set(false);
       await this.loadCases();
     } catch (error) {
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في حفظ القضية' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: this.translate.instant('CASES.SAVE_ERROR') 
+      });
     }
   }
 
@@ -174,10 +223,10 @@ export class CasesPage implements OnInit {
 
   getStatusLabel(status: CaseStatus): string {
     switch (status) {
-      case CaseStatus.Open: return 'مفتوحة';
-      case CaseStatus.Pending: return 'قيد الانتظار';
-      case CaseStatus.Closed: return 'مغلقة';
-      default: return 'غير معروف';
+      case CaseStatus.Open: return this.translate.instant('CASES.OPEN');
+      case CaseStatus.Pending: return this.translate.instant('CASES.PENDING');
+      case CaseStatus.Closed: return this.translate.instant('CASES.CLOSED');
+      default: return 'Unknown';
     }
   }
 }

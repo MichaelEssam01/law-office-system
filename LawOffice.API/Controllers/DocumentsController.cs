@@ -14,6 +14,10 @@ public class DocumentsController : ControllerBase
     private readonly IDocumentService _documentService;
     public DocumentsController(IDocumentService documentService) => _documentService = documentService;
 
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<DocumentDto>>> GetDocuments()
+        => Ok(await _documentService.GetAllDocumentsAsync());
+
     [HttpGet("case/{caseId}")]
     public async Task<ActionResult<IEnumerable<DocumentDto>>> GetCaseDocuments(Guid caseId)
         => Ok(await _documentService.GetCaseDocumentsAsync(caseId));

@@ -1,0 +1,59 @@
+<div class="p-6">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-slate-800">{{ 'SETTINGS.TITLE' | translate }}</h1>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+            <h3 class="text-lg font-semibold text-slate-800">{{ 'SETTINGS.FIRM_DETAILS' | translate }}</h3>
+        </div>
+        
+        <div class="p-8 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-700 block">{{ 'SETTINGS.FIRM_NAME' | translate }}</label>
+                    <input pInputText type="text" [(ngModel)]="settings().firmName" 
+                           class="w-full border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-3 transition-all" />
+                </div>
+                
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-700 block">{{ 'SETTINGS.LAWYER_NAME' | translate }}</label>
+                    <input pInputText type="text" [(ngModel)]="settings().lawyerName" 
+                           class="w-full border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-3 transition-all" />
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-700 block">{{ 'SETTINGS.PHONE' | translate }}</label>
+                    <input pInputText type="text" [(ngModel)]="settings().phone" 
+                           class="w-full border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-3 transition-all" dir="ltr" />
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-700 block">{{ 'SETTINGS.EMAIL' | translate }}</label>
+                    <input pInputText type="email" [(ngModel)]="settings().email" 
+                           class="w-full border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-3 transition-all" dir="ltr" />
+                </div>
+
+                <div class="space-y-2 md:col-span-2">
+                    <label class="text-sm font-medium text-slate-700 block">{{ 'SETTINGS.ADDRESS' | translate }}</label>
+                    <input pInputText type="text" [(ngModel)]="settings().address" 
+                           class="w-full border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-3 transition-all" />
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-slate-700 block">{{ 'SETTINGS.TAX_NUMBER' | translate }}</label>
+                    <input pInputText type="text" [(ngModel)]="settings().taxNumber" 
+                           class="w-full border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-xl px-4 py-3 transition-all" dir="ltr" />
+                </div>
+            </div>
+
+            <div class="pt-6 border-t border-slate-100 flex justify-end">
+                <p-button [label]="'COMMON.SAVE' | translate" icon="pi pi-save" [loading]="saving()" 
+                          styleClass="bg-blue-600 border-none hover:bg-blue-700 rounded-xl px-8 py-3 font-semibold shadow-lg shadow-blue-600/20"
+                          (onClick)="save()"></p-button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<p-toast position="top-left"></p-toast>

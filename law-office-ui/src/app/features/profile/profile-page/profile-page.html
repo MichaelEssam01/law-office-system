@@ -1,0 +1,219 @@
+<div class="max-w-5xl mx-auto space-y-6">
+    <!-- Breadcrumb / Page Header -->
+    <div class="flex flex-col gap-1 mb-4">
+        <div class="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
+            <span>{{ 'SIDEBAR.SYSTEM' | translate }}</span>
+            <i class="pi pi-chevron-right text-[8px]"></i>
+            <span class="text-blue-600">{{ 'PROFILE.VIEW_PROFILE' | translate }}</span>
+        </div>
+        <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">
+            {{ activeTab() === 'profile' ? ('PROFILE.VIEW_PROFILE' | translate) : (activeTab() === 'security' ? ('PROFILE.SECURITY_LOG' | translate) : ('PROFILE.NOTIFICATIONS' | translate)) }}
+        </h1>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Sidebar Navigation (Internal) -->
+        <div class="lg:col-span-1 space-y-4">
+            <div class="bg-white rounded-2xl p-2 shadow-sm border border-slate-100">
+                <nav class="space-y-1">
+                    <button (click)="setTab('profile')" 
+                            [class]="activeTab() === 'profile' ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-500 hover:bg-slate-50'"
+                            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all">
+                        <i class="pi pi-user"></i>
+                        <span class="text-sm">{{ 'PROFILE.VIEW_PROFILE' | translate }}</span>
+                    </button>
+                    <button (click)="setTab('notifications')" 
+                            [class]="activeTab() === 'notifications' ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-500 hover:bg-slate-50'"
+                            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all">
+                        <i class="pi pi-bell"></i>
+                        <span class="text-sm">{{ 'PROFILE.NOTIFICATIONS' | translate }}</span>
+                    </button>
+                    <button (click)="setTab('security')" 
+                            [class]="activeTab() === 'security' ? 'bg-blue-50 text-blue-700 font-bold' : 'text-slate-500 hover:bg-slate-50'"
+                            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all border-t border-slate-50 mt-2 pt-2">
+                        <i class="pi pi-shield"></i>
+                        <span class="text-sm">{{ 'PROFILE.SECURITY_LOG' | translate }}</span>
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="lg:col-span-3 space-y-6">
+            <!-- Profile Tab -->
+            @if (activeTab() === 'profile') {
+                <div class="space-y-6 animate-in fade-in duration-300">
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <div class="h-32 bg-gradient-to-r from-slate-800 to-slate-900 relative">
+                            <div class="absolute -bottom-10 left-8">
+                                <div class="w-24 h-24 rounded-2xl bg-white p-1 shadow-lg overflow-hidden group relative">
+                                    <div class="w-full h-full rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-3xl font-bold overflow-hidden">
+                                        {{ getInitials() }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="pt-14 pb-8 px-8">
+                            <h2 class="text-2xl font-bold text-slate-800">{{ currentUser()?.fullName }}</h2>
+                            <div class="flex items-center gap-3 mt-1">
+                                <span class="text-sm font-medium text-slate-500 flex items-center gap-1">
+                                    <i class="pi pi-envelope text-xs"></i>
+                                    {{ currentUser()?.email }}
+                                </span>
+                                <span class="h-1 w-1 rounded-full bg-slate-300"></span>
+                                <span class="text-xs font-bold text-blue-600 uppercase tracking-wider">{{ currentUser()?.role }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-4">
+                            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">{{ 'USERS.NAME' | translate }}</h3>
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                                <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center text-slate-400 shadow-sm">
+                                    <i class="pi pi-id-card"></i>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{{ 'USERS.NAME' | translate }}</span>
+                                    <span class="text-sm font-bold text-slate-700">{{ currentUser()?.fullName }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-4">
+                            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">{{ 'AUTH.RESET_PASSWORD_TITLE' | translate }}</h3>
+                            <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()" class="space-y-4">
+                                <p-password formControlName="currentPassword" [toggleMask]="true" [feedback]="false" [placeholder]="'AUTH.PASSWORD' | translate"
+                                            styleClass="w-full" inputStyleClass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
+                                <p-password formControlName="newPassword" [toggleMask]="true" [placeholder]="'AUTH.NEW_PASSWORD' | translate"
+                                            styleClass="w-full" inputStyleClass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
+                                <p-password formControlName="confirmPassword" [toggleMask]="true" [feedback]="false" [placeholder]="'AUTH.CONFIRM_PASSWORD' | translate"
+                                            styleClass="w-full" inputStyleClass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
+                                <button pButton type="submit" [disabled]="passwordForm.invalid || loading()" 
+                                        class="w-full bg-slate-900 hover:bg-slate-800 text-white py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50 mt-2">
+                                    {{ 'AUTH.RESET_PASSWORD_BUTTON' | translate }}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <!-- Notifications Tab -->
+            @if (activeTab() === 'notifications') {
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div class="border-b border-slate-50 pb-4">
+                        <h2 class="text-xl font-bold text-slate-800">{{ 'PROFILE.NOTIF_PREFS_TITLE' | translate }}</h2>
+                        <p class="text-slate-500 text-sm">{{ 'PROFILE.NOTIF_PREFS_DESC' | translate }}</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div class="bg-slate-50 p-6 rounded-2xl space-y-4">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">{{ 'PROFILE.EMAIL_NOTIFS' | translate }}</h3>
+                            <div class="flex items-center justify-between p-2">
+                                <div>
+                                    <p class="font-bold text-slate-700">{{ 'PROFILE.CASE_ASSIGN_TITLE' | translate }}</p>
+                                    <p class="text-xs text-slate-500">{{ 'PROFILE.CASE_ASSIGN_DESC' | translate }}</p>
+                                </div>
+                                <p-toggleswitch [(ngModel)]="notificationSettings().emailCases"></p-toggleswitch>
+                            </div>
+                            <div class="flex items-center justify-between p-2">
+                                <div>
+                                    <p class="font-bold text-slate-700">{{ 'PROFILE.UPCOMING_SESS_TITLE' | translate }}</p>
+                                    <p class="text-xs text-slate-500">{{ 'PROFILE.UPCOMING_SESS_DESC' | translate }}</p>
+                                </div>
+                                <p-toggleswitch [(ngModel)]="notificationSettings().emailSessions"></p-toggleswitch>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-6 rounded-2xl space-y-4">
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">{{ 'PROFILE.IN_APP_ALERTS' | translate }}</h3>
+                            <div class="flex items-center justify-between p-2">
+                                <div>
+                                    <p class="font-bold text-slate-700">{{ 'PROFILE.FINANCE_UPD_TITLE' | translate }}</p>
+                                    <p class="text-xs text-slate-500">{{ 'PROFILE.FINANCE_UPD_DESC' | translate }}</p>
+                                </div>
+                                <p-toggleswitch [(ngModel)]="notificationSettings().appFinance"></p-toggleswitch>
+                            </div>
+                            <div class="flex items-center justify-between p-2">
+                                <div>
+                                    <p class="font-bold text-slate-700">{{ 'PROFILE.SYSTEM_ANN_TITLE' | translate }}</p>
+                                    <p class="text-xs text-slate-500">{{ 'PROFILE.SYSTEM_ANN_DESC' | translate }}</p>
+                                </div>
+                                <p-toggleswitch [ngModel]="true"></p-toggleswitch>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-4">
+                        <button (click)="saveNotificationSettings()" [disabled]="loading()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-blue-200 active:scale-95">
+                            {{ 'COMMON.SAVE' | translate }}
+                        </button>
+                    </div>
+                </div>
+            }
+
+            <!-- Security Log Tab -->
+            @if (activeTab() === 'security') {
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden animate-in fade-in slide-in-from-right-4 duration-300">
+                    <div class="p-8 border-b border-slate-50">
+                        <h2 class="text-xl font-bold text-slate-800">{{ 'PROFILE.SECURITY_LOG_TITLE' | translate }}</h2>
+                        <p class="text-slate-500 text-sm">{{ 'PROFILE.SECURITY_LOG_DESC' | translate }}</p>
+                    </div>
+
+                    <p-table [value]="securityLogs()" styleClass="p-datatable-sm">
+                        <ng-template pTemplate="header">
+                            <tr class="bg-slate-50">
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ 'PROFILE.EVENT' | translate }}</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ 'PROFILE.TIMESTAMP' | translate }}</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ 'PROFILE.DEVICE_IP' | translate }}</th>
+                                <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest text-right">{{ 'PROFILE.STATUS' | translate }}</th>
+                            </tr>
+                        </ng-template>
+                        <ng-template pTemplate="body" let-log>
+                            <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+                                            <i [class]="log.event === 'Login' ? 'pi pi-sign-in' : 'pi pi-key'"></i>
+                                        </div>
+                                        <span class="font-bold text-slate-700 text-sm">{{ log.event }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-slate-500 text-sm">{{ (log.timestamp + 'Z') | date:'MMM d, y, h:mm a' }}</td>
+                                <td class="px-6 py-4">
+                                    <div class="flex flex-col">
+                                        <span class="text-slate-700 text-sm font-bold">{{ formatDevice(log.device) }}</span>
+                                        <span class="text-[10px] text-slate-400 truncate max-w-[200px]" [title]="log.device">{{ log.ipAddress }} • {{ log.device }}</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
+                                          [ngClass]="{
+                                            'bg-green-50 text-green-600': log.status === 'Success',
+                                            'bg-orange-50 text-orange-600': log.status === 'Invalid Password',
+                                            'bg-red-50 text-red-600': log.status !== 'Success' && log.status !== 'Invalid Password'
+                                          }">
+                                        {{ log.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                    
+                    <div class="p-6 bg-slate-50/50 border-t border-slate-50 flex items-center justify-between">
+                        <p class="text-xs text-slate-400 italic">{{ 'PROFILE.LAST_30_DAYS' | translate }}</p>
+                        <button (click)="downloadLogs()" [disabled]="loading()"
+                                class="text-blue-600 text-xs font-bold hover:underline transition-all active:scale-95 disabled:opacity-50">
+                            {{ 'PROFILE.DOWNLOAD_EXCEL' | translate }}
+                        </button>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<p-toast></p-toast>

@@ -12,6 +12,7 @@ public class DocumentDto
     public DocumentCategory Category { get; set; }
     public string? Description { get; set; }
     public DateTime UploadedAt { get; set; }
+    public string? CaseTitle { get; set; }
 }
 
 public class UploadDocumentDto

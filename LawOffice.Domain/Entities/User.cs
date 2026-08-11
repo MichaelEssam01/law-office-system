@@ -8,6 +8,9 @@ public class User : IdentityUser<Guid>
 {
     public string FullName { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsActive { get; set; } = true;
 
     public ICollection<Case> Cases { get; set; } = new List<Case>();
+    public ICollection<UserSecurityLog> SecurityLogs { get; set; } = new List<UserSecurityLog>();
+    public UserNotificationSetting? NotificationSetting { get; set; }
 }

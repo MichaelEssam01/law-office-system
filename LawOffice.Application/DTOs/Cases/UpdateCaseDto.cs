@@ -8,9 +8,8 @@ public class UpdateCaseDto
     [Required]
     public Guid Id { get; set; }
 
-    [Required]
     [StringLength(50)]
-    public string CaseNumber { get; set; } = string.Empty;
+    public string? CaseNumber { get; set; }
 
     [Required]
     [StringLength(200)]

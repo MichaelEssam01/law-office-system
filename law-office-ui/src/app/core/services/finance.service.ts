@@ -14,12 +14,14 @@ export enum PaymentMethod {
   Cash = 0,
   BankTransfer = 1,
   CreditCard = 2,
-  Check = 3
+  Check = 3,
+  Other = 4
 }
 
 export interface InvoiceListDto {
   id: string;
   caseId: string;
+  clientId?: string;
   caseNumber: string;
   caseTitle: string;
   invoiceNumber: string;
@@ -61,7 +63,7 @@ export class FinanceService {
 
   // Invoices
   async getInvoices(caseId?: string, status?: number): Promise<InvoiceListDto[]> {
-    let params = new HttpParams();
+    let params = new HttpParams().set('_t', new Date().getTime().toString());
     if (caseId) params = params.set('caseId', caseId);
     if (status !== undefined) params = params.set('status', status.toString());
     
@@ -76,17 +78,42 @@ export class FinanceService {
     return firstValueFrom(this.http.post<any>(`${this.baseUrl}/invoices`, data));
   }
 
+  async updateInvoice(id: string, data: any): Promise<void> {
+    return firstValueFrom(this.http.put<void>(`${this.baseUrl}/invoices/${id}`, data));
+  }
+
+  async deleteInvoice(id: string): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`${this.baseUrl}/invoices/${id}`));
+  }
+
   // Payments
   async getPayments(caseId?: string, invoiceId?: string): Promise<PaymentListDto[]> {
-    let params = new HttpParams();
+    let params = new HttpParams().set('_t', new Date().getTime().toString());
     if (caseId) params = params.set('caseId', caseId);
     if (invoiceId) params = params.set('invoiceId', invoiceId);
     
     return firstValueFrom(this.http.get<PaymentListDto[]>(`${this.baseUrl}/payments`, { params }));
   }
 
+  async getPaymentsByInvoice(invoiceId: string): Promise<PaymentListDto[]> {
+    const params = new HttpParams().set('invoiceId', invoiceId).set('_t', new Date().getTime().toString());
+    return firstValueFrom(this.http.get<PaymentListDto[]>(`${this.baseUrl}/payments`, { params }));
+  }
+
+  async getPaymentById(id: string): Promise<PaymentListDto> {
+    return firstValueFrom(this.http.get<PaymentListDto>(`${this.baseUrl}/payments/${id}`));
+  }
+
   async createPayment(data: any): Promise<any> {
     return firstValueFrom(this.http.post<any>(`${this.baseUrl}/payments`, data));
+  }
+
+  async updatePayment(id: string, data: any): Promise<void> {
+    return firstValueFrom(this.http.put<void>(`${this.baseUrl}/payments/${id}`, data));
+  }
+
+  async deletePayment(id: string): Promise<void> {
+    return firstValueFrom(this.http.delete<void>(`${this.baseUrl}/payments/${id}`));
   }
 
   // Summary
@@ -95,6 +122,7 @@ export class FinanceService {
   }
 
   async getCaseSummary(caseId: string): Promise<FinancialSummaryDto> {
-    return firstValueFrom(this.http.get<FinancialSummaryDto>(`${this.baseUrl}/finance/summary/${caseId}`));
+    let params = new HttpParams().set('_t', new Date().getTime().toString());
+    return firstValueFrom(this.http.get<FinancialSummaryDto>(`${this.baseUrl}/finance/summary/${caseId}`, { params }));
   }
 }

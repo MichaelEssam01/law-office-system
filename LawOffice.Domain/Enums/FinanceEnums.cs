@@ -14,5 +14,6 @@ public enum PaymentMethod
     Cash = 0,
     BankTransfer = 1,
     CreditCard = 2,
-    Check = 3
+    Check = 3,
+    Other = 4
 }

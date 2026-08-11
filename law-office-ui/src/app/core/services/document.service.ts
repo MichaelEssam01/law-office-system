@@ -19,6 +19,7 @@ export interface DocumentDto {
   category: DocumentCategory;
   description?: string;
   uploadedAt: string;
+  caseTitle?: string;
 }
 
 @Injectable({
@@ -27,6 +28,10 @@ export interface DocumentDto {
 export class DocumentService {
   private http = inject(HttpClient);
   private baseUrl = 'http://localhost:5137/api/documents';
+
+  async getAllDocuments(): Promise<DocumentDto[]> {
+    return firstValueFrom(this.http.get<DocumentDto[]>(this.baseUrl));
+  }
 
   async getCaseDocuments(caseId: string): Promise<DocumentDto[]> {
     return firstValueFrom(this.http.get<DocumentDto[]>(`${this.baseUrl}/case/${caseId}`));

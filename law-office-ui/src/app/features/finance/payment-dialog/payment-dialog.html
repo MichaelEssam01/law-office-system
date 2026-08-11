@@ -1,4 +1,4 @@
-<p-dialog header="تسجيل دفعة جديدة" 
+<p-dialog [header]="'FINANCE.ADD_PAYMENT' | translate" 
           [(visible)]="visible" 
           [modal]="true" 
           [breakpoints]="{ '960px': '75vw', '640px': '90vw' }" 
@@ -7,89 +7,127 @@
           [resizable]="false"
           styleClass="rtl-dialog">
     
-    <form [formGroup]="paymentForm" class="flex flex-col gap-4 mt-2" dir="rtl">
-        <!-- Case Selection -->
-        <div class="flex flex-col gap-2">
-            <label for="caseId" class="font-bold text-slate-700">القضية</label>
-            <p-select id="caseId" [options]="cases()" formControlName="caseId" 
-                      optionLabel="title" optionValue="id" [filter]="true" filterBy="caseNumber,title"
-                      placeholder="اختر القضية" styleClass="w-full"
-                      (onChange)="onCaseChange($event)"
-                      [class.p-invalid]="paymentForm.get('caseId')?.touched && paymentForm.get('caseId')?.invalid">
-                <ng-template pTemplate="selectedItem" let-selectedOption>
-                    <div class="flex items-center gap-2" *ngIf="selectedOption">
-                        <span class="font-mono text-blue-600 font-bold">{{ selectedOption.caseNumber }}</span>
-                        <span>-</span>
-                        <span>{{ selectedOption.title }}</span>
+    <form [formGroup]="paymentForm" class="flex flex-col gap-4 mt-2" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
+        <!-- Client & Case Selection -->
+        <div class="flex flex-col gap-4" [class.opacity-60]="caseId()">
+            <!-- Client Selection (Only if no caseId provided) -->
+            @if (!caseId()) {
+                <div class="flex flex-col gap-2">
+                    <label for="clientId" class="font-bold text-slate-700">{{ 'CASES.CLIENT' | translate }}</label>
+                    <p-select id="clientId" [options]="clients()" [ngModel]="selectedClientId()" (onChange)="onClientChange($event)"
+                              [ngModelOptions]="{standalone: true}"
+                              optionLabel="fullName" optionValue="id" [filter]="true" filterBy="fullName,nationalId"
+                              [placeholder]="'CASES.ALL_CLIENTS' | translate" styleClass="w-full" appendTo="body">
+                    </p-select>
+                </div>
+            }
+
+            <!-- Case Selection -->
+            <div class="flex flex-col gap-2">
+                <label for="caseId" class="font-bold text-slate-700">{{ 'FINANCE.LINKED_CASE' | translate }}</label>
+                
+                @if (caseId()) {
+                    <div class="w-full">
+                        <input pInputText [value]="getSelectedCase()?.caseNumber + ' - ' + getSelectedCase()?.title" 
+                               class="w-full bg-slate-200 border-slate-200 text-slate-500 font-medium cursor-not-allowed opacity-70 p-disabled" 
+                               readonly />
                     </div>
-                </ng-template>
-                <ng-template pTemplate="item" let-case>
-                    <div class="flex flex-col">
-                        <span class="font-mono text-blue-600 text-xs font-bold">{{ case.caseNumber }}</span>
-                        <span class="text-sm">{{ case.title }}</span>
-                    </div>
-                </ng-template>
-            </p-select>
+                } @else {
+                    <p-select id="caseId" [options]="filteredCases()" formControlName="caseId" 
+                              optionLabel="title" optionValue="id" dataKey="id" [filter]="true" filterBy="caseNumber,title"
+                              [placeholder]="'FINANCE.SELECT_CASE' | translate" styleClass="w-full" appendTo="body"
+                              (onChange)="onCaseChange($event)"
+                              [class.p-invalid]="paymentForm.get('caseId')?.touched && paymentForm.get('caseId')?.invalid">
+                        <ng-template pTemplate="selectedItem">
+                            @if (getSelectedCase(); as selected) {
+                                <div class="flex items-center gap-2">
+                                    <span class="font-mono text-blue-600 font-bold">{{ selected.caseNumber }}</span>
+                                    <span>-</span>
+                                    <span>{{ selected.title }}</span>
+                                </div>
+                            }
+                        </ng-template>
+                        <ng-template pTemplate="item" let-case>
+                            <div class="flex flex-col">
+                                <span class="font-mono text-blue-600 text-xs font-bold">{{ case.caseNumber }}</span>
+                                <span class="text-sm">{{ case.title }}</span>
+                            </div>
+                        </ng-template>
+                    </p-select>
+                }
+            </div>
         </div>
 
         <!-- Invoice Selection (Conditional) -->
-        <div class="flex flex-col gap-2" *ngIf="paymentForm.get('caseId')?.value">
-            <label for="invoiceId" class="font-bold text-slate-700">الفاتورة (اختياري)</label>
-            <p-select id="invoiceId" [options]="invoices()" formControlName="invoiceId" 
-                      optionLabel="title" optionValue="id"
-                      placeholder="اختر الفاتورة" styleClass="w-full"
-                      (onChange)="onInvoiceChange($event)" [showClear]="true">
-                <ng-template pTemplate="item" let-inv>
-                    <div class="flex justify-between items-center w-full">
-                        <div class="flex flex-col">
-                            <span class="font-bold">{{ inv.invoiceNumber }}</span>
-                            <span class="text-xs text-slate-500">{{ inv.title }}</span>
+        @if (paymentForm.get('caseId')?.value) {
+            <div class="flex flex-col gap-2">
+                <label for="invoiceId" class="font-bold text-slate-700">{{ 'FINANCE.INVOICE_OPTIONAL' | translate }}</label>
+                <p-select id="invoiceId" [options]="filteredInvoices()" formControlName="invoiceId" 
+                          optionLabel="title" optionValue="id" dataKey="id" [filter]="true" filterBy="invoiceNumber,title"
+                          [placeholder]="'FINANCE.SELECT_INVOICE' | translate" styleClass="w-full" appendTo="body"
+                          (onChange)="onInvoiceChange($event)" [showClear]="true">
+                    <ng-template pTemplate="item" let-inv>
+                        <div class="flex justify-between items-center w-full">
+                            <div class="flex flex-col">
+                                <span class="font-bold">{{ inv.invoiceNumber }}</span>
+                                <span class="text-xs text-slate-500">{{ inv.title }}</span>
+                            </div>
+                            <div class="text-xs font-mono text-orange-600">
+                                {{ 'FINANCE.REMAINING' | translate }}: {{ inv.remainingAmount | number }}
+                            </div>
                         </div>
-                        <div class="text-xs font-mono text-orange-600">
-                            متبقي: {{ inv.remainingAmount | number }}
-                        </div>
-                    </div>
-                </ng-template>
-            </p-select>
-        </div>
+                    </ng-template>
+                </p-select>
+                @if (!paymentForm.get('invoiceId')?.value && caseSummary()) {
+                    <small class="text-slate-500 italic">
+                        {{ 'FINANCE.REMAINING' | translate }} ({{ 'SIDEBAR.CASES' | translate }}): 
+                        <span class="font-mono font-bold text-orange-600">{{ caseSummary()?.totalRemaining | number }}</span>
+                    </small>
+                }
+            </div>
+        }
 
         <div class="grid grid-cols-2 gap-4">
             <!-- Amount -->
             <div class="flex flex-col gap-2">
-                <label for="amount" class="font-bold text-slate-700">مبلغ الدفعة</label>
-                <p-inputNumber id="amount" formControlName="amount" mode="currency" currency="EGP" locale="ar-EG" 
-                              [min]="1" styleClass="w-full"
-                              [class.p-invalid]="paymentForm.get('amount')?.touched && paymentForm.get('amount')?.invalid"></p-inputNumber>
-                <small class="text-red-500" *ngIf="paymentForm.get('amount')?.hasError('overpayment')">المبلغ يتجاوز رصيد الفاتورة</small>
-                <small class="text-red-500" *ngIf="paymentForm.get('amount')?.touched && paymentForm.get('amount')?.hasError('min')">المبلغ مطلوب</small>
+                <label for="amount" class="font-bold text-slate-700">{{ 'FINANCE.AMOUNT' | translate }}</label>
+                <p-inputNumber id="amount" formControlName="amount" [min]="0" styleClass="w-full"
+                               [showButtons]="true" [minFractionDigits]="0" locale="en-US"
+                               [class.p-invalid]="paymentForm.get('amount')?.touched && paymentForm.get('amount')?.invalid"></p-inputNumber>
+                @if (paymentForm.get('amount')?.hasError('overpayment')) {
+                    <small class="text-red-500">{{ 'FINANCE.OVERPAYMENT_ERROR' | translate }}</small>
+                }
+                @if (paymentForm.get('amount')?.touched && paymentForm.get('amount')?.hasError('min')) {
+                    <small class="text-red-500">{{ 'FINANCE.AMOUNT_REQUIRED' | translate }}</small>
+                }
             </div>
 
             <!-- Payment Date -->
             <div class="flex flex-col gap-2">
-                <label for="paymentDate" class="font-bold text-slate-700">تاريخ الدفع</label>
-                <p-datepicker id="paymentDate" formControlName="paymentDate" placeholder="اختر التاريخ" appendTo="body" 
+                <label for="paymentDate" class="font-bold text-slate-700">{{ 'FINANCE.PAYMENT_DATE' | translate }}</label>
+                <p-datepicker id="paymentDate" formControlName="paymentDate" [placeholder]="'FINANCE.SELECT_DATE' | translate" appendTo="body" 
                              styleClass="w-full"></p-datepicker>
             </div>
         </div>
 
         <!-- Method -->
         <div class="flex flex-col gap-2">
-            <label for="method" class="font-bold text-slate-700">طريقة الدفع</label>
-            <p-select id="method" [options]="methods" formControlName="method" 
-                      optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+            <label for="method" class="font-bold text-slate-700">{{ 'FINANCE.PAYMENT_METHOD' | translate }}</label>
+            <p-select id="method" [options]="methods()" formControlName="method" 
+                      optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-select>
         </div>
 
         <!-- Notes -->
         <div class="flex flex-col gap-2">
-            <label for="notes" class="font-bold text-slate-700">ملاحظات</label>
-            <textarea pTextarea id="notes" formControlName="notes" [rows]="2" placeholder="أي تفاصيل..."></textarea>
+            <label for="notes" class="font-bold text-slate-700">{{ 'FINANCE.NOTES' | translate }}</label>
+            <textarea pTextarea id="notes" formControlName="notes" [rows]="2" [placeholder]="'CASES.NOTES_PLACEHOLDER' | translate"></textarea>
         </div>
     </form>
 
     <ng-template pTemplate="footer">
-        <div class="flex justify-end gap-2" dir="rtl">
-            <button pButton label="إلغاء" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="close()"></button>
-            <button pButton label="تسجيل الدفعة" icon="pi pi-check" 
+        <div class="flex justify-end gap-2" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
+            <button pButton [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="close()"></button>
+            <button pButton [label]="'FINANCE.ADD_PAYMENT' | translate" icon="pi pi-check" 
                     class="p-button-success shadow-md" [loading]="saving()" (click)="save()"></button>
         </div>
     </ng-template>

@@ -14,6 +14,7 @@ export interface CaseListDto {
   title: string;
   status: CaseStatus;
   clientName: string;
+  clientId: string;
   lawyerName: string;
   startDate: string;
   createdAt: string;

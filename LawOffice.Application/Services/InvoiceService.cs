@@ -32,12 +32,14 @@ public class InvoiceService : IInvoiceService
             {
                 Id = i.Id,
                 CaseId = i.CaseId,
+                ClientId = i.Case!.ClientId,
                 CaseNumber = i.Case!.CaseNumber,
                 CaseTitle = i.Case!.Title,
                 InvoiceNumber = i.InvoiceNumber,
                 Title = i.Title,
                 Amount = i.Amount,
                 PaidAmount = i.Payments.Sum(p => p.Amount),
+                RemainingAmount = i.Amount - i.Payments.Sum(p => p.Amount),
                 DueDate = i.DueDate,
                 Status = i.Status,
                 CreatedAt = i.CreatedAt
@@ -58,12 +60,14 @@ public class InvoiceService : IInvoiceService
         {
             Id = i.Id,
             CaseId = i.CaseId,
+            ClientId = i.Case!.ClientId,
             CaseNumber = i.Case!.CaseNumber,
             CaseTitle = i.Case!.Title,
             InvoiceNumber = i.InvoiceNumber,
             Title = i.Title,
             Amount = i.Amount,
             PaidAmount = i.Payments.Sum(p => p.Amount),
+            RemainingAmount = i.Amount - i.Payments.Sum(p => p.Amount),
             DueDate = i.DueDate,
             Status = i.Status,
             CreatedAt = i.CreatedAt,
@@ -81,9 +85,27 @@ public class InvoiceService : IInvoiceService
 
     public async Task<InvoiceDetailDto> CreateInvoiceAsync(CreateInvoiceDto dto, Guid createdBy)
     {
-        // Validation: Unique InvoiceNumber
-        var exists = await _unitOfWork.Repository<Invoice>().Query().AnyAsync(i => i.InvoiceNumber == dto.InvoiceNumber);
-        if (exists) throw new Exception("Invoice number already exists");
+        string invoiceNumber = dto.InvoiceNumber ?? string.Empty;
+
+        // Auto-generate invoice number if not provided
+        if (string.IsNullOrWhiteSpace(invoiceNumber))
+        {
+            var totalCount = await _unitOfWork.Repository<Invoice>().Query().CountAsync();
+            invoiceNumber = $"INV-{totalCount + 1:D4}";
+            
+            // Safety check for collisions
+            while (await _unitOfWork.Repository<Invoice>().Query().AnyAsync(i => i.InvoiceNumber == invoiceNumber))
+            {
+                totalCount++;
+                invoiceNumber = $"INV-{totalCount + 1:D4}";
+            }
+        }
+        else
+        {
+            // Validation: Unique InvoiceNumber if provided manually
+            var exists = await _unitOfWork.Repository<Invoice>().Query().AnyAsync(i => i.InvoiceNumber == invoiceNumber);
+            if (exists) throw new Exception("Invoice number already exists");
+        }
 
         // Validation: Amount > 0
         if (dto.Amount <= 0) throw new Exception("Amount must be greater than 0");
@@ -92,7 +114,7 @@ public class InvoiceService : IInvoiceService
         {
             Id = Guid.NewGuid(),
             CaseId = dto.CaseId,
-            InvoiceNumber = dto.InvoiceNumber,
+            InvoiceNumber = invoiceNumber,
             Title = dto.Title,
             Amount = dto.Amount,
             DueDate = dto.DueDate,
@@ -145,7 +167,7 @@ public class InvoiceService : IInvoiceService
 
         var paidAmount = invoice.Payments.Sum(p => p.Amount);
 
-        if (paidAmount >= invoice.Amount)
+        if (paidAmount >= invoice.Amount && invoice.Amount > 0)
         {
             invoice.Status = InvoiceStatus.Paid;
         }
@@ -153,7 +175,12 @@ public class InvoiceService : IInvoiceService
         {
             invoice.Status = InvoiceStatus.PartiallyPaid;
         }
-        else if (invoice.DueDate < DateTime.UtcNow && invoice.Status != InvoiceStatus.Cancelled)
+        else if (invoice.Status == InvoiceStatus.Cancelled)
+        {
+            // Keep it cancelled if the user manually set it and there are no payments
+            invoice.Status = InvoiceStatus.Cancelled;
+        }
+        else if (invoice.DueDate < DateTime.UtcNow)
         {
             invoice.Status = InvoiceStatus.Overdue;
         }

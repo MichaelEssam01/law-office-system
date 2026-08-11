@@ -1,0 +1,78 @@
+<div class="space-y-6">
+    <div>
+        <h2 class="text-2xl font-bold text-slate-800">{{ 'DASHBOARD.TOTAL_DOCUMENTS' | translate }}</h2>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden p-4">
+        <p-table #dt [value]="documents()" [loading]="loading()" [paginator]="true" [rows]="10"
+                 [globalFilterFields]="['originalFileName', 'caseTitle', 'description']"
+                 styleClass="p-datatable-sm" [tableStyle]="{'min-width': '60rem'}">
+            
+            <ng-template pTemplate="caption">
+                <div class="flex items-center justify-between">
+                    <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
+                        <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+                        <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
+                               [placeholder]="'COMMON.SEARCH' | translate" class="py-2 border-slate-200 rounded-lg w-full sm:w-auto" />
+                    </p-iconField>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="header">
+                <tr>
+                    <th pSortableColumn="originalFileName">{{ 'COMMON.FILE_NAME' | translate }} <p-sortIcon field="originalFileName"></p-sortIcon></th>
+                    <th pSortableColumn="caseTitle">{{ 'CASES.TITLE' | translate }} <p-sortIcon field="caseTitle"></p-sortIcon></th>
+                    <th pSortableColumn="category">{{ 'COMMON.CATEGORY' | translate }} <p-sortIcon field="category"></p-sortIcon></th>
+                    <th>{{ 'COMMON.DESCRIPTION' | translate }}</th>
+                    <th>{{ 'COMMON.SIZE' | translate }}</th>
+                    <th pSortableColumn="uploadedAt">{{ 'COMMON.DATE' | translate }} <p-sortIcon field="uploadedAt"></p-sortIcon></th>
+                    <th>{{ 'COMMON.ACTIONS' | translate }}</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-doc>
+                <tr>
+                    <td class="font-medium text-slate-800">
+                        <div class="flex items-center gap-2">
+                            <i class="pi pi-file text-slate-400"></i>
+                            {{doc.originalFileName}}
+                        </div>
+                    </td>
+                    <td>
+                        <a [routerLink]="['/cases', doc.caseId]" class="text-blue-600 hover:underline">
+                            {{doc.caseTitle}}
+                        </a>
+                    </td>
+                    <td>
+                        <span class="px-2 py-1 rounded-md text-xs font-medium"
+                              [ngClass]="{
+                                'bg-blue-50 text-blue-600': doc.category === 0,
+                                'bg-purple-50 text-purple-600': doc.category === 1,
+                                'bg-amber-50 text-amber-600': doc.category === 2,
+                                'bg-green-50 text-green-600': doc.category === 3,
+                                'bg-slate-50 text-slate-600': doc.category === 4
+                              }">
+                            {{getCategoryLabel(doc.category)}}
+                        </span>
+                    </td>
+                    <td class="text-slate-500 text-sm truncate max-w-[150px]">{{doc.description || '-'}}</td>
+                    <td class="text-slate-500 text-sm">{{formatSize(doc.fileSize)}}</td>
+                    <td class="text-slate-500 text-sm">{{doc.uploadedAt | date:'yyyy/MM/dd HH:mm'}}</td>
+                    <td>
+                        <div class="flex gap-1">
+                            <p-button icon="pi pi-download" [rounded]="true" [text]="true" severity="info" (onClick)="download(doc)"></p-button>
+                            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="delete(doc)"></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="7" class="text-center py-6 text-slate-500">{{ 'COMMON.NO_DATA' | translate }}</td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
+</div>
+
+<p-toast position="top-left"></p-toast>
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>

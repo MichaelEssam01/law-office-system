@@ -20,9 +20,7 @@ public class Case : BaseEntity
     public User AssignedLawyer { get; set; } = null!;
 
     // Audit Fields
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public Guid CreatedBy { get; set; }
-    public DateTime? UpdatedAt { get; set; }
 
     public ICollection<Session> Sessions { get; set; } = new List<Session>();
     public ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();

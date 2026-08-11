@@ -17,6 +17,12 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<Invoice> Invoices { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Document> Documents { get; set; }
+    public DbSet<SystemSetting> SystemSettings { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
+    public DbSet<UserSecurityLog> UserSecurityLogs { get; set; }
+    public DbSet<UserNotificationSetting> UserNotificationSettings { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -79,6 +85,44 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
             entity.HasOne(d => d.Case)
                 .WithMany(c => c.Documents)
                 .HasForeignKey(d => d.CaseId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // RefreshToken Configuration
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasOne(rt => rt.User)
+                .WithMany()
+                .HasForeignKey(rt => rt.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            entity.HasIndex(rt => rt.TokenHash).IsUnique();
+        });
+
+        // UserSecurityLog Configuration
+        modelBuilder.Entity<UserSecurityLog>(entity =>
+        {
+            entity.HasOne(l => l.User)
+                .WithMany(u => u.SecurityLogs)
+                .HasForeignKey(l => l.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // UserNotificationSetting Configuration
+        modelBuilder.Entity<UserNotificationSetting>(entity =>
+        {
+            entity.HasOne(s => s.User)
+                .WithOne(u => u.NotificationSetting)
+                .HasForeignKey<UserNotificationSetting>(s => s.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Notification Configuration
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

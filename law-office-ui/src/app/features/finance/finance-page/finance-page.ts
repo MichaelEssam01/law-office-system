@@ -1,16 +1,21 @@
 import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { TableModule } from 'primeng/table';
+import { Table, TableModule } from 'primeng/table';
+import { ViewChild } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 import { FinanceService, InvoiceListDto, FinancialSummaryDto, InvoiceStatus } from '../../../core/services/finance.service';
 import { InvoiceDialog } from '../invoice-dialog/invoice-dialog';
 import { PaymentDialog } from '../payment-dialog/payment-dialog';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { AppStateService } from '../../../core/services/app-state.service';
 
 @Component({
   selector: 'app-finance-page',
@@ -25,7 +30,10 @@ import { PaymentDialog } from '../payment-dialog/payment-dialog';
     ToastModule,
     TooltipModule,
     InvoiceDialog,
-    PaymentDialog
+    PaymentDialog,
+    TranslateModule,
+    IconFieldModule,
+    InputIconModule
   ],
   providers: [MessageService],
   templateUrl: './finance-page.html'
@@ -33,11 +41,16 @@ import { PaymentDialog } from '../payment-dialog/payment-dialog';
 export class FinancePage implements OnInit {
   private financeService = inject(FinanceService);
   private messageService = inject(MessageService);
-  private cdr = inject(ChangeDetectorRef);
+  private translate = inject(TranslateService);
+  public cdr = inject(ChangeDetectorRef);
+  public appState = inject(AppStateService);
+  @ViewChild('dt') dt?: Table;
 
   summary = signal<FinancialSummaryDto | null>(null);
-  invoices = signal<InvoiceListDto[]>([]);
+  invoices = signal<any[]>([]);
   loading = signal(true);
+
+
 
   // Dialogs
   displayInvoiceDialog = signal(false);
@@ -59,7 +72,11 @@ export class FinancePage implements OnInit {
       this.invoices.set(invoicesData);
     } catch (error) {
       console.error('Error loading finance data', error);
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: 'فشل في تحميل البيانات المالية' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: this.translate.instant('FINANCE.LOAD_ERROR') || 'Failed to load'
+      });
     } finally {
       this.loading.set(false);
       this.cdr.detectChanges();
@@ -83,28 +100,97 @@ export class FinancePage implements OnInit {
   async onInvoiceSave(data: any) {
     try {
       if (data.id) {
-        await this.financeService.createInvoice(data); // Backend update logic should be in Service, I'll use create as placeholder if PUT not implemented
-        // Actually I should use updateInvoice in service
-        this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم تحديث الفاتورة بنجاح' });
+        await this.financeService.updateInvoice(data.id, data);
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: this.translate.instant('COMMON.SUCCESS'), 
+          detail: this.translate.instant('FINANCE.UPDATE_SUCCESS') || 'Updated'
+        });
       } else {
         await this.financeService.createInvoice(data);
-        this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم إضافة الفاتورة بنجاح' });
+        this.messageService.add({ 
+          severity: 'success', 
+          summary: this.translate.instant('COMMON.SUCCESS'), 
+          detail: this.translate.instant('FINANCE.CREATE_SUCCESS') || 'Created'
+        });
       }
       this.displayInvoiceDialog.set(false);
       await this.loadData();
     } catch (error: any) {
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: error.message || 'فشل في حفظ الفاتورة' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: error.message || this.translate.instant('COMMON.ERROR')
+      });
     }
   }
 
   async onPaymentSave(data: any) {
     try {
       await this.financeService.createPayment(data);
-      this.messageService.add({ severity: 'success', summary: 'نجاح', detail: 'تم تسجيل الدفعة بنجاح' });
+      this.messageService.add({ 
+        severity: 'success', 
+        summary: this.translate.instant('COMMON.SUCCESS'), 
+        detail: this.translate.instant('FINANCE.PAYMENT_SUCCESS') || 'Payment recorded'
+      });
       this.displayPaymentDialog.set(false);
       await this.loadData();
     } catch (error: any) {
-      this.messageService.add({ severity: 'error', summary: 'خطأ', detail: error.message || 'فشل في تسجيل الدفعة' });
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: error.message || this.translate.instant('COMMON.ERROR')
+      });
+    }
+  }
+
+  // onRowExpand logic is already handled, just cleaning up unused signal
+  async onRowExpand(event: any) {
+    const invoice = event.data;
+
+    if (invoice.payments?.length) {
+      return;
+    }
+
+    // Set loading state immutably
+    this.invoices.update(items =>
+      items.map(item =>
+        item.id === invoice.id ? { ...item, loadingPayments: true } : item
+      )
+    );
+
+    try {
+      const payments = await this.financeService.getPaymentsByInvoice(invoice.id);
+      
+      // Update data immutably
+      this.invoices.update(items =>
+        items.map(item =>
+          item.id === invoice.id ? { ...item, payments, loadingPayments: false } : item
+        )
+      );
+    } catch (error) {
+      this.invoices.update(items =>
+        items.map(item =>
+          item.id === invoice.id ? { ...item, payments: [], loadingPayments: false } : item
+        )
+      );
+    } finally {
+      this.cdr.markForCheck();
+      this.cdr.detectChanges();
+    }
+  }
+
+  onRowCollapse(event: any) {
+    // Handled by table API
+  }
+
+  getPaymentMethodLabel(method: number): string {
+    switch (method) {
+      case 0: return this.translate.instant('FINANCE.METHODS.CASH');
+      case 1: return this.translate.instant('FINANCE.METHODS.BANK');
+      case 2: return this.translate.instant('FINANCE.METHODS.CARD');
+      case 3: return this.translate.instant('FINANCE.METHODS.CHECK');
+      default: return this.translate.instant('FINANCE.METHODS.OTHER');
     }
   }
 
@@ -121,12 +207,12 @@ export class FinancePage implements OnInit {
 
   getStatusLabel(status: InvoiceStatus): string {
     switch (status) {
-      case InvoiceStatus.Paid: return 'مدفوعة';
-      case InvoiceStatus.PartiallyPaid: return 'مدفوعة جزئياً';
-      case InvoiceStatus.Unpaid: return 'غير مدفوعة';
-      case InvoiceStatus.Overdue: return 'متأخرة';
-      case InvoiceStatus.Cancelled: return 'ملغاة';
-      default: return 'غير معروف';
+      case InvoiceStatus.Paid: return this.translate.instant('FINANCE.PAID');
+      case InvoiceStatus.PartiallyPaid: return this.translate.instant('FINANCE.PARTIAL');
+      case InvoiceStatus.Unpaid: return this.translate.instant('FINANCE.UNPAID');
+      case InvoiceStatus.Overdue: return this.translate.instant('FINANCE.OVERDUE');
+      case InvoiceStatus.Cancelled: return this.translate.instant('CASES.CANCELLED');
+      default: return 'Unknown';
     }
   }
 }

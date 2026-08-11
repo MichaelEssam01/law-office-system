@@ -1,39 +1,39 @@
-<div class="p-6" dir="rtl">
+<div class="p-6" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
     <p-toast></p-toast>
     <p-confirmDialog></p-confirmDialog>
     
     <!-- Header Area -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-slate-800">إدارة الجلسات</h1>
-            <p class="text-slate-500">متابعة مواعيد الجلسات والادعاءات القانونية</p>
+            <h1 class="text-2xl font-bold text-slate-800">{{ 'SIDEBAR.SESSIONS' | translate }}</h1>
+            <p class="text-slate-500">{{ 'SESSIONS.SUBTITLE' | translate }}</p>
         </div>
-        <button pButton label="جلسة جديدة" icon="pi pi-plus" class="p-button-primary shadow-md" (click)="openNew()"></button>
+        <button pButton [label]="'SESSIONS.ADD_SESSION' | translate" icon="pi pi-plus" class="p-button-primary shadow-md" (click)="openNew()"></button>
     </div>
 
     <!-- Filters Area -->
     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div class="flex flex-col gap-2">
-                <label class="text-xs font-bold text-slate-500">البحث</label>
-                <p-iconField iconPosition="left">
+                <label class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
+                <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
                     <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
-                    <input pInputText type="text" [(ngModel)]="searchTerm" (ngModelChange)="dt.filterGlobal($event, 'contains')"
-                           placeholder="ابحث بالعنوان أو المحكمة..." class="w-full rounded-lg border-slate-200" />
+                    <input pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event); dt.filterGlobal($event, 'contains')"
+                           [placeholder]="'SESSIONS.SEARCH_PLACEHOLDER' | translate" class="w-full rounded-lg border-slate-200" />
                 </p-iconField>
             </div>
             
             <div class="flex flex-col gap-2">
-                <label class="text-xs font-bold text-slate-500">الحالة</label>
-                <p-select [options]="statuses" [(ngModel)]="selectedStatus" (onChange)="onFilterChange()"
-                          optionLabel="label" optionValue="value" placeholder="كل الحالات" 
+                <label class="text-xs font-bold text-slate-500">{{ 'SESSIONS.STATUS' | translate }}</label>
+                <p-select [options]="statuses()" [ngModel]="selectedStatus()" (ngModelChange)="selectedStatus.set($event); onFilterChange()"
+                          optionLabel="label" optionValue="value" [placeholder]="'SESSIONS.ALL_STATUSES' | translate" 
                           [showClear]="true" styleClass="w-full rounded-lg"></p-select>
             </div>
 
             <div class="flex flex-col gap-2 md:col-span-1">
-                <label class="text-xs font-bold text-slate-500">القضية</label>
-                <p-select [options]="cases()" [(ngModel)]="selectedCase" (onChange)="onFilterChange()"
-                          optionLabel="title" optionValue="id" placeholder="كل القضايا" 
+                <label class="text-xs font-bold text-slate-500">{{ 'SESSIONS.CASE' | translate }}</label>
+                <p-select [options]="cases()" [ngModel]="selectedCase()" (ngModelChange)="selectedCase.set($event); onFilterChange()"
+                          optionLabel="title" optionValue="id" [placeholder]="'SESSIONS.ALL_CASES' | translate" 
                           [showClear]="true" [filter]="true" filterBy="caseNumber,title"
                           styleClass="w-full rounded-lg">
                     <ng-template pTemplate="item" let-case>
@@ -47,7 +47,7 @@
 
             <div class="flex justify-end">
                 <button pButton icon="pi pi-filter-slash" class="p-button-outlined p-button-secondary h-[42px] px-4" 
-                        (click)="resetFilters()" pTooltip="إعادة تعيين الفلاتر"></button>
+                        (click)="resetFilters()" [pTooltip]="'SESSIONS.RESET_FILTERS' | translate"></button>
             </div>
         </div>
     </div>
@@ -56,17 +56,16 @@
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <p-table #dt [value]="sessions()" [loading]="loading()" [rows]="10" [paginator]="true" 
                  [globalFilterFields]="['title', 'caseNumber', 'courtName']"
-                 styleClass="p-datatable-sm" [rowHover]="true"
-                 responsiveLayout="scroll">
+                 styleClass="p-datatable-sm" [rowHover]="true">
             
             <ng-template pTemplate="header">
                 <tr class="bg-slate-50 text-slate-700">
-                    <th pSortableColumn="title" class="p-4">عنوان الجلسة <p-sortIcon field="title"></p-sortIcon></th>
-                    <th pSortableColumn="caseNumber" class="p-4">رقم القضية <p-sortIcon field="caseNumber"></p-sortIcon></th>
-                    <th pSortableColumn="scheduledAt" class="p-4 text-center">التاريخ والوقت <p-sortIcon field="scheduledAt"></p-sortIcon></th>
-                    <th pSortableColumn="courtName" class="p-4">المكان/المحكمة <p-sortIcon field="courtName"></p-sortIcon></th>
-                    <th pSortableColumn="status" class="p-4">الحالة <p-sortIcon field="status"></p-sortIcon></th>
-                    <th class="p-4 text-center">الإجراءات</th>
+                    <th pSortableColumn="title" class="p-4">{{ 'SESSIONS.SESSION_TITLE' | translate }} <p-sortIcon field="title"></p-sortIcon></th>
+                    <th pSortableColumn="caseNumber" class="p-4">{{ 'CASES.CASE_NUMBER' | translate }} <p-sortIcon field="caseNumber"></p-sortIcon></th>
+                    <th pSortableColumn="scheduledAt" class="p-4 text-center">{{ 'SESSIONS.DATE_TIME' | translate }} <p-sortIcon field="scheduledAt"></p-sortIcon></th>
+                    <th pSortableColumn="courtName" class="p-4">{{ 'SESSIONS.LOCATION' | translate }} <p-sortIcon field="courtName"></p-sortIcon></th>
+                    <th pSortableColumn="status" class="p-4">{{ 'SESSIONS.STATUS' | translate }} <p-sortIcon field="status"></p-sortIcon></th>
+                    <th class="p-4 text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
                 </tr>
             </ng-template>
 
@@ -108,7 +107,7 @@
                     <td colspan="6" class="p-12 text-center text-slate-500">
                         <div class="flex flex-col items-center gap-3">
                             <i class="pi pi-calendar-times text-4xl text-slate-200"></i>
-                            <p>لم يتم العثور على جلسات تطابق البحث.</p>
+                            <p>{{ 'SESSIONS.NO_SESSIONS_FOUND' | translate }}</p>
                         </div>
                     </td>
                 </tr>
@@ -117,8 +116,9 @@
     </div>
 
     <!-- Session Dialog -->
-    <app-session-dialog [(visible)]="displayDialog" 
-                        [session]="selectedSession" 
+    <app-session-dialog [visible]="displayDialog()" 
+                        (visibleChange)="displayDialog.set($event)"
+                        [session]="selectedSession()" 
                         (onSave)="onSave($event)">
     </app-session-dialog>
 </div>
