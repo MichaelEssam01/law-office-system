@@ -11,6 +11,9 @@ import { MessageService } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { FormsModule } from '@angular/forms';
+import { PopoverModule } from 'primeng/popover';
+import { CheckboxModule } from 'primeng/checkbox';
 import { FinanceService, InvoiceListDto, FinancialSummaryDto, InvoiceStatus } from '../../../core/services/finance.service';
 import { InvoiceDialog } from '../invoice-dialog/invoice-dialog';
 import { PaymentDialog } from '../payment-dialog/payment-dialog';
@@ -22,6 +25,7 @@ import { AppStateService } from '../../../core/services/app-state.service';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterModule,
     TableModule,
     ButtonModule,
@@ -29,6 +33,8 @@ import { AppStateService } from '../../../core/services/app-state.service';
     CardModule,
     ToastModule,
     TooltipModule,
+    PopoverModule,
+    CheckboxModule,
     InvoiceDialog,
     PaymentDialog,
     TranslateModule,
@@ -49,8 +55,43 @@ export class FinancePage implements OnInit {
   summary = signal<FinancialSummaryDto | null>(null);
   invoices = signal<any[]>([]);
   loading = signal(true);
+  selectedStatuses = signal<number[]>([]);
 
+  statuses = [
+    { label: 'FINANCE.UNPAID', value: InvoiceStatus.Unpaid, color: 'text-amber-600 bg-amber-50 border-amber-200' },
+    { label: 'FINANCE.PARTIAL', value: InvoiceStatus.PartiallyPaid, color: 'text-blue-600 bg-blue-50 border-blue-200' },
+    { label: 'FINANCE.PAID', value: InvoiceStatus.Paid, color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
+    { label: 'FINANCE.OVERDUE', value: InvoiceStatus.Overdue, color: 'text-rose-600 bg-rose-50 border-rose-200' },
+    { label: 'CASES.CANCELLED', value: InvoiceStatus.Cancelled, color: 'text-slate-600 bg-slate-50 border-slate-200' }
+  ];
 
+  toggleStatusFilter(statusValue: number) {
+    const current = [...this.selectedStatuses()];
+    const index = current.indexOf(statusValue);
+    if (index > -1) {
+      current.splice(index, 1);
+    } else {
+      current.push(statusValue);
+    }
+    this.selectedStatuses.set(current);
+    this.applyStatusFilter();
+  }
+
+  clearStatusFilters() {
+    this.selectedStatuses.set([]);
+    this.applyStatusFilter();
+  }
+
+  private applyStatusFilter() {
+    if (this.dt) {
+      const selected = this.selectedStatuses();
+      if (selected.length === 0) {
+        this.dt.filter(null, 'status', 'in');
+      } else {
+        this.dt.filter(selected, 'status', 'in');
+      }
+    }
+  }
 
   // Dialogs
   displayInvoiceDialog = signal(false);
@@ -191,6 +232,17 @@ export class FinancePage implements OnInit {
       case 2: return this.translate.instant('FINANCE.METHODS.CARD');
       case 3: return this.translate.instant('FINANCE.METHODS.CHECK');
       default: return this.translate.instant('FINANCE.METHODS.OTHER');
+    }
+  }
+
+  getPaymentMethodIcon(method: any): string {
+    const val = typeof method === 'number' ? method : Number(method);
+    switch (val) {
+      case 0: return 'pi pi-money-bill'; // Cash
+      case 1: return 'pi pi-building';   // Bank Transfer
+      case 2: return 'pi pi-credit-card';// Card
+      case 3: return 'pi pi-file-edit';  // Check
+      default: return 'pi pi-wallet';
     }
   }
 

@@ -10,7 +10,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TooltipModule } from 'primeng/tooltip';
 import { AppStateService } from '../../../core/services/app-state.service';
 import { UserManagementService, UserListDto } from '../../../core/services/user-management.service';
 import { UserManagementDialog } from '../user-dialog/user-dialog';
@@ -27,6 +28,7 @@ import { UserManagementDialog } from '../user-dialog/user-dialog';
     ToastModule, 
     ConfirmDialogModule, 
     TranslateModule,
+    TooltipModule,
     UserManagementDialog,
     IconFieldModule,
     InputIconModule
@@ -38,6 +40,7 @@ export class UsersPage implements OnInit {
   private userService = inject(UserManagementService);
   private messageService = inject(MessageService);
   private confirmationService = inject(ConfirmationService);
+  private translate = inject(TranslateService);
   public cdr = inject(ChangeDetectorRef);
   public appState = inject(AppStateService);
 
@@ -65,6 +68,16 @@ export class UsersPage implements OnInit {
   openNew() {
     this.selectedUserId.set(null);
     this.displayDialog.set(true);
+  }
+
+  getRoleLabel(role: string): string {
+    const keyMap: { [key: string]: string } = {
+      'Admin': 'USERS.ROLES.ADMIN',
+      'Lawyer': 'USERS.ROLES.LAWYER',
+      'Receptionist': 'USERS.ROLES.RECEPTIONIST',
+      'Accountant': 'USERS.ROLES.ACCOUNTANT'
+    };
+    return keyMap[role] ? this.translate.instant(keyMap[role]) : role;
   }
 
   editUser(user: UserListDto) {

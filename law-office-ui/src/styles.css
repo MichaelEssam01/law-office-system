@@ -35,3 +35,183 @@ input, textarea {
     backdrop-filter: blur(4px);
     background-color: rgba(15, 23, 42, 0.4) !important;
 }
+
+/* Premium Paginator Styling */
+.p-paginator {
+    background: transparent !important;
+    border: none !important;
+    border-top: 1px solid #f1f5f9 !important;
+    padding: 0.75rem 1.25rem !important;
+    gap: 0.75rem !important;
+    font-size: 0.875rem !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+}
+
+/* Page navigation & numbers on left/start side */
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-pages,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-last {
+    order: 1 !important;
+}
+
+/* Current page report & rows dropdown on right/end side */
+.p-paginator .p-paginator-current {
+    order: 2 !important;
+    margin-left: auto !important;
+    font-size: 0.8125rem !important;
+    font-weight: 600 !important;
+    color: #64748b !important;
+    white-space: nowrap !important;
+}
+
+[dir="rtl"] .p-paginator .p-paginator-current {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+}
+
+.p-paginator .p-paginator-rpp-options,
+.p-paginator .p-paginator-rpp-select,
+.p-paginator .p-select,
+.p-paginator .p-dropdown,
+.p-paginator p-select,
+.p-paginator p-dropdown,
+.p-paginator .p-paginator-rpp-options * {
+    order: 3 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+.p-paginator .p-paginator-first,
+.p-paginator .p-paginator-prev,
+.p-paginator .p-paginator-next,
+.p-paginator .p-paginator-last,
+.p-paginator .p-paginator-pages .p-paginator-page {
+    min-width: 2.25rem !important;
+    height: 2.25rem !important;
+    border-radius: 0.5rem !important;
+    color: #64748b !important;
+    font-weight: 600 !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    border: 1px solid transparent !important;
+}
+
+.p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+    background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25) !important;
+    font-weight: 700 !important;
+}
+
+.p-paginator .p-paginator-first:not(.p-disabled):hover,
+.p-paginator .p-paginator-prev:not(.p-disabled):hover,
+.p-paginator .p-paginator-next:not(.p-disabled):hover,
+.p-paginator .p-paginator-last:not(.p-disabled):hover,
+.p-paginator .p-paginator-pages .p-paginator-page:not(.p-highlight):hover {
+    background-color: #f1f5f9 !important;
+    color: #1e293b !important;
+    transform: translateY(-1px);
+}
+
+.p-paginator .p-paginator-rpp-options,
+.p-paginator .p-dropdown,
+.p-paginator p-select {
+    border-radius: 0.5rem !important;
+    border: 1px solid #e2e8f0 !important;
+    background-color: #ffffff !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.p-paginator .p-paginator-rpp-options:hover,
+.p-paginator .p-dropdown:hover,
+.p-paginator p-select:hover {
+    border-color: #6366f1 !important;
+}
+
+/* Ensure PrimeNG select/dropdown overlays open above table headers without layout displacement */
+.p-select-overlay,
+.p-dropdown-panel,
+.p-popover {
+    z-index: 99999 !important;
+}
+
+/* Minimal paginator style */
+.no-page-links .p-paginator-page,
+.no-page-links .p-paginator-pages {
+    display: none !important;
+}
+
+.no-page-links .p-paginator {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+}
+
+.no-page-links .p-paginator-first { order: 1 !important; }
+.no-page-links .p-paginator-prev { order: 2 !important; }
+.no-page-links .p-paginator-current {
+    order: 3 !important;
+    margin: 0 0.5rem !important;
+    font-weight: 600 !important;
+    color: #475569 !important;
+    font-size: 0.875rem !important;
+}
+
+.no-page-links .p-paginator-next { order: 4 !important; }
+.no-page-links .p-paginator-last { order: 5 !important; }
+
+/* Page size dropdown placed after all icons in center group */
+.no-page-links .p-paginator-rpp-options,
+.no-page-links .p-dropdown,
+.no-page-links p-select,
+.no-page-links .p-select { 
+    order: 6 !important;
+    position: relative !important;
+    margin-left: 0.75rem !important;
+}
+
+[dir="rtl"] .no-page-links .p-paginator-rpp-options,
+[dir="rtl"] .no-page-links .p-dropdown,
+[dir="rtl"] .no-page-links p-select,
+[dir="rtl"] .no-page-links .p-select { 
+    margin-left: 0 !important;
+    margin-right: 0.75rem !important;
+}
+
+
+
+
+
+
+
+.demo-toggles {
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-toggles * {
+  margin-bottom: 16px;
+}
+
+.demo-options {
+  display: flex;
+  flex-direction: column;
+  width: 600px;
+}
+
+.demo-data * {
+  margin: 16px 0;
+}
+
+.demo-paginator {
+  width: 600px;
+}

@@ -12,11 +12,19 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ProfileService, SecurityLogDto, NotificationSettingsDto } from '../../../core/services/profile.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
+import { NotificationService } from '../../../core/services/notification.service';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+
+import { TooltipModule } from 'primeng/tooltip';
+
+export type ProfileTab = 'profile' | 'notifications' | 'preferences' | 'security';
+
 @Component({
   selector: 'app-profile-page',
   standalone: true,
   imports: [
     CommonModule, 
+    RouterModule,
     FormsModule, 
     ReactiveFormsModule, 
     InputTextModule, 
@@ -25,6 +33,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     ToastModule, 
     ToggleSwitchModule,
     TableModule,
+    TooltipModule,
     TranslateModule
   ],
   templateUrl: './profile-page.html',
@@ -36,11 +45,13 @@ export class ProfilePage implements OnInit {
   private profileService = inject(ProfileService);
   private messageService = inject(MessageService);
   private translate = inject(TranslateService);
+  private route = inject(ActivatedRoute);
+  public notificationService = inject(NotificationService);
 
   currentUser = this.authService.currentUser;
   passwordForm: FormGroup;
   loading = signal(false);
-  activeTab = signal<'profile' | 'notifications' | 'security'>('profile');
+  activeTab = signal<string>('profile');
 
   // Real data from database
   securityLogs = signal<SecurityLogDto[]>([]);
@@ -62,7 +73,22 @@ export class ProfilePage implements OnInit {
   }
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['tab'] === 'notifications') {
+        this.activeTab.set('notifications');
+      } else if (params['tab'] === 'preferences') {
+        this.activeTab.set('preferences');
+      } else if (params['tab'] === 'security') {
+        this.activeTab.set('security');
+      } else if (params['tab'] === 'profile') {
+        this.activeTab.set('profile');
+      }
+    });
     this.loadData();
+  }
+
+  setTab(tab: string) {
+    this.activeTab.set(tab);
   }
 
   async loadData() {
@@ -118,10 +144,6 @@ export class ProfilePage implements OnInit {
     return parts[0].charAt(0).toUpperCase();
   }
 
-  setTab(tab: 'profile' | 'notifications' | 'security') {
-    this.activeTab.set(tab);
-  }
-
   formatDevice(userAgent: string): string {
     if (!userAgent) return 'Unknown Device';
     
@@ -142,6 +164,36 @@ export class ProfilePage implements OnInit {
     else if (userAgent.includes('Firefox/')) browser = 'Firefox';
 
     return `${browser} on ${os}`;
+  }
+
+  formatLogEvent(event: string): string {
+    const keyMap: { [key: string]: string } = {
+      'Login': 'PROFILE.LOG_EVENTS.LOGIN',
+      'Login Attempt': 'PROFILE.LOG_EVENTS.LOGIN_ATTEMPT',
+      'Change Password': 'PROFILE.LOG_EVENTS.CHANGE_PASSWORD',
+      'Update Profile': 'PROFILE.LOG_EVENTS.UPDATE_PROFILE'
+    };
+    return keyMap[event] ? this.translate.instant(keyMap[event]) : event;
+  }
+
+  formatLogStatus(status: string): string {
+    const keyMap: { [key: string]: string } = {
+      'Success': 'PROFILE.LOG_STATUSES.SUCCESS',
+      'Invalid Password': 'PROFILE.LOG_STATUSES.INVALID_PASSWORD',
+      'Failed': 'PROFILE.LOG_STATUSES.FAILED'
+    };
+    return keyMap[status] ? this.translate.instant(keyMap[status]) : status;
+  }
+
+  getRoleLabel(role?: string): string {
+    if (!role) return '';
+    const keyMap: { [key: string]: string } = {
+      'Admin': 'USERS.ROLES.ADMIN',
+      'Lawyer': 'USERS.ROLES.LAWYER',
+      'Receptionist': 'USERS.ROLES.RECEPTIONIST',
+      'Accountant': 'USERS.ROLES.ACCOUNTANT'
+    };
+    return keyMap[role] ? this.translate.instant(keyMap[role]) : role;
   }
 
   async saveNotificationSettings() {
@@ -188,5 +240,53 @@ export class ProfilePage implements OnInit {
     } finally {
       this.loading.set(false);
     }
+  }
+  /** Returns the plain-text prefix portion of a notification message */
+  getNotificationPrefix(n: any): string {
+    const params = n.parameters || {};
+    switch (n.message) {
+      case 'NOTIFICATIONS.CASE_ASSIGNED_MSG':
+        return this.translate.instant('NOTIFICATIONS.CASE_ASSIGNED_MSG_PREFIX') + ' ';
+      case 'NOTIFICATIONS.CASE_UPDATED_MSG':
+        return this.translate.instant('NOTIFICATIONS.CASE_UPDATED_MSG_PREFIX') + ' ';
+      case 'NOTIFICATIONS.PAYMENT_RECORDED_MSG':
+        return this.translate.instant('NOTIFICATIONS.PAYMENT_RECORDED_MSG_PREFIX', params) + ' ';
+      default:
+        return '';
+    }
+  }
+
+  /** Returns the case-number/title text (clickable portion) */
+  getNotificationCaseText(n: any): string {
+    const params = n.parameters || {};
+    switch (n.message) {
+      case 'NOTIFICATIONS.CASE_ASSIGNED_MSG':
+        return this.translate.instant('NOTIFICATIONS.CASE_ASSIGNED_MSG_CASE', params);
+      case 'NOTIFICATIONS.CASE_UPDATED_MSG':
+        return this.translate.instant('NOTIFICATIONS.CASE_UPDATED_MSG_CASE', params);
+      case 'NOTIFICATIONS.PAYMENT_RECORDED_MSG':
+        return this.translate.instant('NOTIFICATIONS.PAYMENT_RECORDED_MSG_CASE', params);
+      default:
+        return '';
+    }
+  }
+
+  /** Returns optional plain-text suffix after the case link */
+  getNotificationSuffix(n: any): string {
+    switch (n.message) {
+      case 'NOTIFICATIONS.CASE_UPDATED_MSG':
+        return ' ' + this.translate.instant('NOTIFICATIONS.CASE_UPDATED_MSG_SUFFIX');
+      default:
+        return '';
+    }
+  }
+
+  /** Whether this notification should use the split prefix+link format */
+  hasSplitMessage(n: any): boolean {
+    return n.link && [
+      'NOTIFICATIONS.CASE_ASSIGNED_MSG',
+      'NOTIFICATIONS.CASE_UPDATED_MSG',
+      'NOTIFICATIONS.PAYMENT_RECORDED_MSG'
+    ].includes(n.message);
   }
 }

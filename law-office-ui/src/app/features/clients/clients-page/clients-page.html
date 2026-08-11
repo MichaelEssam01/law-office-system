@@ -6,19 +6,27 @@
         <p-button [label]="'CLIENTS.ADD_CLIENT' | translate" icon="pi pi-plus" severity="primary" (onClick)="openNew()"></p-button>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden p-4">
-        <p-table #dt [value]="clients" [loading]="loading" [paginator]="true" [rows]="10"
+    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 no-page-links">
+        <p-table #dt [value]="clients" [loading]="loading" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                 [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                  [globalFilterFields]="['fullName', 'nationalId', 'phone']"
                  (onFilter)="cdr.detectChanges()"
                  styleClass="p-datatable-sm" [tableStyle]="{'min-width': '50rem'}">
             
             <ng-template pTemplate="caption">
                 <div class="flex items-center justify-between">
-                    <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
-                        <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+                    <div class="relative flex items-center">
+                        <i class="pi pi-search absolute text-slate-400 pointer-events-none text-sm"
+                           [class.right-3]="appState.currentLang() !== 'ar'"
+                           [class.left-3]="appState.currentLang() === 'ar'"></i>
                         <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
-                               [placeholder]="'COMMON.SEARCH' | translate" class="w-full sm:w-auto" />
-                    </p-iconField>
+                               [placeholder]="'COMMON.SEARCH' | translate" 
+                               class="w-full sm:w-64 p-inputtext-sm"
+                               [class.pr-9]="appState.currentLang() !== 'ar'"
+                               [class.pl-9]="appState.currentLang() === 'ar'"
+                               [class.pl-3]="appState.currentLang() !== 'ar'"
+                               [class.pr-3]="appState.currentLang() === 'ar'" />
+                    </div>
                 </div>
             </ng-template>
 
@@ -68,12 +76,12 @@
 <!-- Client Activity & Related Works Dialog -->
 <p-dialog [(visible)]="displayWorksDialog" [style]="{width: '90vw', maxWidth: '1000px'}" [header]="('CLIENTS.WORKS_TITLE' | translate) + ' - ' + (selectedClient?.fullName || '')" [modal]="true">
     @if (loadingWorks) {
-        <div class="p-8 text-center text-slate-500">
+        <div class="p-8 text-center text-slate-500" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
             <i class="pi pi-spin pi-spinner text-3xl mb-2"></i>
             <p>{{ 'COMMON.LOADING' | translate }}</p>
         </div>
     } @else if (clientWorks) {
-        <div class="space-y-4 py-2">
+        <div class="space-y-4 py-2" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
             <!-- Client Overview Header -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
                 <div class="space-y-1">
@@ -81,8 +89,8 @@
                     <p class="text-sm font-semibold text-slate-800">{{ clientWorks.client.fullName }}</p>
                 </div>
                 <div class="space-y-1">
-                    <span class="text-xs text-slate-400 font-medium">{{ 'CLIENTS.PHONE' | translate }}</span>
-                    <p class="text-sm font-semibold text-slate-800" dir="ltr">{{ clientWorks.client.phone }}</p>
+                    <span class="text-xs text-slate-400 font-medium block">{{ 'CLIENTS.PHONE' | translate }}</span>
+                    <p class="text-sm font-semibold text-slate-800 inline-block" dir="ltr">{{ clientWorks.client.phone }}</p>
                 </div>
                 <div class="space-y-1">
                     <span class="text-xs text-slate-400 font-medium">{{ 'CLIENTS.EMAIL' | translate }}</span>
@@ -119,10 +127,10 @@
                     </p-tab>
                 </p-tablist>
 
-                <p-tabpanels>
+                <p-tabpanels class="no-page-links">
                     <!-- Cases Tab -->
                     <p-tabpanel value="0">
-                        <p-table [value]="clientWorks.cases" styleClass="p-datatable-sm">
+                        <p-table [value]="clientWorks.cases" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]">
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th>{{ 'CASES.CASE_NUMBER' | translate }}</th>
@@ -138,7 +146,7 @@
                                     <td class="font-medium text-slate-800">{{ item.title }}</td>
                                     <td>{{ item.lawyerName }}</td>
                                     <td>
-                                        <p-tag [value]="item.status" [severity]="item.status === 'Open' ? 'success' : (item.status === 'Pending' ? 'warn' : 'secondary')"></p-tag>
+                                        <p-tag [value]="getCaseStatusLabel(item.status)" [severity]="item.status === 'Open' ? 'success' : (item.status === 'Pending' ? 'warn' : 'secondary')"></p-tag>
                                     </td>
                                     <td>{{ item.startDate | date:'mediumDate' }}</td>
                                 </tr>
@@ -153,7 +161,7 @@
 
                     <!-- Sessions Tab -->
                     <p-tabpanel value="1">
-                        <p-table [value]="clientWorks.sessions" styleClass="p-datatable-sm">
+                        <p-table [value]="clientWorks.sessions" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]">
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th>{{ 'CASES.CASE_NUMBER' | translate }}</th>
@@ -170,7 +178,7 @@
                                     <td>{{ item.courtName }}</td>
                                     <td>{{ item.scheduledAt | date:'medium' }}</td>
                                     <td>
-                                        <p-tag [value]="item.status" severity="info"></p-tag>
+                                        <p-tag [value]="getSessionStatusLabel(item.status)" severity="info"></p-tag>
                                     </td>
                                 </tr>
                             </ng-template>
@@ -184,7 +192,7 @@
 
                     <!-- Invoices Tab -->
                     <p-tabpanel value="2">
-                        <p-table #invDt [value]="clientWorks.invoices" styleClass="p-datatable-sm" dataKey="id">
+                        <p-table #invDt [value]="clientWorks.invoices" styleClass="p-datatable-sm" dataKey="id" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]">
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th style="width: 3rem"></th>
@@ -203,7 +211,7 @@
                                     <td>
                                         <button type="button" pButton pRipple [pRowToggler]="item" 
                                                 class="p-button-text p-button-rounded p-button-sm p-button-plain" 
-                                                [icon]="invDt.isRowExpanded(item) ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+                                                [icon]="invDt.isRowExpanded(item) ? 'pi pi-chevron-down' : (appState.currentLang() === 'ar' ? 'pi pi-chevron-left' : 'pi pi-chevron-right')"></button>
                                     </td>
                                     <td class="font-mono font-medium">{{ item.invoiceNumber }}</td>
                                     <td class="font-mono text-indigo-600 font-medium">{{ item.caseNumber }}</td>
@@ -213,7 +221,7 @@
                                     <td class="text-center font-semibold text-amber-600">{{ item.remainingAmount | number:'1.0-0' }}</td>
                                     <td class="text-center">{{ item.dueDate | date:'mediumDate' }}</td>
                                     <td>
-                                        <p-tag [value]="item.status" [severity]="item.status === 'Paid' ? 'success' : (item.status === 'Overdue' ? 'danger' : 'warn')"></p-tag>
+                                        <p-tag [value]="getInvoiceStatusLabel(item.status)" [severity]="item.status === 'Paid' ? 'success' : (item.status === 'Overdue' ? 'danger' : 'warn')"></p-tag>
                                     </td>
                                 </tr>
                                 <!-- Inline Child Row for Payments -->
@@ -224,10 +232,10 @@
                                                 <table class="w-full text-xs">
                                                     <thead>
                                                         <tr class="bg-slate-100 text-slate-600 border-b border-slate-200">
-                                                            <th class="p-2.5 text-left font-bold">{{ 'COMMON.DATE' | translate }}</th>
-                                                            <th class="p-2.5 text-left font-bold">{{ 'FINANCE.PAYMENT_METHOD' | translate }}</th>
-                                                            <th class="p-2.5 text-left font-bold">{{ 'FINANCE.NOTES' | translate }}</th>
-                                                            <th class="p-2.5 text-right font-bold w-32">{{ 'FINANCE.AMOUNT' | translate }}</th>
+                                                            <th class="p-2.5 text-start font-bold">{{ 'COMMON.DATE' | translate }}</th>
+                                                            <th class="p-2.5 text-start font-bold">{{ 'FINANCE.PAYMENT_METHOD' | translate }}</th>
+                                                            <th class="p-2.5 text-start font-bold">{{ 'FINANCE.NOTES' | translate }}</th>
+                                                            <th class="p-2.5 text-end font-bold w-32">{{ 'FINANCE.AMOUNT' | translate }}</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -236,12 +244,12 @@
                                                                 <td class="p-2.5 text-slate-700">{{ pay.paymentDate | date:'mediumDate' }}</td>
                                                                 <td class="p-2.5 font-medium text-slate-800">
                                                                     <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100 text-slate-700">
-                                                                        <i class="pi pi-credit-card text-xs"></i>
-                                                                        {{ pay.method }}
+                                                                        <i [class]="getPaymentMethodIcon(pay.method) + ' text-xs text-slate-500'"></i>
+                                                                        {{ getPaymentMethodLabel(pay.method) }}
                                                                     </span>
                                                                 </td>
                                                                 <td class="p-2.5 text-slate-500">{{ pay.notes || '-' }}</td>
-                                                                <td class="p-2.5 text-right font-bold text-emerald-600">{{ pay.amount | number:'1.0-0' }}</td>
+                                                                <td class="p-2.5 text-end font-bold text-emerald-600">{{ pay.amount | number:'1.0-0' }}</td>
                                                             </tr>
                                                         } @empty {
                                                             <tr>
@@ -265,7 +273,7 @@
 
                     <!-- Documents Tab -->
                     <p-tabpanel value="3">
-                        <p-table [value]="clientWorks.documents" styleClass="p-datatable-sm">
+                        <p-table [value]="clientWorks.documents" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]">
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th>{{ 'COMMON.FILE_NAME' | translate }}</th>
@@ -283,7 +291,7 @@
                                     </td>
                                     <td class="font-mono text-indigo-600 font-medium">{{ item.caseNumber }}</td>
                                     <td>
-                                        <p-tag [value]="item.category" severity="secondary"></p-tag>
+                                        <p-tag [value]="getDocumentCategoryLabel(item.category)" severity="secondary"></p-tag>
                                     </td>
                                     <td class="text-xs text-slate-500">{{ (item.fileSize / 1024) | number:'1.0-1' }} KB</td>
                                     <td>{{ item.createdAt | date:'mediumDate' }}</td>

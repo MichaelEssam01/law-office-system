@@ -7,7 +7,8 @@ import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { PasswordModule } from 'primeng/password';
-import { TranslateModule } from '@ngx-translate/core';
+import { TooltipModule } from 'primeng/tooltip';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { UserManagementService } from '../../../core/services/user-management.service';
 
 @Component({
@@ -23,6 +24,7 @@ import { UserManagementService } from '../../../core/services/user-management.se
     CheckboxModule,
     ToggleSwitchModule,
     PasswordModule,
+    TooltipModule,
     TranslateModule
   ],
   templateUrl: './user-dialog.html'
@@ -51,12 +53,14 @@ export class UserManagementDialog implements OnInit {
     return Object.entries(groups).map(([category, perms]) => ({ category, perms }));
   });
 
-  roles = [
-    { label: 'Admin', value: 'Admin' },
-    { label: 'Lawyer', value: 'Lawyer' },
-    { label: 'Receptionist', value: 'Receptionist' },
-    { label: 'Accountant', value: 'Accountant' }
-  ];
+  private translate = inject(TranslateService);
+
+  roles = computed(() => [
+    { label: this.translate.instant('USERS.ROLES.ADMIN'), value: 'Admin' },
+    { label: this.translate.instant('USERS.ROLES.LAWYER'), value: 'Lawyer' },
+    { label: this.translate.instant('USERS.ROLES.RECEPTIONIST'), value: 'Receptionist' },
+    { label: this.translate.instant('USERS.ROLES.ACCOUNTANT'), value: 'Accountant' }
+  ]);
 
   constructor() {
     this.userForm = this.fb.group({

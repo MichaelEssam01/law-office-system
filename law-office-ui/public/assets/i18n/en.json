@@ -20,7 +20,11 @@
     "DATE": "Date",
     "LOADING": "Loading...",
     "TITLE": "Title",
-    "DOWNLOAD": "Download"
+    "DOWNLOAD": "Download",
+    "ALL": "All"
+  },
+  "PAGINATOR": {
+    "CURRENT_PAGE_REPORT": "{first} – {last} of {totalRecords}"
   },
   "SIDEBAR": {
     "DASHBOARD": "Dashboard",
@@ -47,8 +51,16 @@
     "ROLE": "Primary Role",
     "SELECT_ROLE": "Select a role",
     "PASSWORD": "Password",
+    "NEW_PASSWORD": "New Password",
     "NEW_PASSWORD_OPTIONAL": "New Password (leave blank to keep current)",
+    "LEAVE_BLANK_HINT": "Leave blank to keep current password",
     "STATUS": "Status",
+    "ROLES": {
+      "ADMIN": "Administrator",
+      "LAWYER": "Lawyer",
+      "RECEPTIONIST": "Receptionist",
+      "ACCOUNTANT": "Accountant"
+    },
     "ACTIVE": "Active",
     "INACTIVE": "Inactive",
     "ACTIVE_ACCOUNT": "Account is Active",
@@ -104,8 +116,12 @@
     "TOTAL_DOCUMENTS": "Total Documents",
     "CASES_BY_STATUS": "Cases by Status",
     "REVENUE_TREND": "Revenue Trend",
+    "OVERALL_PROGRESS": "Overall Financial Breakdown",
+    "SELECT_VIEW": "Select View Mode",
+    "ALL_TIME": "Overall Progress (All Time)",
     "INVOICED": "Invoiced",
     "PAID": "Paid",
+    "UNCLAIMED": "Remaining / Unclaimed",
     "NO_RECORDS_FOUND": "No records found matching your search"
   },
   "CLIENTS": {
@@ -213,6 +229,9 @@
     "INVOICE_NUMBER": "Invoice Number",
     "INVOICE_TITLE": "Invoice Title",
     "TITLE_PLACEHOLDER": "e.g. Legal Fees",
+    "ALL_CATEGORIES": "All Categories",
+    "ALL_CASES": "All Cases",
+    "RESET_FILTERS": "Reset Filters",
     "ADD_INVOICE": "New Invoice",
     "EDIT_INVOICE": "Edit Invoice",
     "CREATE_SUCCESS": "Financial record created successfully",
@@ -270,6 +289,9 @@
     "EVIDENCE": "Evidence",
     "INVOICE": "Invoice",
     "OTHER": "Other",
+    "ALL_CATEGORIES": "All Categories",
+    "ALL_CASES": "All Cases",
+    "RESET_FILTERS": "Reset Filters",
     "UPLOAD_TITLE": "Upload New Document",
     "SELECT_FILE": "Select File",
     "MAX_SIZE_ERROR": "Maximum size is 10MB",
@@ -351,7 +373,11 @@
     "VIEW_PROFILE": "View Profile",
     "ACCOUNT_SETTINGS": "Account Settings",
     "LOGOUT": "Logout",
-    "NOTIFICATIONS": "Notifications",
+    "LOGOUT_CONFIRM_TITLE": "Confirm Logout",
+    "LOGOUT_CONFIRM_MESSAGE": "Are you sure you want to log out of your account?",
+    "NOTIFICATIONS": "Notification History",
+    "NOTIFICATION_HISTORY": "Notification History",
+    "NOTIFICATION_PREFERENCES": "Preferences",
     "SECURITY_LOG": "Security Log",
     "NOTIF_PREFS_TITLE": "Notification Preferences",
     "NOTIF_PREFS_DESC": "Control how you receive alerts and updates.",
@@ -373,21 +399,46 @@
     "STATUS": "Status",
     "LAST_30_DAYS": "*Showing last 30 days of activity.",
     "DOWNLOAD_EXCEL": "Download Full Log (Excel)",
+    "PAGE_REPORT": "Showing {first} to {last} of {totalRecords} entries",
+    "NO_LOGS": "No security logs found",
     "EXPORT_SUCCESS": "Log exported successfully",
     "EXPORT_ERROR": "Failed to export logs",
     "SAVE_SUCCESS": "Notification preferences saved",
-    "SAVE_ERROR": "Failed to save settings"
+    "SAVE_ERROR": "Failed to save settings",
+    "LOG_EVENTS": {
+      "LOGIN": "Login",
+      "LOGIN_ATTEMPT": "Login Attempt",
+      "CHANGE_PASSWORD": "Password Changed",
+      "UPDATE_PROFILE": "Profile Updated"
+    },
+    "LOG_STATUSES": {
+      "SUCCESS": "Success",
+      "INVALID_PASSWORD": "Invalid Password",
+      "FAILED": "Failed"
+    }
   },
   "NOTIFICATIONS": {
     "TITLE": "Notifications",
+    "SUBTITLE": "View and manage your recent system alerts and updates",
     "MARK_ALL_READ": "Mark all as read",
+    "MARK_READ": "Mark as read",
     "EMPTY": "You don't have any notifications",
     "VIEW_ALL": "View All Notifications",
     "CASE_ASSIGNED_TITLE": "New Case Assigned",
     "CASE_ASSIGNED_MSG": "You have been assigned to case {{number}}: {{title}}",
+    "CASE_ASSIGNED_MSG_PREFIX": "You have been assigned to case",
+    "CASE_ASSIGNED_MSG_CASE": "{{number}}: {{title}}",
     "CASE_UPDATED_TITLE": "Case Assignment Updated",
     "CASE_UPDATED_MSG": "Case {{number}} assignment has been updated.",
+    "CASE_UPDATED_MSG_PREFIX": "Case",
+    "CASE_UPDATED_MSG_CASE": "{{number}}",
+    "CASE_UPDATED_MSG_SUFFIX": "assignment has been updated.",
     "PAYMENT_RECORDED_TITLE": "Payment Recorded",
-    "PAYMENT_RECORDED_MSG": "A payment of {{amount}} has been recorded for case {{number}}."
+    "PAYMENT_RECORDED_MSG": "A payment of {{amount}} has been recorded for case {{number}}.",
+    "PAYMENT_RECORDED_MSG_PREFIX": "A payment of {{amount}} has been recorded for case",
+    "PAYMENT_RECORDED_MSG_CASE": "{{number}}.",
+    "CATEGORY_CASES": "Cases",
+    "CATEGORY_FINANCE": "Finance",
+    "CATEGORY_SESSIONS": "Sessions"
   }
 }

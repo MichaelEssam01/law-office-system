@@ -9,8 +9,9 @@
                   (onClick)="openNew()"></p-button>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <p-table #dt [value]="users()" [loading]="loading()" [paginator]="true" [rows]="10"
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 no-page-links">
+        <p-table #dt [value]="users()" [loading]="loading()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                 [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                  [globalFilterFields]="['fullName', 'email', 'role']"
                  (onFilter)="cdr.detectChanges()"
                  styleClass="p-datatable-gridlines p-datatable-sm">
@@ -49,7 +50,7 @@
                                 'bg-teal-100 text-teal-700': user.role === 'Receptionist',
                                 'bg-amber-100 text-amber-700': user.role === 'Accountant'
                               }">
-                            {{user.role}}
+                            {{ getRoleLabel(user.role) }}
                         </span>
                     </td>
                     <td class="px-4 py-4">

@@ -182,4 +182,79 @@ export class ClientsPage implements OnInit {
       this.cdr.detectChanges();
     }
   }
+
+  getCaseStatusLabel(status: string): string {
+    const keyMap: { [key: string]: string } = {
+      'Open': 'CASES.OPEN',
+      'Pending': 'CASES.PENDING',
+      'Closed': 'CASES.CLOSED',
+      'Judgment': 'CASES.JUDGMENT',
+      'Appeal': 'CASES.APPEAL',
+      'Cancelled': 'CASES.CANCELLED'
+    };
+    return keyMap[status] ? this.translate.instant(keyMap[status]) : status;
+  }
+
+  getInvoiceStatusLabel(status: string): string {
+    const keyMap: { [key: string]: string } = {
+      'Unpaid': 'FINANCE.STATUS_LABELS.UNPAID',
+      'PartiallyPaid': 'FINANCE.STATUS_LABELS.PARTIAL',
+      'Paid': 'FINANCE.STATUS_LABELS.PAID',
+      'Overdue': 'FINANCE.STATUS_LABELS.OVERDUE',
+      'Cancelled': 'FINANCE.STATUS_LABELS.CANCELLED'
+    };
+    return keyMap[status] ? this.translate.instant(keyMap[status]) : status;
+  }
+
+  getPaymentMethodLabel(method: string): string {
+    const keyMap: { [key: string]: string } = {
+      'Cash': 'FINANCE.METHODS.CASH',
+      'BankTransfer': 'FINANCE.METHODS.BANK',
+      'CreditCard': 'FINANCE.METHODS.CARD',
+      'Check': 'FINANCE.METHODS.CHEQUE',
+      'Cheque': 'FINANCE.METHODS.CHEQUE',
+      'Other': 'FINANCE.METHODS.OTHER'
+    };
+    return keyMap[method] ? this.translate.instant(keyMap[method]) : method;
+  }
+
+  getPaymentMethodIcon(method: string): string {
+    switch (method) {
+      case 'Cash':
+        return 'pi pi-money-bill';
+      case 'BankTransfer':
+      case 'Bank':
+        return 'pi pi-building';
+      case 'CreditCard':
+      case 'Card':
+        return 'pi pi-credit-card';
+      case 'Check':
+      case 'Cheque':
+        return 'pi pi-file-edit';
+      default:
+        return 'pi pi-wallet';
+    }
+  }
+
+  getSessionStatusLabel(status: string): string {
+    const keyMap: { [key: string]: string } = {
+      'Scheduled': 'SESSIONS.SCHEDULED',
+      'Completed': 'SESSIONS.COMPLETED',
+      'Postponed': 'SESSIONS.POSTPONED',
+      'Cancelled': 'SESSIONS.CANCELLED'
+    };
+    return keyMap[status] ? this.translate.instant(keyMap[status]) : status;
+  }
+
+  getDocumentCategoryLabel(category: string): string {
+    const keyMap: { [key: string]: string } = {
+      'Contract': 'DOCUMENTS.CONTRACT',
+      'CourtDocument': 'DOCUMENTS.COURT',
+      'Court': 'DOCUMENTS.COURT',
+      'Evidence': 'DOCUMENTS.EVIDENCE',
+      'Invoice': 'DOCUMENTS.INVOICE',
+      'Other': 'DOCUMENTS.OTHER'
+    };
+    return keyMap[category] ? this.translate.instant(keyMap[category]) : category;
+  }
 }

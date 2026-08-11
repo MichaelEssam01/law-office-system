@@ -60,20 +60,64 @@
     </div>
 
     <!-- Invoices Table -->
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm no-page-links">
         <div class="p-4 border-b border-slate-100 flex justify-between items-center">
             <h2 class="text-lg font-bold text-slate-800">{{ 'FINANCE.INVOICES' | translate }}</h2>
             <div class="flex gap-2">
-                <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
-                    <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+                <div class="relative flex items-center">
+                    <i class="pi pi-search absolute text-slate-400 pointer-events-none text-sm"
+                       [class.right-3]="appState.currentLang() !== 'ar'"
+                       [class.left-3]="appState.currentLang() === 'ar'"></i>
                     <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
-                           [placeholder]="'COMMON.SEARCH' | translate" class="w-full sm:w-auto p-inputtext-sm" />
-                </p-iconField>
-                <button pButton icon="pi pi-filter" class="p-button-text p-button-secondary"></button>
+                           [placeholder]="'COMMON.SEARCH' | translate" 
+                           class="w-full sm:w-64 p-inputtext-sm"
+                           [class.pr-9]="appState.currentLang() !== 'ar'"
+                           [class.pl-9]="appState.currentLang() === 'ar'"
+                           [class.pl-3]="appState.currentLang() !== 'ar'"
+                           [class.pr-3]="appState.currentLang() === 'ar'" />
+                </div>
+
+                <button pButton icon="pi pi-filter" 
+                        [class.p-button-primary]="selectedStatuses().length > 0"
+                        [class.p-button-outlined]="selectedStatuses().length === 0"
+                        class="p-button-secondary rounded-lg relative !overflow-visible"
+                        (click)="filterOp.toggle($event)">
+                    @if (selectedStatuses().length > 0) {
+                        <span class="absolute -top-1.5 -right-1.5 rtl:-left-1.5 rtl:right-auto bg-blue-600 text-white text-[10px] min-w-4 h-4 px-1 rounded-full flex items-center justify-center font-bold z-10 shadow-sm border border-white">
+                            {{ selectedStatuses().length }}
+                        </span>
+                    }
+                </button>
+
+                <p-popover #filterOp>
+                    <div class="p-3 w-56 space-y-2">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 flex justify-between items-center">
+                            <span>{{ 'CASES.STATUS' | translate }}</span>
+                            @if (selectedStatuses().length > 0) {
+                                <button class="text-[10px] text-blue-600 hover:underline font-normal" (click)="clearStatusFilters()">
+                                    {{ 'CASES.RESET_FILTERS' | translate }}
+                                </button>
+                            }
+                        </div>
+                        <div class="space-y-1.5 pt-1">
+                            @for (s of statuses; track s.value) {
+                                <div (click)="toggleStatusFilter(s.value)" 
+                                     class="flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-slate-50 cursor-pointer select-none transition-colors">
+                                    <p-checkbox [binary]="true" 
+                                                [ngModel]="selectedStatuses().includes(s.value)"></p-checkbox>
+                                    <span class="px-2 py-0.5 rounded text-[11px] font-bold border" [ngClass]="s.color">
+                                        {{ s.label | translate }}
+                                    </span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </p-popover>
             </div>
         </div>
         
-        <p-table #dt [value]="invoices()" [loading]="loading()" [rows]="10" [paginator]="true" 
+        <p-table #dt [value]="invoices()" [loading]="loading()" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                 [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                  styleClass="p-datatable-sm" dataKey="id" 
                  [globalFilterFields]="['invoiceNumber', 'clientName', 'caseNumber', 'caseTitle', 'title']"
                  (onFilter)="cdr.detectChanges()"
@@ -98,7 +142,7 @@
                     <td class="p-4">
                         <button type="button" pButton pRipple [pRowToggler]="inv" 
                                 class="p-button-text p-button-rounded p-button-sm p-button-plain" 
-                                [icon]="dt.isRowExpanded(inv) ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></button>
+                                [icon]="dt.isRowExpanded(inv) ? 'pi pi-chevron-down' : (appState.currentLang() === 'ar' ? 'pi pi-chevron-left' : 'pi pi-chevron-right')"></button>
                     </td>
                     <td class="p-4 font-mono font-bold text-blue-600">{{ inv.invoiceNumber }}</td>
                     <td class="p-4 text-sm">
@@ -130,11 +174,11 @@
                                 <table class="w-full text-sm">
                                     <thead>
                                         <tr class="bg-slate-50 text-slate-700 border-b border-slate-200">
-                                            <th class="p-3 text-left w-12"></th>
-                                            <th class="p-3 text-left font-bold">{{ 'COMMON.DATE' | translate }}</th>
-                                            <th class="p-3 text-left font-bold">{{ 'FINANCE.PAYMENT_METHOD' | translate }}</th>
-                                            <th class="p-3 text-left font-bold">{{ 'FINANCE.NOTES' | translate }}</th>
-                                            <th class="p-3 text-right font-bold w-32">{{ 'FINANCE.AMOUNT' | translate }}</th>
+                                            <th class="p-3 text-start w-12"></th>
+                                            <th class="p-3 text-start font-bold">{{ 'COMMON.DATE' | translate }}</th>
+                                            <th class="p-3 text-start font-bold">{{ 'FINANCE.PAYMENT_METHOD' | translate }}</th>
+                                            <th class="p-3 text-start font-bold">{{ 'FINANCE.NOTES' | translate }}</th>
+                                            <th class="p-3 text-end font-bold w-32">{{ 'FINANCE.AMOUNT' | translate }}</th>
                                             <th class="p-3 w-10"></th>
                                         </tr>
                                     </thead>
@@ -149,14 +193,14 @@
                                             @for (pay of inv.payments; track pay.id) {
                                                 <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors last:border-0">
                                                     <td class="p-3 text-center">
-                                                        <i class="pi pi-corner-down-right text-[10px] text-blue-400"></i>
+                                                        <i [class]="appState.currentLang() === 'ar' ? 'pi pi-corner-down-left text-[10px] text-blue-400' : 'pi pi-corner-down-right text-[10px] text-blue-400'"></i>
                                                     </td>
                                                     <td class="p-3 text-slate-600 font-medium">{{ pay.paymentDate | date:'dd/MM/yyyy' }}</td>
                                                     <td class="p-3">
-                                                        <p-tag [value]="getPaymentMethodLabel(pay.method)" severity="secondary" styleClass="text-[10px] uppercase"></p-tag>
+                                                        <p-tag [icon]="getPaymentMethodIcon(pay.method)" [value]="getPaymentMethodLabel(pay.method)" severity="secondary" styleClass="text-[10px] uppercase gap-1"></p-tag>
                                                     </td>
                                                     <td class="p-3 text-slate-400 italic text-xs">{{ pay.notes || '-' }}</td>
-                                                    <td class="p-3 text-right font-bold text-green-600">{{ pay.amount | number:'1.0-0' }}</td>
+                                                    <td class="p-3 text-end font-bold text-green-600">{{ pay.amount | number:'1.0-0' }}</td>
                                                     <td class="p-3"></td>
                                                 </tr>
                                             }

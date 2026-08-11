@@ -5,7 +5,9 @@
         
         <!-- Breadcrumbs / Back -->
         <div class="mb-4">
-            <button pButton icon="pi pi-arrow-right" [label]="'CASES.BACK_TO_CASES' | translate" 
+            <button pButton [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-right' : 'pi pi-arrow-left'"
+                    [iconPos]="appState.currentLang() === 'ar' ? 'right' : 'left'"
+                    [label]="'CASES.BACK_TO_CASES' | translate" 
                     class="p-button-text p-button-secondary p-button-sm" 
                     routerLink="/cases"></button>
         </div>

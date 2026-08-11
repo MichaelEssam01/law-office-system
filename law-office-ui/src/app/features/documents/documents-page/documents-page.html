@@ -1,22 +1,69 @@
-<div class="space-y-6">
+<div class="space-y-6" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
+    <p-toast></p-toast>
+    <p-confirmDialog></p-confirmDialog>
+
     <div>
         <h2 class="text-2xl font-bold text-slate-800">{{ 'DASHBOARD.TOTAL_DOCUMENTS' | translate }}</h2>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden p-4">
-        <p-table #dt [value]="documents()" [loading]="loading()" [paginator]="true" [rows]="10"
-                 [globalFilterFields]="['originalFileName', 'caseTitle', 'description']"
-                 styleClass="p-datatable-sm" [tableStyle]="{'min-width': '60rem'}">
-            
-            <ng-template pTemplate="caption">
-                <div class="flex items-center justify-between">
-                    <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
-                        <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
-                        <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
-                               [placeholder]="'COMMON.SEARCH' | translate" class="py-2 border-slate-200 rounded-lg w-full sm:w-auto" />
-                    </p-iconField>
+    <!-- Filters Area -->
+    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div class="flex flex-col gap-2">
+                <label class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
+                <div class="relative">
+                    <input pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event); dt.filterGlobal($event, 'contains')"
+                           [placeholder]="'COMMON.SEARCH' | translate" 
+                           class="w-full rounded-lg border-slate-200"
+                           [ngClass]="appState.currentLang() === 'ar' ? 'pl-9 pr-3' : 'pr-9 pl-3'" />
+                    <i class="pi pi-search absolute top-1/2 -translate-y-1/2 text-slate-400"
+                       [ngClass]="appState.currentLang() === 'ar' ? 'left-3' : 'right-3'"></i>
                 </div>
-            </ng-template>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-xs font-bold text-slate-500">{{ 'COMMON.CATEGORY' | translate }}</label>
+                <p-select [options]="categoryOptions" [ngModel]="selectedCategory()" (ngModelChange)="selectedCategory.set($event); applyFilters()"
+                          optionValue="value" [placeholder]="'DOCUMENTS.ALL_CATEGORIES' | translate" 
+                          [showClear]="true" styleClass="w-full rounded-lg">
+                    <ng-template pTemplate="selectedItem" let-selectedOption>
+                        {{ getCategoryLabel(selectedOption.value) }}
+                    </ng-template>
+                    <ng-template pTemplate="item" let-option>
+                        {{ getCategoryLabel(option.value) }}
+                    </ng-template>
+                </p-select>
+            </div>
+
+            <div class="flex flex-col gap-2 md:col-span-1">
+                <label class="text-xs font-bold text-slate-500">{{ 'CASES.TITLE' | translate }}</label>
+                <p-select [options]="cases()" [ngModel]="selectedCase()" (ngModelChange)="selectedCase.set($event); applyFilters()"
+                          optionLabel="title" optionValue="id" [placeholder]="'DOCUMENTS.ALL_CASES' | translate" 
+                          [showClear]="true" [filter]="true" filterBy="caseNumber,title"
+                          styleClass="w-full rounded-lg">
+                    <ng-template pTemplate="item" let-case>
+                        <div class="flex flex-col">
+                            <span class="font-mono text-blue-600 text-xs font-bold">{{ case.caseNumber }}</span>
+                            <span class="text-sm">{{ case.title }}</span>
+                        </div>
+                    </ng-template>
+                </p-select>
+            </div>
+
+            <div class="flex justify-end">
+                <button pButton icon="pi pi-filter-slash" class="p-button-outlined p-button-secondary h-[42px] px-4" 
+                        (click)="resetFilters()" [pTooltip]="'DOCUMENTS.RESET_FILTERS' | translate" [title]="'DOCUMENTS.RESET_FILTERS' | translate"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table Card -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-100 p-4 no-page-links">
+        <p-table #dt [value]="documents()" [loading]="loading()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                 [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
+                 [globalFilterFields]="['originalFileName', 'caseTitle', 'description']"
+                 (onFilter)="cdr.detectChanges()"
+                 styleClass="p-datatable-sm" [tableStyle]="{'min-width': '60rem'}">
 
             <ng-template pTemplate="header">
                 <tr>

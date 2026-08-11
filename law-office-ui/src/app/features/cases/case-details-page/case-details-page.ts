@@ -83,17 +83,19 @@ export class CaseDetailsPage implements OnInit {
   documents = signal<DocumentDto[]>([]);
   docsLoading = signal(true);
 
-  async ngOnInit() {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.caseId.set(id);
-      await Promise.all([
-        this.loadCaseDetails(id),
-        this.loadSessions(id),
-        this.loadFinanceData(id),
-        this.loadDocuments(id)
-      ]);
-    }
+  ngOnInit() {
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.caseId.set(id);
+        Promise.all([
+          this.loadCaseDetails(id),
+          this.loadSessions(id),
+          this.loadFinanceData(id),
+          this.loadDocuments(id)
+        ]);
+      }
+    });
   }
 
   async loadCaseDetails(id: string) {

@@ -20,7 +20,11 @@
     "DATE": "التاريخ",
     "LOADING": "جاري التحميل...",
     "TITLE": "العنوان",
-    "DOWNLOAD": "تحميل"
+    "DOWNLOAD": "تحميل",
+    "ALL": "الكل"
+  },
+  "PAGINATOR": {
+    "CURRENT_PAGE_REPORT": "{first} – {last} من {totalRecords}"
   },
   "SIDEBAR": {
     "DASHBOARD": "الرئيسية",
@@ -47,8 +51,16 @@
     "ROLE": "الدور الرئيسي",
     "SELECT_ROLE": "اختر دوراً",
     "PASSWORD": "كلمة المرور",
+    "NEW_PASSWORD": "كلمة المرور الجديدة",
     "NEW_PASSWORD_OPTIONAL": "كلمة المرور الجديدة (اتركه فارغاً للإبقاء على الحالية)",
+    "LEAVE_BLANK_HINT": "اتركه فارغاً للإبقاء على كلمة المرور الحالية",
     "STATUS": "الحالة",
+    "ROLES": {
+      "ADMIN": "مدير النظام",
+      "LAWYER": "محامي",
+      "RECEPTIONIST": "موظف استقبال",
+      "ACCOUNTANT": "محاسب"
+    },
     "ACTIVE": "نشط",
     "INACTIVE": "غير نشط",
     "ACTIVE_ACCOUNT": "الحساب نشط",
@@ -104,8 +116,12 @@
     "TOTAL_DOCUMENTS": "إجمالي المستندات",
     "CASES_BY_STATUS": "القضايا حسب الحالة",
     "REVENUE_TREND": "اتجاهات الإيرادات",
-    "INVOICED": "المطلوبات",
+    "OVERALL_PROGRESS": "الموقف المالي العام",
+    "SELECT_VIEW": "اختر نوع العرض",
+    "ALL_TIME": "الأداء الكلي (منذ البداية)",
+    "INVOICED": "إجمالي الفواتير",
     "PAID": "المحصل",
+    "UNCLAIMED": "المتبقي (غير المحصل)",
     "NO_RECORDS_FOUND": "لا توجد سجلات مطابقة للبحث"
   },
   "CLIENTS": {
@@ -213,6 +229,9 @@
     "INVOICE_NUMBER": "رقم الفاتورة",
     "INVOICE_TITLE": "عنوان الفاتورة",
     "TITLE_PLACEHOLDER": "مثلاً: أتعاب المرافعة",
+    "ALL_CATEGORIES": "جميع التصنيفات",
+    "ALL_CASES": "جميع القضايا",
+    "RESET_FILTERS": "إعادة ضبط الفلاتر",
     "ADD_INVOICE": "فاتورة جديدة",
     "EDIT_INVOICE": "تعديل فاتورة",
     "CREATE_SUCCESS": "تم إضافة السجل المالي بنجاح",
@@ -270,6 +289,9 @@
     "EVIDENCE": "دليل",
     "INVOICE": "فاتورة",
     "OTHER": "أخرى",
+    "ALL_CATEGORIES": "جميع التصنيفات",
+    "ALL_CASES": "جميع القضايا",
+    "RESET_FILTERS": "إعادة ضبط الفلاتر",
     "UPLOAD_TITLE": "رفع مستند جديد",
     "SELECT_FILE": "اختر الملف",
     "MAX_SIZE_ERROR": "الحد الأقصى هو 10 ميجابايت",
@@ -351,7 +373,11 @@
     "VIEW_PROFILE": "الملف الشخصي",
     "ACCOUNT_SETTINGS": "إعدادات الحساب",
     "LOGOUT": "تسجيل الخروج",
-    "NOTIFICATIONS": "التنبيهات",
+    "LOGOUT_CONFIRM_TITLE": "تأكيد تسجيل الخروج",
+    "LOGOUT_CONFIRM_MESSAGE": "هل أنت تأكد من أنك تريد تسجيل الخروج من حسابك؟",
+    "NOTIFICATIONS": "سجل التنبيهات",
+    "NOTIFICATION_HISTORY": "سجل التنبيهات",
+    "NOTIFICATION_PREFERENCES": "تفضيلات التنبيهات",
     "SECURITY_LOG": "سجل الأمان",
     "NOTIF_PREFS_TITLE": "تفضيلات التنبيهات",
     "NOTIF_PREFS_DESC": "تحكم في كيفية تلقي التنبيهات والتحديثات.",
@@ -373,21 +399,46 @@
     "STATUS": "الحالة",
     "LAST_30_DAYS": "*عرض نشاط آخر 30 يوماً.",
     "DOWNLOAD_EXCEL": "تحميل السجل بالكامل (Excel)",
+    "PAGE_REPORT": "عرض {first} إلى {last} من أصل {totalRecords} سجل",
+    "NO_LOGS": "لا توجد سجلات أمان",
     "EXPORT_SUCCESS": "تم تصدير السجل بنجاح",
     "EXPORT_ERROR": "فشل في تصدير السجل",
     "SAVE_SUCCESS": "تم حفظ تفضيلات التنبيهات",
-    "SAVE_ERROR": "فشل في حفظ الإعدادات"
+    "SAVE_ERROR": "فشل في حفظ الإعدادات",
+    "LOG_EVENTS": {
+      "LOGIN": "تسجيل دخول",
+      "LOGIN_ATTEMPT": "محاولة تسجيل دخول",
+      "CHANGE_PASSWORD": "تغيير كلمة المرور",
+      "UPDATE_PROFILE": "تحديث الملف الشخصي"
+    },
+    "LOG_STATUSES": {
+      "SUCCESS": "ناجح",
+      "INVALID_PASSWORD": "كلمة مرور خاطئة",
+      "FAILED": "فشل"
+    }
   },
   "NOTIFICATIONS": {
     "TITLE": "التنبيهات",
+    "SUBTITLE": "عرض وإدارة الإشعارات والتحديثات الأخيرة الخاصة بك",
     "MARK_ALL_READ": "تحديد الكل كمقروء",
+    "MARK_READ": "تحديد كمقروء",
     "EMPTY": "ليس لديك أي تنبيهات",
     "VIEW_ALL": "عرض كل التنبيهات",
     "CASE_ASSIGNED_TITLE": "تم تعيين قضية جديدة",
     "CASE_ASSIGNED_MSG": "تم تعيينك في القضية رقم {{number}}: {{title}}",
+    "CASE_ASSIGNED_MSG_PREFIX": "تم تعيينك في القضية",
+    "CASE_ASSIGNED_MSG_CASE": "{{number}}: {{title}}",
     "CASE_UPDATED_TITLE": "تم تحديث تعيين القضية",
     "CASE_UPDATED_MSG": "تم تحديث تعيين القضية رقم {{number}}.",
+    "CASE_UPDATED_MSG_PREFIX": "القضية",
+    "CASE_UPDATED_MSG_CASE": "{{number}}",
+    "CASE_UPDATED_MSG_SUFFIX": "تم تحديث تعيينها.",
     "PAYMENT_RECORDED_TITLE": "تم تسجيل دفعة",
-    "PAYMENT_RECORDED_MSG": "تم تسجيل مبلغ {{amount}} للقضية رقم {{number}}."
+    "PAYMENT_RECORDED_MSG": "تم تسجيل مبلغ {{amount}} للقضية رقم {{number}}.",
+    "PAYMENT_RECORDED_MSG_PREFIX": "تم تسجيل مبلغ {{amount}} للقضية",
+    "PAYMENT_RECORDED_MSG_CASE": "{{number}}.",
+    "CATEGORY_CASES": "القضايا",
+    "CATEGORY_FINANCE": "المالية",
+    "CATEGORY_SESSIONS": "الجلسات"
   }
 }

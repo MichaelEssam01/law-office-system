@@ -53,8 +53,9 @@
     </div>
 
     <!-- Table Card -->
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <p-table #dt [value]="sessions()" [loading]="loading()" [rows]="10" [paginator]="true" 
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm no-page-links">
+        <p-table #dt [value]="sessions()" [loading]="loading()" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                 [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                  [globalFilterFields]="['title', 'caseNumber', 'courtName']"
                  styleClass="p-datatable-sm" [rowHover]="true">
             

@@ -55,9 +55,11 @@
 
     <!-- Bottom Profile Area -->
     <div class="p-4 border-t border-slate-800">
-        <a (click)="logout(); appState.closeSidebar()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-red-400 font-medium cursor-pointer transition-all duration-200">
+        <a (click)="logout()" class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-red-400 font-medium cursor-pointer transition-all duration-200">
             <i class="pi pi-sign-out text-lg"></i>
             <span>{{ 'SIDEBAR.LOGOUT' | translate }}</span>
         </a>
     </div>
 </div>
+
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>

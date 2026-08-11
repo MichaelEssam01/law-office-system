@@ -41,14 +41,38 @@ public class DashboardService : IDashboardService
             .ToListAsync();
         stats.CasesByStatus = statusGroups;
 
-        // 4. Last 6 Months Finance (Simplified for now)
-        // In a real app we'd group by month. Here we just return current month as a sample.
-        stats.Last6MonthsFinance.Add(new MonthlyFinancialPoint 
-        { 
-            Month = DateTime.UtcNow.ToString("MMM yyyy"),
-            Invoiced = stats.TotalInvoiced,
-            Paid = stats.TotalPaid
-        });
+        // 4. Monthly Financial Points (Dynamically calculated from all existing invoice dates)
+        var monthlyGroups = invoices
+            .GroupBy(inv => new { inv.CreatedAt.Year, inv.CreatedAt.Month })
+            .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+            .ToList();
+
+        if (monthlyGroups.Any())
+        {
+            foreach (var g in monthlyGroups)
+            {
+                var dt = new DateTime(g.Key.Year, g.Key.Month, 1);
+                decimal monthInvoiced = g.Sum(inv => inv.Amount);
+                decimal monthPaid = g.Sum(inv => inv.Payments.Sum(p => p.Amount));
+
+                stats.Last6MonthsFinance.Add(new MonthlyFinancialPoint
+                {
+                    Month = dt.ToString("MMM yyyy"),
+                    Invoiced = monthInvoiced,
+                    Paid = monthPaid
+                });
+            }
+        }
+        else
+        {
+            // Fallback to current month if no invoices exist yet
+            stats.Last6MonthsFinance.Add(new MonthlyFinancialPoint
+            {
+                Month = DateTime.UtcNow.ToString("MMM yyyy"),
+                Invoiced = 0,
+                Paid = 0
+            });
+        }
 
         return stats;
     }

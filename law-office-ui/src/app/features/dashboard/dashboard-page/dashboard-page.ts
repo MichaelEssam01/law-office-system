@@ -8,10 +8,13 @@ import { DashboardService, DashboardStatsDto } from '../../../core/services/dash
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AppStateService } from '../../../core/services/app-state.service';
 
+import { SelectModule } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, CardModule, ChartModule, ButtonModule, TranslateModule],
+  imports: [CommonModule, RouterModule, CardModule, ChartModule, ButtonModule, SelectModule, FormsModule, TranslateModule],
   templateUrl: './dashboard-page.html'
 })
 export class DashboardPage implements OnInit, OnDestroy {
@@ -21,6 +24,7 @@ export class DashboardPage implements OnInit, OnDestroy {
   
   stats = signal<DashboardStatsDto | null>(null);
   loading = signal(true);
+  selectedViewMode = signal<string>('ALL');
 
   caseChartData: any;
   financeChartData: any;
@@ -59,6 +63,28 @@ export class DashboardPage implements OnInit, OnDestroy {
     }
   }
 
+  get viewModeOptions() {
+    const isRtl = this.appState.currentLang() === 'ar';
+    const options = [
+      { label: this.translate.instant('DASHBOARD.ALL_TIME'), value: 'ALL' }
+    ];
+
+    if (this.stats()?.last6MonthsFinance) {
+      this.stats()!.last6MonthsFinance.forEach(pt => {
+        options.push({ label: pt.month, value: pt.month });
+      });
+    }
+
+    return options;
+  }
+
+  onViewModeChange(mode: string) {
+    this.selectedViewMode.set(mode);
+    if (this.stats()) {
+      this.initCharts(this.stats()!);
+    }
+  }
+
   initCharts(data: DashboardStatsDto) {
     // 1. Cases by Status (Pie/Doughnut)
     this.caseChartData = {
@@ -73,32 +99,68 @@ export class DashboardPage implements OnInit, OnDestroy {
     };
 
     // 2. Finance Summary (Bar)
+    const isRtl = this.appState.currentLang() === 'ar';
+    const mode = this.selectedViewMode();
+
+    let chartPoints = data.last6MonthsFinance;
+    if (mode !== 'ALL') {
+      chartPoints = data.last6MonthsFinance.filter(x => x.month === mode);
+    }
+
+    const financeData = isRtl ? [...chartPoints].reverse() : chartPoints;
+
     this.financeChartData = {
-      labels: data.last6MonthsFinance.map(x => x.month),
+      labels: financeData.map(x => x.month),
       datasets: [
         {
           label: this.translate.instant('DASHBOARD.INVOICED'),
           backgroundColor: '#3B82F6',
-          data: data.last6MonthsFinance.map(x => x.invoiced)
+          data: financeData.map(x => x.invoiced)
         },
         {
           label: this.translate.instant('DASHBOARD.PAID'),
           backgroundColor: '#10B981',
-          data: data.last6MonthsFinance.map(x => x.paid)
+          data: financeData.map(x => x.paid)
+        },
+        {
+          label: this.translate.instant('DASHBOARD.UNCLAIMED'),
+          backgroundColor: '#F59E0B',
+          data: financeData.map(x => Math.max(0, x.invoiced - x.paid))
         }
       ]
     };
   }
 
   initChartOptions() {
+    const isRtl = this.appState.currentLang() === 'ar';
     this.chartOptions = {
       plugins: {
         legend: {
           labels: {
-            font: { family: 'Cairo, sans-serif' },
+            font: { family: isRtl ? 'IBM Plex Sans Arabic, sans-serif' : 'Inter, sans-serif' },
             usePointStyle: true
           },
-          position: 'bottom'
+          position: 'bottom',
+          rtl: isRtl,
+          textDirection: isRtl ? 'rtl' : 'ltr'
+        },
+        tooltip: {
+          rtl: isRtl,
+          textDirection: isRtl ? 'rtl' : 'ltr'
+        }
+      },
+      scales: {
+        x: {
+          reverse: isRtl,
+          ticks: {
+            font: { family: isRtl ? 'IBM Plex Sans Arabic, sans-serif' : 'Inter, sans-serif' }
+          }
+        },
+        y: {
+          position: isRtl ? 'right' : 'left',
+          ticks: {
+            font: { family: isRtl ? 'IBM Plex Sans Arabic, sans-serif' : 'Inter, sans-serif' }
+          }
         }
       },
       responsive: true,

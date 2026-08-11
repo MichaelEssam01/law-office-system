@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AvatarModule } from 'primeng/avatar';
 import { InputTextModule } from 'primeng/inputtext';
@@ -13,12 +13,28 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { NotificationService, NotificationDto } from '../../core/services/notification.service';
 import { PopoverModule } from 'primeng/popover';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, AvatarModule, InputTextModule, BadgeModule, TranslateModule, MenuModule, IconFieldModule, InputIconModule, PopoverModule],
+  imports: [
+    CommonModule, 
+    RouterModule,
+    AvatarModule, 
+    InputTextModule, 
+    BadgeModule, 
+    TranslateModule, 
+    MenuModule, 
+    IconFieldModule, 
+    InputIconModule, 
+    PopoverModule,
+    ConfirmDialogModule
+  ],
+  providers: [ConfirmationService],
   templateUrl: './header.html',
   styleUrl: './header.css'
 })
@@ -27,15 +43,18 @@ export class Header {
   public appState = inject(AppStateService);
   public notificationService = inject(NotificationService);
   private translate = inject(TranslateService);
+  private confirmationService = inject(ConfirmationService);
   private router = inject(Router);
 
   profileMenuItems: MenuItem[] = [];
 
   constructor() {
-    // Refresh menu items when language changes or on init
+    // Refresh menu items when language changes or user logs in/changes role
     this.translate.onLangChange.subscribe(() => this.updateMenuItems());
-    // Initial load
-    setTimeout(() => this.updateMenuItems(), 100);
+    effect(() => {
+      const user = this.authService.currentUser();
+      this.updateMenuItems();
+    });
   }
 
   updateMenuItems() {
@@ -48,7 +67,8 @@ export class Header {
       {
         label: this.translate.instant('PROFILE.ACCOUNT_SETTINGS'),
         icon: 'pi pi-cog',
-        routerLink: '/settings'
+        routerLink: '/settings',
+        visible: this.authService.hasPermission('Settings.Manage')
       },
       {
         label: this.translate.instant('USERS.TITLE'),
@@ -62,9 +82,20 @@ export class Header {
       {
         label: this.translate.instant('PROFILE.LOGOUT'),
         icon: 'pi pi-sign-out',
-        command: () => this.authService.logout()
+        command: () => this.confirmLogout()
       }
     ];
+  }
+
+  confirmLogout() {
+    this.confirmationService.confirm({
+      header: this.translate.instant('PROFILE.LOGOUT_CONFIRM_TITLE'),
+      message: this.translate.instant('PROFILE.LOGOUT_CONFIRM_MESSAGE'),
+      icon: 'pi pi-exclamation-triangle',
+      accept: () => {
+        this.authService.logout();
+      }
+    });
   }
 
   getInitials(): string {
@@ -78,14 +109,26 @@ export class Header {
     return parts[0].charAt(0).toUpperCase();
   }
 
+  getRoleLabel(role?: string): string {
+    const defaultRole = role || 'Lawyer';
+    const keyMap: { [key: string]: string } = {
+      'Admin': 'USERS.ROLES.ADMIN',
+      'Lawyer': 'USERS.ROLES.LAWYER',
+      'Receptionist': 'USERS.ROLES.RECEPTIONIST',
+      'Accountant': 'USERS.ROLES.ACCOUNTANT'
+    };
+    return keyMap[defaultRole] ? this.translate.instant(keyMap[defaultRole]) : defaultRole;
+  }
+
   onNotificationClick(notification: NotificationDto, op: any) {
     if (!notification.isRead) {
       this.notificationService.markAsRead(notification.id);
     }
-    if (notification.link) {
-      this.router.navigateByUrl(notification.link);
-    }
     op.hide();
+    const targetUrl = notification.link ? notification.link : '/cases';
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigateByUrl(targetUrl);
+    });
   }
 
   markAllAsRead() {

@@ -59,8 +59,9 @@
     </div>
 
     <!-- Table Card -->
-    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <p-table #dt [value]="cases()" [loading]="loading()" [paginator]="true" [rows]="10"
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm no-page-links">
+        <p-table #dt [value]="cases()" [loading]="loading()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                 [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                  [globalFilterFields]="['caseNumber', 'title', 'clientName', 'lawyerName']"
                  (onFilter)="cdr.detectChanges()"
                  styleClass="p-datatable-sm shadow-sm rounded-lg overflow-hidden" [rowHover]="true">
