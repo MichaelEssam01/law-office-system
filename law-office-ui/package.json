@@ -1,6 +1,6 @@
 {
   "name": "law-office-ui",
-  "version": "1.0.0",
+  "version": "2.0.0-dev",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
