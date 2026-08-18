@@ -84,6 +84,7 @@ public class FinancialSummaryDto
     public decimal TotalInvoiced { get; set; }
     public decimal TotalPaid { get; set; }
     public decimal TotalRemaining { get; set; }
+    public decimal TotalCancelled { get; set; }
     public int UnpaidInvoicesCount { get; set; }
     public int OverdueInvoicesCount { get; set; }
 }

@@ -23,6 +23,7 @@ public class NotificationService : INotificationService
     public async Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(Guid userId, int count = 20)
     {
         var notifications = await _unitOfWork.Repository<Notification>().Query()
+            .AsNoTracking()
             .Where(n => n.UserId == userId)
             .OrderByDescending(n => n.CreatedAt)
             .Take(count)

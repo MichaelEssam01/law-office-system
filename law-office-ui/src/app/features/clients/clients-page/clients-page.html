@@ -130,7 +130,8 @@
                 <p-tabpanels class="no-page-links">
                     <!-- Cases Tab -->
                     <p-tabpanel value="0">
-                        <p-table [value]="clientWorks.cases" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]">
+                        <p-table [value]="clientWorks.cases" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                                 [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th>{{ 'CASES.CASE_NUMBER' | translate }}</th>
@@ -161,7 +162,8 @@
 
                     <!-- Sessions Tab -->
                     <p-tabpanel value="1">
-                        <p-table [value]="clientWorks.sessions" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]">
+                        <p-table [value]="clientWorks.sessions" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                                 [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th>{{ 'CASES.CASE_NUMBER' | translate }}</th>
@@ -192,7 +194,8 @@
 
                     <!-- Invoices Tab -->
                     <p-tabpanel value="2">
-                        <p-table #invDt [value]="clientWorks.invoices" styleClass="p-datatable-sm" dataKey="id" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]">
+                        <p-table #invDt [value]="clientWorks.invoices" styleClass="p-datatable-sm" dataKey="id" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                                 [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th style="width: 3rem"></th>
@@ -273,7 +276,8 @@
 
                     <!-- Documents Tab -->
                     <p-tabpanel value="3">
-                        <p-table [value]="clientWorks.documents" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]">
+                        <p-table [value]="clientWorks.documents" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                                 [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
                             <ng-template pTemplate="header">
                                 <tr>
                                     <th>{{ 'COMMON.FILE_NAME' | translate }}</th>

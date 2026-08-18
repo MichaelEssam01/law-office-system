@@ -51,6 +51,7 @@ export interface FinancialSummaryDto {
   totalInvoiced: number;
   totalPaid: number;
   totalRemaining: number;
+  totalCancelled: number;
   unpaidInvoicesCount: number;
   overdueInvoicesCount: number;
 }

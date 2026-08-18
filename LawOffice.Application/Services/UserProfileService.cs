@@ -18,6 +18,7 @@ public class UserProfileService : IUserProfileService
     public async Task<IEnumerable<SecurityLogDto>> GetSecurityLogsAsync(Guid userId)
     {
         return await _unitOfWork.Repository<UserSecurityLog>().Query()
+            .AsNoTracking()
             .Where(l => l.UserId == userId)
             .OrderByDescending(l => l.Timestamp)
             .Take(20)
@@ -35,6 +36,7 @@ public class UserProfileService : IUserProfileService
     public async Task<NotificationSettingsDto> GetNotificationSettingsAsync(Guid userId)
     {
         var settings = await _unitOfWork.Repository<UserNotificationSetting>().Query()
+            .AsNoTracking()
             .FirstOrDefaultAsync(s => s.UserId == userId);
 
         if (settings == null)

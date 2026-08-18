@@ -18,16 +18,34 @@ public class FinanceService : IFinanceService
 
     public async Task<FinancialSummaryDto> GetGlobalSummaryAsync()
     {
-        var totalInvoiced = await _unitOfWork.Repository<Invoice>().Query().SumAsync(i => i.Amount);
-        var totalPaid = await _unitOfWork.Repository<Payment>().Query().SumAsync(p => p.Amount);
-        var unpaidCount = await _unitOfWork.Repository<Invoice>().Query().CountAsync(i => i.Status == InvoiceStatus.Unpaid || i.Status == InvoiceStatus.PartiallyPaid);
-        var overdueCount = await _unitOfWork.Repository<Invoice>().Query().CountAsync(i => i.Status == InvoiceStatus.Overdue);
+        var now = DateTime.UtcNow;
+        var allInvoices = await _unitOfWork.Repository<Invoice>().Query()
+            .AsNoTracking()
+            .Include(i => i.Payments)
+            .ToListAsync();
+
+        var totalInvoiced = allInvoices.Sum(i => i.Amount);
+        
+        var totalPaid = await _unitOfWork.Repository<Payment>().Query()
+            .AsNoTracking()
+            .SumAsync(p => (decimal?)p.Amount) ?? 0m;
+
+        var activeInvoices = allInvoices.Where(i => i.Status != InvoiceStatus.Cancelled).ToList();
+        var cancelledInvoices = allInvoices.Where(i => i.Status == InvoiceStatus.Cancelled).ToList();
+
+        var totalRemaining = activeInvoices.Sum(i => i.Status == InvoiceStatus.Paid ? 0m : Math.Max(0m, i.Amount - i.Payments.Sum(p => p.Amount)));
+        var totalCancelled = cancelledInvoices.Sum(i => Math.Max(0m, i.Amount - i.Payments.Sum(p => p.Amount)));
+
+        var unpaidCount = activeInvoices.Count(i => i.Status == InvoiceStatus.Unpaid || i.Status == InvoiceStatus.PartiallyPaid);
+        var overdueCount = activeInvoices.Count(i => i.Status == InvoiceStatus.Overdue || 
+                                                     (i.Status != InvoiceStatus.Paid && i.DueDate < now));
 
         return new FinancialSummaryDto
         {
             TotalInvoiced = totalInvoiced,
             TotalPaid = totalPaid,
-            TotalRemaining = totalInvoiced - totalPaid,
+            TotalRemaining = totalRemaining,
+            TotalCancelled = totalCancelled,
             UnpaidInvoicesCount = unpaidCount,
             OverdueInvoicesCount = overdueCount
         };
@@ -35,27 +53,35 @@ public class FinanceService : IFinanceService
 
     public async Task<FinancialSummaryDto> GetCaseSummaryAsync(Guid caseId)
     {
-        var totalInvoiced = await _unitOfWork.Repository<Invoice>().Query()
-            .Where(i => i.CaseId == caseId && i.Status != InvoiceStatus.Cancelled)
-            .SumAsync(i => i.Amount);
+        var now = DateTime.UtcNow;
+        var caseInvoices = await _unitOfWork.Repository<Invoice>().Query()
+            .AsNoTracking()
+            .Include(i => i.Payments)
+            .Where(i => i.CaseId == caseId)
+            .ToListAsync();
+
+        var totalInvoiced = caseInvoices.Sum(i => i.Amount);
             
         var totalPaid = await _unitOfWork.Repository<Payment>().Query()
             .Where(p => p.CaseId == caseId)
-            .SumAsync(p => p.Amount);
+            .SumAsync(p => (decimal?)p.Amount) ?? 0m;
 
-        var unpaidCount = await _unitOfWork.Repository<Invoice>().Query()
-            .Where(i => i.CaseId == caseId && (i.Status == InvoiceStatus.Unpaid || i.Status == InvoiceStatus.PartiallyPaid))
-            .CountAsync();
+        var activeInvoices = caseInvoices.Where(i => i.Status != InvoiceStatus.Cancelled).ToList();
+        var cancelledInvoices = caseInvoices.Where(i => i.Status == InvoiceStatus.Cancelled).ToList();
 
-        var overdueCount = await _unitOfWork.Repository<Invoice>().Query()
-            .Where(i => i.CaseId == caseId && i.Status == InvoiceStatus.Overdue)
-            .CountAsync();
+        var totalRemaining = activeInvoices.Sum(i => i.Status == InvoiceStatus.Paid ? 0m : Math.Max(0m, i.Amount - i.Payments.Sum(p => p.Amount)));
+        var totalCancelled = cancelledInvoices.Sum(i => Math.Max(0m, i.Amount - i.Payments.Sum(p => p.Amount)));
+
+        var unpaidCount = activeInvoices.Count(i => i.Status == InvoiceStatus.Unpaid || i.Status == InvoiceStatus.PartiallyPaid);
+        var overdueCount = activeInvoices.Count(i => i.Status == InvoiceStatus.Overdue || 
+                                                     (i.Status != InvoiceStatus.Paid && i.DueDate < now));
 
         return new FinancialSummaryDto
         {
             TotalInvoiced = totalInvoiced,
             TotalPaid = totalPaid,
-            TotalRemaining = totalInvoiced - totalPaid,
+            TotalRemaining = totalRemaining,
+            TotalCancelled = totalCancelled,
             UnpaidInvoicesCount = unpaidCount,
             OverdueInvoicesCount = overdueCount
         };

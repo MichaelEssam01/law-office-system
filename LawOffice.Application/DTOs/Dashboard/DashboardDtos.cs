@@ -10,6 +10,7 @@ public class DashboardStatsDto
     public decimal TotalInvoiced { get; set; }
     public decimal TotalPaid { get; set; }
     public decimal PendingBalance { get; set; }
+    public decimal TotalCancelled { get; set; }
     public int OverdueInvoicesCount { get; set; }
     
     public int TotalDocuments { get; set; }

@@ -109,9 +109,9 @@
                     </div>
                     
                     @if (invoice()!.status !== 2 && invoice()!.status !== 4) {
-                        <button pButton [label]="'FINANCE.STATUS_LABELS.CANCELLED' | translate" 
-                                class="p-button-text p-button-danger p-button-sm" 
-                                (click)="cancelInvoice()"></button>
+                        <button type="button" pButton [label]="'FINANCE.CANCEL_INVOICE' | translate" icon="pi pi-ban"
+                                class="p-button-outlined p-button-danger p-button-sm rounded-lg" 
+                                (click)="confirmCancelInvoice()"></button>
                     }
                 </div>
             </div>
@@ -132,3 +132,4 @@
         </div>
     </ng-template>
 </p-dialog>
+<p-confirmDialog></p-confirmDialog>

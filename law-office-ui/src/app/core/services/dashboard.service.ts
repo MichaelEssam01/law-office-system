@@ -10,6 +10,7 @@ export interface DashboardStatsDto {
   totalInvoiced: number;
   totalPaid: number;
   pendingBalance: number;
+  totalCancelled: number;
   overdueInvoicesCount: number;
   totalDocuments: number;
   casesByStatus: { label: string; value: number }[];

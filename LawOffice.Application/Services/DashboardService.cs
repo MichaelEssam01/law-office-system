@@ -27,15 +27,22 @@ public class DashboardService : IDashboardService
 
         // 2. Financial Totals
         var invoices = await _unitOfWork.Repository<Invoice>().Query()
+            .AsNoTracking()
             .Include(i => i.Payments)
             .ToListAsync();
         stats.TotalInvoiced = invoices.Sum(i => i.Amount);
         stats.TotalPaid = invoices.Sum(i => i.Payments.Sum(p => p.Amount));
-        stats.PendingBalance = stats.TotalInvoiced - stats.TotalPaid;
-        stats.OverdueInvoicesCount = invoices.Count(i => i.Status == InvoiceStatus.Overdue);
+        
+        var activeInvoices = invoices.Where(i => i.Status != InvoiceStatus.Cancelled).ToList();
+        var cancelledInvoices = invoices.Where(i => i.Status == InvoiceStatus.Cancelled).ToList();
+
+        stats.PendingBalance = activeInvoices.Sum(i => i.Status == InvoiceStatus.Paid ? 0m : Math.Max(0m, i.Amount - i.Payments.Sum(p => p.Amount)));
+        stats.TotalCancelled = cancelledInvoices.Sum(i => Math.Max(0m, i.Amount - i.Payments.Sum(p => p.Amount)));
+        stats.OverdueInvoicesCount = activeInvoices.Count(i => i.Status == InvoiceStatus.Overdue || (i.Status != InvoiceStatus.Paid && i.Status != InvoiceStatus.Cancelled && i.DueDate < DateTime.UtcNow));
 
         // 3. Cases by Status Chart
         var statusGroups = await _unitOfWork.Repository<Case>().Query()
+            .AsNoTracking()
             .GroupBy(c => c.Status)
             .Select(g => new ChartDataPoint { Label = g.Key.ToString(), Value = g.Count() })
             .ToListAsync();

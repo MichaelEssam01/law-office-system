@@ -8,6 +8,8 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 import { CaseService, CaseListDto } from '../../../core/services/case.service';
 import { ClientService, Client } from '../../../core/services/client';
 import { InvoiceStatus, InvoiceListDto } from '../../../core/services/finance.service';
@@ -22,6 +24,7 @@ import { AppStateService } from '../../../core/services/app-state.service';
     FormsModule,
     ReactiveFormsModule,
     DialogModule,
+    ConfirmDialogModule,
     ButtonModule,
     InputTextModule,
     InputNumberModule,
@@ -30,6 +33,7 @@ import { AppStateService } from '../../../core/services/app-state.service';
     TextareaModule,
     TranslateModule
   ],
+  providers: [ConfirmationService],
   templateUrl: './invoice-dialog.html'
 })
 export class InvoiceDialog {
@@ -37,6 +41,7 @@ export class InvoiceDialog {
   private caseService = inject(CaseService);
   private clientService = inject(ClientService);
   private translate = inject(TranslateService);
+  private confirmationService = inject(ConfirmationService);
   public appState = inject(AppStateService);
   private cdr = inject(ChangeDetectorRef);
 
@@ -158,9 +163,18 @@ export class InvoiceDialog {
     }
   }
 
-  cancelInvoice() {
-    this.invoiceForm.get('status')?.setValue(InvoiceStatus.Cancelled);
-    this.save();
+  confirmCancelInvoice() {
+    this.confirmationService.confirm({
+      message: this.translate.instant('FINANCE.CANCEL_CONFIRM'),
+      header: this.translate.instant('CASES.DELETE_CONFIRM_TITLE'),
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: this.translate.instant('CASES.DELETE_ACCEPT'),
+      rejectLabel: this.translate.instant('CASES.DELETE_REJECT'),
+      accept: () => {
+        this.invoiceForm.get('status')?.setValue(InvoiceStatus.Cancelled);
+        this.save();
+      }
+    });
   }
 
   async loadCases() {

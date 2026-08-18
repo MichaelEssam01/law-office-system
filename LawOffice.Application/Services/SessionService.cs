@@ -19,6 +19,7 @@ public class SessionService : ISessionService
     public async Task<IEnumerable<SessionListDto>> GetSessionsAsync(Guid? caseId = null, SessionStatus? status = null, DateTime? date = null)
     {
         var query = _unitOfWork.Repository<Session>().Query()
+            .AsNoTracking()
             .Include(s => s.Case)
             .AsQueryable();
 

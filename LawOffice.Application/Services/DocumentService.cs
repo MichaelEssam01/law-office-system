@@ -28,6 +28,7 @@ public class DocumentService : IDocumentService
     public async Task<IEnumerable<DocumentDto>> GetCaseDocumentsAsync(Guid caseId)
     {
         return await _unitOfWork.Repository<Document>().Query()
+            .AsNoTracking()
             .Where(d => d.CaseId == caseId)
             .OrderByDescending(d => d.CreatedAt)
             .Select(d => new DocumentDto
@@ -47,6 +48,7 @@ public class DocumentService : IDocumentService
     public async Task<IEnumerable<DocumentDto>> GetAllDocumentsAsync()
     {
         return await _unitOfWork.Repository<Document>().Query()
+            .AsNoTracking()
             .Include(d => d.Case)
             .OrderByDescending(d => d.CreatedAt)
             .Select(d => new DocumentDto

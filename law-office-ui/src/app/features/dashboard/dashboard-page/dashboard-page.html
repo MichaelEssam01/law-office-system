@@ -55,11 +55,10 @@
         </div>
 
         <!-- Financial Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div class="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-2xl shadow-lg text-white">
                 <p class="text-blue-100 text-sm mb-1">{{ 'DASHBOARD.TOTAL_RECEIVABLES' | translate }}</p>
                 <h2 class="text-3xl font-bold">{{ s.totalInvoiced | currency:'EGP':'symbol-narrow':'1.0-0' }}</h2>
-                <i class="pi pi-wallet absolute top-4 left-4 opacity-20 text-4xl"></i>
             </div>
             <div class="bg-gradient-to-br from-green-600 to-green-700 p-6 rounded-2xl shadow-lg text-white">
                 <p class="text-green-100 text-sm mb-1">{{ 'DASHBOARD.TOTAL_PAID' | translate }}</p>
@@ -68,6 +67,10 @@
             <div class="bg-white border-2 border-orange-100 p-6 rounded-2xl shadow-sm">
                 <p class="text-slate-500 text-sm mb-1 font-bold">{{ 'DASHBOARD.PENDING_BALANCE' | translate }}</p>
                 <h2 class="text-3xl font-bold text-orange-600">{{ s.pendingBalance | currency:'EGP':'symbol-narrow':'1.0-0' }}</h2>
+            </div>
+            <div class="bg-white border-2 border-slate-100 p-6 rounded-2xl shadow-sm">
+                <p class="text-slate-500 text-sm mb-1 font-bold">{{ 'DASHBOARD.CANCELLED_BALANCE' | translate }}</p>
+                <h2 class="text-3xl font-bold text-slate-600">{{ s.totalCancelled | currency:'EGP':'symbol-narrow':'1.0-0' }}</h2>
             </div>
         </div>
 

@@ -19,6 +19,7 @@ public class InvoiceService : IInvoiceService
     public async Task<IEnumerable<InvoiceListDto>> GetInvoicesAsync(Guid? caseId = null, InvoiceStatus? status = null)
     {
         var query = _unitOfWork.Repository<Invoice>().Query()
+            .AsNoTracking()
             .Include(i => i.Case)
                 .ThenInclude(c => c!.Client)
             .Include(i => i.Payments)
@@ -43,7 +44,11 @@ public class InvoiceService : IInvoiceService
                 PaidAmount = i.Payments.Sum(p => p.Amount),
                 RemainingAmount = i.Amount - i.Payments.Sum(p => p.Amount),
                 DueDate = i.DueDate,
-                Status = i.Status,
+                Status = i.Status == InvoiceStatus.Cancelled ? InvoiceStatus.Cancelled :
+                         i.Payments.Sum(p => p.Amount) >= i.Amount && i.Amount > 0 ? InvoiceStatus.Paid :
+                         i.DueDate < DateTime.UtcNow ? InvoiceStatus.Overdue :
+                         i.Payments.Any() ? InvoiceStatus.PartiallyPaid :
+                         i.Status,
                 CreatedAt = i.CreatedAt
             })
             .ToListAsync();
@@ -171,18 +176,18 @@ public class InvoiceService : IInvoiceService
 
         var paidAmount = invoice.Payments.Sum(p => p.Amount);
 
-        if (paidAmount >= invoice.Amount && invoice.Amount > 0)
+        if (invoice.Status == InvoiceStatus.Cancelled)
+        {
+            // Keep it cancelled if the user manually set it to Cancelled
+            invoice.Status = InvoiceStatus.Cancelled;
+        }
+        else if (paidAmount >= invoice.Amount && invoice.Amount > 0)
         {
             invoice.Status = InvoiceStatus.Paid;
         }
         else if (paidAmount > 0)
         {
             invoice.Status = InvoiceStatus.PartiallyPaid;
-        }
-        else if (invoice.Status == InvoiceStatus.Cancelled)
-        {
-            // Keep it cancelled if the user manually set it and there are no payments
-            invoice.Status = InvoiceStatus.Cancelled;
         }
         else if (invoice.DueDate < DateTime.UtcNow)
         {
