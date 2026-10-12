@@ -49,8 +49,10 @@ export class ClientsPage implements OnInit {
   loading: boolean = true;
 
   displayWorksDialog: boolean = false;
+  activeWorksTab: string = '0';
   clientWorks: ClientWorks | null = null;
   loadingWorks: boolean = false;
+  expandedInvoices: { [key: string]: boolean } = {};
 
   constructor(
     private clientService: ClientService,
@@ -164,6 +166,8 @@ export class ClientsPage implements OnInit {
   async viewClientWorks(client: Client) {
     if (!client.id) return;
     this.selectedClient = client;
+    this.activeWorksTab = '0';
+    this.expandedInvoices = {};
     this.displayWorksDialog = true;
     this.loadingWorks = true;
     this.clientWorks = null;
@@ -256,5 +260,68 @@ export class ClientsPage implements OnInit {
       'Other': 'DOCUMENTS.OTHER'
     };
     return keyMap[category] ? this.translate.instant(keyMap[category]) : category;
+  }
+
+  getAverageRating(client: Client): number {
+    const ratings = [
+      client.solvencyRating || 0,
+      client.commitmentRating || 0,
+      client.cooperationRating || 0,
+      client.networkRating || 0
+    ].filter(r => r > 0);
+    if (ratings.length === 0) return 0;
+    const sum = ratings.reduce((a, b) => a + b, 0);
+    return Math.round((sum / ratings.length) * 10) / 10;
+  }
+
+  getPhoneList(phone?: string): string[] {
+    if (!phone) return [];
+    return phone.split(',').map(p => p.trim()).filter(p => p.length > 0);
+  }
+
+  getPoaTypeLabel(poaType?: string): string {
+    if (!poaType) return '-';
+    switch (poaType) {
+      case 'نفسه':
+      case 'Self':
+        return this.translate.instant('CLIENTS.POA_TYPE_SELF');
+      case 'صفة':
+      case 'Capacity':
+        return this.translate.instant('CLIENTS.POA_TYPE_CAPACITY');
+      case 'نفسه وصفة':
+      case 'Self & Capacity':
+        return this.translate.instant('CLIENTS.POA_TYPE_BOTH');
+      default:
+        return poaType;
+    }
+  }
+
+  areAllInvoicesExpanded(): boolean {
+    if (!this.clientWorks?.invoices || this.clientWorks.invoices.length === 0) return false;
+    return this.clientWorks.invoices.every(inv => inv.id && this.expandedInvoices[inv.id]);
+  }
+
+  isAnyInvoiceExpanded(): boolean {
+    return Object.values(this.expandedInvoices).some(val => val === true);
+  }
+
+  onExpandedInvoicesChange(event: any): void {
+    this.expandedInvoices = event || {};
+  }
+
+  toggleAllInvoices(): void {
+    if (!this.clientWorks?.invoices || this.clientWorks.invoices.length === 0) return;
+
+    if (this.isAnyInvoiceExpanded()) {
+      // Close/Collapse all rows
+      this.expandedInvoices = {};
+    } else {
+      // Expand all rows
+      const all: { [key: string]: boolean } = {};
+      this.clientWorks.invoices.forEach(inv => {
+        if (inv.id) all[inv.id] = true;
+      });
+      this.expandedInvoices = all;
+    }
   }
 }

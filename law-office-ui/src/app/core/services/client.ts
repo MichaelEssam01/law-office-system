@@ -4,11 +4,40 @@ import { firstValueFrom } from 'rxjs';
 
 export interface Client {
   id?: string;
+  firstName?: string;
+  secondName?: string;
+  thirdName?: string;
+  fourthName?: string;
   fullName: string;
   phone: string;
+  homeLandline?: string;
+  workLandline?: string;
   email: string;
   address: string;
   nationalId: string;
+  job?: string;
+
+  // Ratings
+  solvencyRating?: number;
+  commitmentRating?: number;
+  cooperationRating?: number;
+  networkRating?: number;
+  otherRatings?: string;
+
+  // Relatives
+  relativesInfo?: string;
+
+  // POA (التوكيل)
+  hasPowerOfAttorney?: boolean;
+  poaNumber?: string;
+  poaLetter?: string;
+  poaYear?: number;
+  poaOffice?: string;
+  poaType?: string; // نفسه - صفة - نفسه وصفة
+  poaCapacityDetails?: string;
+
+  // Instructions
+  instructions?: string;
 }
 
 export interface ClientCaseSummary {

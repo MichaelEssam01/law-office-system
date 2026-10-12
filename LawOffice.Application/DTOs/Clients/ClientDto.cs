@@ -5,33 +5,113 @@ namespace LawOffice.Application.DTOs.Clients;
 public class ClientDto
 {
     public Guid Id { get; set; }
+    public string FirstName { get; set; } = string.Empty;
+    public string SecondName { get; set; } = string.Empty;
+    public string ThirdName { get; set; } = string.Empty;
+    public string FourthName { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
+    
     public string Phone { get; set; } = string.Empty;
+    public string? HomeLandline { get; set; }
+    public string? WorkLandline { get; set; }
     public string Email { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     public string NationalId { get; set; } = string.Empty;
+    public string? Job { get; set; }
+
+    // Ratings
+    public int? SolvencyRating { get; set; }
+    public int? CommitmentRating { get; set; }
+    public int? CooperationRating { get; set; }
+    public int? NetworkRating { get; set; }
+    public string? OtherRatings { get; set; }
+
+    // Relatives
+    public string? RelativesInfo { get; set; }
+
+    // POA
+    public bool HasPowerOfAttorney { get; set; }
+    public string? PoaNumber { get; set; }
+    public string? PoaLetter { get; set; }
+    public int? PoaYear { get; set; }
+    public string? PoaOffice { get; set; }
+    public string? PoaType { get; set; }
+    public string? PoaCapacityDetails { get; set; }
+
+    // Instructions
+    public string? Instructions { get; set; }
 }
 
 public class CreateClientDto
 {
-    public string FullName { get; set; } = string.Empty;
+    public string FirstName { get; set; } = string.Empty;
+    public string SecondName { get; set; } = string.Empty;
+    public string ThirdName { get; set; } = string.Empty;
+    public string FourthName { get; set; } = string.Empty;
+    
     public string Phone { get; set; } = string.Empty;
+    public string? HomeLandline { get; set; }
+    public string? WorkLandline { get; set; }
     public string Email { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     
     [RegularExpression(@"^\d{14}$", ErrorMessage = "National ID must be exactly 14 digits.")]
     public string NationalId { get; set; } = string.Empty;
+    public string? Job { get; set; }
+
+    public int? SolvencyRating { get; set; }
+    public int? CommitmentRating { get; set; }
+    public int? CooperationRating { get; set; }
+    public int? NetworkRating { get; set; }
+    public string? OtherRatings { get; set; }
+
+    public string? RelativesInfo { get; set; }
+
+    public bool HasPowerOfAttorney { get; set; }
+    public string? PoaNumber { get; set; }
+    public string? PoaLetter { get; set; }
+    public int? PoaYear { get; set; }
+    public string? PoaOffice { get; set; }
+    public string? PoaType { get; set; }
+    public string? PoaCapacityDetails { get; set; }
+
+    public string? Instructions { get; set; }
 }
 
 public class UpdateClientDto
 {
-    public string FullName { get; set; } = string.Empty;
+    public string FirstName { get; set; } = string.Empty;
+    public string SecondName { get; set; } = string.Empty;
+    public string ThirdName { get; set; } = string.Empty;
+    public string FourthName { get; set; } = string.Empty;
+
     public string Phone { get; set; } = string.Empty;
+    public string? HomeLandline { get; set; }
+    public string? WorkLandline { get; set; }
     public string Email { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
     
     [RegularExpression(@"^\d{14}$", ErrorMessage = "National ID must be exactly 14 digits.")]
     public string NationalId { get; set; } = string.Empty;
+    public string? Job { get; set; }
+
+    public int? SolvencyRating { get; set; }
+    public int? CommitmentRating { get; set; }
+    public int? CooperationRating { get; set; }
+    public int? NetworkRating { get; set; }
+    public string? OtherRatings { get; set; }
+
+    public string? RelativesInfo { get; set; }
+
+    public bool HasPowerOfAttorney { get; set; }
+    public string? PoaNumber { get; set; }
+    public string? PoaLetter { get; set; }
+    public int? PoaYear { get; set; }
+    public string? PoaOffice { get; set; }
+    public string? PoaType { get; set; }
+    public string? PoaCapacityDetails { get; set; }
+
+    public string? Instructions { get; set; }
 }
 
 public class ClientWorksDto

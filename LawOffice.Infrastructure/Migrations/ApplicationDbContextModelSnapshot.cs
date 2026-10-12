@@ -139,6 +139,12 @@ namespace LawOffice.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("CommitmentRating")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CooperationRating")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -146,23 +152,84 @@ namespace LawOffice.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FourthName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FullName")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("HasPowerOfAttorney")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("HomeLandline")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Instructions")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Job")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("NationalId")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("NetworkRating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("OtherRatings")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Phone")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PoaCapacityDetails")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PoaLetter")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PoaNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PoaOffice")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PoaType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PoaYear")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RelativesInfo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SecondName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("SolvencyRating")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ThirdName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("WorkLandline")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

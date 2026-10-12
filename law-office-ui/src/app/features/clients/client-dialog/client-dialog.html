@@ -1,53 +1,310 @@
-<div class="space-y-4 pt-2">
-    <div class="field">
-        <label for="fullName" class="block font-medium text-slate-700 mb-1">{{ 'CLIENTS.NAME' | translate }} <span class="text-red-500">*</span></label>
-        <input type="text" pInputText id="fullName" [(ngModel)]="formData.fullName" required autofocus class="w-full border-slate-300" />
-    </div>
+<div class="pt-1 space-y-4">
+    <p-tabs [(value)]="activeTab">
+        <p-tablist>
+            <p-tab value="0" class="font-semibold text-base py-3">
+                <i class="pi pi-user ms-1 me-2 text-indigo-600"></i>{{ 'CLIENTS.CLIENT_DETAILS' | translate }}
+                @if (submitted && !isFormValid()) {
+                    <i class="pi pi-exclamation-circle text-red-500 ms-1" [title]="'COMMON.ERROR' | translate"></i>
+                }
+            </p-tab>
+            <p-tab value="1" class="font-semibold text-base py-3"><i class="pi pi-star ms-1 me-2 text-amber-500"></i>{{ 'CLIENTS.RATINGS_SECTION' | translate }}</p-tab>
+            <p-tab value="2" class="font-semibold text-base py-3"><i class="pi pi-file-check ms-1 me-2 text-emerald-600"></i>{{ 'CLIENTS.POA_SECTION' | translate }}</p-tab>
+            <p-tab value="3" class="font-semibold text-base py-3"><i class="pi pi-users ms-1 me-2 text-blue-600"></i>{{ 'CLIENTS.RELATIVES_SECTION' | translate }}</p-tab>
+        </p-tablist>
 
-    <div class="field">
-        <label for="nationalId" class="block font-medium text-slate-700 mb-1">
-            {{ 'CLIENTS.NATIONAL_ID' | translate }} 
-            @if (!hasNoNationalId) {
-                <span class="text-red-500">*</span>
-            }
-        </label>
-        <input type="text" pInputText id="nationalId" [(ngModel)]="formData.nationalId" 
-               [disabled]="hasNoNationalId"
-               [class.ng-invalid]="!hasNoNationalId && formData.nationalId && !isNationalIdValid()"
-               [class.ng-dirty]="!hasNoNationalId && formData.nationalId"
-               class="w-full border-slate-300" />
-        
-        <div class="flex items-center gap-2 mt-2">
-            <p-checkbox [(ngModel)]="hasNoNationalId" [binary]="true" inputId="noNationalId"
-                        (onChange)="hasNoNationalId ? formData.nationalId = '' : ''"></p-checkbox>
-            <label for="noNationalId" class="text-sm text-slate-600 cursor-pointer">
-                {{ 'CLIENTS.NO_NATIONAL_ID' | translate }}
-            </label>
-        </div>
+        <p-tabpanels>
+            <!-- Tab 1: Basic Information -->
+            <p-tabpanel value="0">
+                <div class="space-y-5 pt-4">
+                    <!-- 4-part Name Card -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
+                        <label class="block font-bold text-slate-800 text-sm">
+                            <i class="pi pi-id-card me-1.5 text-indigo-600"></i>{{ 'CLIENTS.NAME' | translate }} <span class="text-red-500">*</span>
+                        </label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">{{ 'CLIENTS.FIRST_NAME' | translate }} <span class="text-red-500">*</span></label>
+                                <input type="text" pInputText [(ngModel)]="formData.firstName" 
+                                       [placeholder]="'CLIENTS.FIRST_NAME' | translate" 
+                                       [class.ng-invalid]="submitted && !formData.firstName?.trim()"
+                                       [class.border-red-500]="submitted && !formData.firstName?.trim()"
+                                       class="w-full border-slate-300" required autofocus />
+                                @if (submitted && !formData.firstName?.trim()) {
+                                    <small class="text-red-500 font-medium block mt-1">{{ 'CLIENTS.FIRST_NAME_REQUIRED' | translate }}</small>
+                                }
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">{{ 'CLIENTS.SECOND_NAME' | translate }}</label>
+                                <input type="text" pInputText [(ngModel)]="formData.secondName" [placeholder]="'CLIENTS.SECOND_NAME' | translate" class="w-full border-slate-300" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">{{ 'CLIENTS.THIRD_NAME' | translate }}</label>
+                                <input type="text" pInputText [(ngModel)]="formData.thirdName" [placeholder]="'CLIENTS.THIRD_NAME' | translate" class="w-full border-slate-300" />
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">{{ 'CLIENTS.FOURTH_NAME' | translate }}</label>
+                                <input type="text" pInputText [(ngModel)]="formData.fourthName" [placeholder]="'CLIENTS.FOURTH_NAME' | translate" class="w-full border-slate-300" />
+                            </div>
+                        </div>
+                    </div>
 
-        @if (!hasNoNationalId && formData.nationalId && !isNationalIdValid()) {
-            <small class="text-red-500 block mt-1">{{ 'CLIENTS.NATIONAL_ID_INVALID' | translate }}</small>
-        }
-    </div>
+                    <!-- National ID & Job -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="field">
+                            <label for="nationalId" class="block font-semibold text-slate-800 text-sm mb-1.5">
+                                <i class="pi pi-credit-card me-1.5 text-slate-500"></i>{{ 'CLIENTS.NATIONAL_ID' | translate }}
+                                @if (!hasNoNationalId) {
+                                    <span class="text-red-500">*</span>
+                                }
+                            </label>
+                            <input type="text" pInputText id="nationalId" [(ngModel)]="formData.nationalId" 
+                                   [disabled]="hasNoNationalId"
+                                   [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_NATIONAL_ID' | translate"
+                                   [class.ng-invalid]="!hasNoNationalId && ((formData.nationalId && !isNationalIdValid()) || (submitted && !formData.nationalId))"
+                                   [class.border-red-500]="!hasNoNationalId && ((formData.nationalId && !isNationalIdValid()) || (submitted && !formData.nationalId))"
+                                   class="w-full border-slate-300" />
+                            
+                            <div class="flex items-center gap-2 mt-2">
+                                <p-checkbox [(ngModel)]="hasNoNationalId" [binary]="true" inputId="noNationalId"
+                                            (onChange)="hasNoNationalId ? formData.nationalId = '' : ''"></p-checkbox>
+                                <label for="noNationalId" class="text-sm font-medium text-slate-600 cursor-pointer">
+                                    {{ 'CLIENTS.NO_NATIONAL_ID' | translate }}
+                                </label>
+                            </div>
 
-    <div class="grid grid-cols-2 gap-4">
-        <div class="field">
-            <label for="phone" class="block font-medium text-slate-700 mb-1">{{ 'CLIENTS.PHONE' | translate }}</label>
-            <input type="text" pInputText id="phone" [(ngModel)]="formData.phone" class="w-full border-slate-300" dir="ltr" />
-        </div>
-        <div class="field">
-            <label for="email" class="block font-medium text-slate-700 mb-1">{{ 'CLIENTS.EMAIL' | translate }}</label>
-            <input type="email" pInputText id="email" [(ngModel)]="formData.email" class="w-full border-slate-300" dir="ltr" />
-        </div>
-    </div>
+                            @if (!hasNoNationalId && submitted && !formData.nationalId) {
+                                <small class="text-red-500 font-medium block mt-1">{{ 'CLIENTS.NATIONAL_ID_REQUIRED' | translate }}</small>
+                            } @else if (!hasNoNationalId && formData.nationalId && !isNationalIdValid()) {
+                                <small class="text-red-500 font-medium block mt-1">{{ 'CLIENTS.NATIONAL_ID_INVALID' | translate }}</small>
+                            }
+                        </div>
 
-    <div class="field">
-        <label for="address" class="block font-medium text-slate-700 mb-1">{{ 'CLIENTS.ADDRESS' | translate }}</label>
-        <input type="text" pInputText id="address" [(ngModel)]="formData.address" class="w-full border-slate-300" />
-    </div>
+                        <div class="field">
+                            <label for="job" class="block font-semibold text-slate-800 text-sm mb-1.5">
+                                <i class="pi pi-briefcase me-1.5 text-slate-500"></i>{{ 'CLIENTS.JOB' | translate }}
+                            </label>
+                            <input type="text" pInputText id="job" [(ngModel)]="formData.job" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_JOB' | translate" />
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Phone Numbers repeater with + Add button -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
+                        <div class="flex items-center justify-between">
+                            <label class="block font-bold text-slate-800 text-sm">
+                                <i class="pi pi-phone me-1.5 text-emerald-600"></i>{{ 'CLIENTS.PHONE_SECTION' | translate }}
+                            </label>
+                            <button type="button" pButton icon="pi pi-plus" [label]="'CLIENTS.ADD_PHONE_BUTTON' | translate" severity="secondary" size="small" [text]="true" (click)="addPhoneField()"></button>
+                        </div>
+
+                        <div class="space-y-2">
+                            @for (entry of phoneEntries; track $index) {
+                                <div class="flex items-center gap-2">
+                                    <!-- Phone Type Dropdown -->
+                                    <div class="w-48">
+                                        <p-select [(ngModel)]="entry.type" [options]="phoneTypes" optionLabel="label" optionValue="value" class="w-full text-sm"></p-select>
+                                    </div>
+                                    <!-- Phone Number Input -->
+                                    <div class="flex-1">
+                                        <input type="text" pInputText [(ngModel)]="entry.number" 
+                                               [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'" 
+                                               [class.text-right]="appState.currentLang() === 'ar'"
+                                               [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_PHONE' | translate" 
+                                               class="w-full border-slate-300 text-sm" />
+                                    </div>
+                                    @if (phoneEntries.length > 1) {
+                                        <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" (onClick)="removePhoneField($index)"></p-button>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Email & Address -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="field">
+                            <label for="email" class="block font-semibold text-slate-800 text-sm mb-1.5">
+                                <i class="pi pi-envelope me-1.5 text-slate-500"></i>{{ 'CLIENTS.EMAIL' | translate }}
+                            </label>
+                            <input type="email" pInputText id="email" [(ngModel)]="formData.email" class="w-full border-slate-300" dir="ltr" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_EMAIL' | translate" />
+                        </div>
+                        <div class="field">
+                            <label for="address" class="block font-semibold text-slate-800 text-sm mb-1.5">
+                                <i class="pi pi-map-marker me-1.5 text-slate-500"></i>{{ 'CLIENTS.ADDRESS' | translate }}
+                            </label>
+                            <input type="text" pInputText id="address" [(ngModel)]="formData.address" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_ADDRESS' | translate" />
+                        </div>
+                    </div>
+                </div>
+            </p-tabpanel>
+
+            <!-- Tab 2: Internal Ratings -->
+            <p-tabpanel value="1">
+                <div class="space-y-4 pt-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50 p-5 rounded-xl border border-slate-200">
+                        <!-- Solvency Rating -->
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-800 text-sm">{{ 'CLIENTS.SOLVENCY_RATING' | translate }}</label>
+                            <p class="text-xs text-slate-500 mb-2">{{ 'CLIENTS.PLACEHOLDERS.SOLVENCY_SUBTITLE' | translate }}</p>
+                            <div class="flex items-center gap-1 py-1" (mouseleave)="hoverSolvency = 0">
+                                @for (star of [1, 2, 3, 4, 5]; track star) {
+                                    <button type="button" 
+                                            class="p-1 focus:outline-none transition-transform hover:scale-125"
+                                            (mouseenter)="hoverSolvency = star"
+                                            (click)="formData.solvencyRating = (formData.solvencyRating === star ? 0 : star)">
+                                        <i class="pi text-xl transition-colors cursor-pointer"
+                                           [class.pi-star-fill]="star <= (hoverSolvency || formData.solvencyRating || 0)"
+                                           [class.pi-star]="star > (hoverSolvency || formData.solvencyRating || 0)"
+                                           [class.text-emerald-500]="star <= (hoverSolvency || formData.solvencyRating || 0)"
+                                           [class.text-slate-300]="star > (hoverSolvency || formData.solvencyRating || 0)"></i>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Commitment Rating -->
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-800 text-sm">{{ 'CLIENTS.COMMITMENT_RATING' | translate }}</label>
+                            <p class="text-xs text-slate-500 mb-2">{{ 'CLIENTS.PLACEHOLDERS.COMMITMENT_SUBTITLE' | translate }}</p>
+                            <div class="flex items-center gap-1 py-1" (mouseleave)="hoverCommitment = 0">
+                                @for (star of [1, 2, 3, 4, 5]; track star) {
+                                    <button type="button" 
+                                            class="p-1 focus:outline-none transition-transform hover:scale-125"
+                                            (mouseenter)="hoverCommitment = star"
+                                            (click)="formData.commitmentRating = (formData.commitmentRating === star ? 0 : star)">
+                                        <i class="pi text-xl transition-colors cursor-pointer"
+                                           [class.pi-star-fill]="star <= (hoverCommitment || formData.commitmentRating || 0)"
+                                           [class.pi-star]="star > (hoverCommitment || formData.commitmentRating || 0)"
+                                           [class.text-emerald-500]="star <= (hoverCommitment || formData.commitmentRating || 0)"
+                                           [class.text-slate-300]="star > (hoverCommitment || formData.commitmentRating || 0)"></i>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Cooperation Rating -->
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-800 text-sm">{{ 'CLIENTS.COOPERATION_RATING' | translate }}</label>
+                            <p class="text-xs text-slate-500 mb-2">{{ 'CLIENTS.PLACEHOLDERS.COOPERATION_SUBTITLE' | translate }}</p>
+                            <div class="flex items-center gap-1 py-1" (mouseleave)="hoverCooperation = 0">
+                                @for (star of [1, 2, 3, 4, 5]; track star) {
+                                    <button type="button" 
+                                            class="p-1 focus:outline-none transition-transform hover:scale-125"
+                                            (mouseenter)="hoverCooperation = star"
+                                            (click)="formData.cooperationRating = (formData.cooperationRating === star ? 0 : star)">
+                                        <i class="pi text-xl transition-colors cursor-pointer"
+                                           [class.pi-star-fill]="star <= (hoverCooperation || formData.cooperationRating || 0)"
+                                           [class.pi-star]="star > (hoverCooperation || formData.cooperationRating || 0)"
+                                           [class.text-emerald-500]="star <= (hoverCooperation || formData.cooperationRating || 0)"
+                                           [class.text-slate-300]="star > (hoverCooperation || formData.cooperationRating || 0)"></i>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Network Rating -->
+                        <div class="space-y-1">
+                            <label class="block font-bold text-slate-800 text-sm">{{ 'CLIENTS.NETWORK_RATING' | translate }}</label>
+                            <p class="text-xs text-slate-500 mb-2">{{ 'CLIENTS.PLACEHOLDERS.NETWORK_SUBTITLE' | translate }}</p>
+                            <div class="flex items-center gap-1 py-1" (mouseleave)="hoverNetwork = 0">
+                                @for (star of [1, 2, 3, 4, 5]; track star) {
+                                    <button type="button" 
+                                            class="p-1 focus:outline-none transition-transform hover:scale-125"
+                                            (mouseenter)="hoverNetwork = star"
+                                            (click)="formData.networkRating = (formData.networkRating === star ? 0 : star)">
+                                        <i class="pi text-xl transition-colors cursor-pointer"
+                                           [class.pi-star-fill]="star <= (hoverNetwork || formData.networkRating || 0)"
+                                           [class.pi-star]="star > (hoverNetwork || formData.networkRating || 0)"
+                                           [class.text-emerald-500]="star <= (hoverNetwork || formData.networkRating || 0)"
+                                           [class.text-slate-300]="star > (hoverNetwork || formData.networkRating || 0)"></i>
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="otherRatings" class="block font-bold text-slate-800 text-sm mb-1.5">{{ 'CLIENTS.OTHER_RATINGS' | translate }}</label>
+                        <textarea pTextarea id="otherRatings" [(ngModel)]="formData.otherRatings" rows="3" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_OTHER_RATINGS' | translate"></textarea>
+                    </div>
+                </div>
+            </p-tabpanel>
+
+            <!-- Tab 3: Power of Attorney (التوكيل) -->
+            <p-tabpanel value="2">
+                <div class="space-y-4 pt-4">
+                    <div class="flex items-center gap-3 bg-amber-50 p-4 rounded-xl border border-amber-200">
+                        <p-checkbox [(ngModel)]="formData.hasPowerOfAttorney" [binary]="true" inputId="hasPoa"></p-checkbox>
+                        <label for="hasPoa" class="font-bold text-amber-900 cursor-pointer text-base">
+                            {{ 'CLIENTS.HAS_POA' | translate }}
+                        </label>
+                    </div>
+
+                    @if (formData.hasPowerOfAttorney) {
+                        <div class="space-y-5 border border-slate-200 p-5 rounded-xl bg-slate-50/70">
+                            <!-- Row 1: POA Number, Letter, Year -->
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="poaNumber" class="block text-sm font-bold text-slate-800 mb-1.5">{{ 'CLIENTS.POA_NUMBER' | translate }}</label>
+                                    <input type="text" pInputText id="poaNumber" [(ngModel)]="formData.poaNumber" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_POA_NUMBER' | translate" />
+                                </div>
+                                <div>
+                                    <label for="poaLetter" class="block text-sm font-bold text-slate-800 mb-1.5">{{ 'CLIENTS.POA_LETTER' | translate }}</label>
+                                    <input type="text" pInputText id="poaLetter" [(ngModel)]="formData.poaLetter" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_POA_LETTER' | translate" />
+                                </div>
+                                <div>
+                                    <label for="poaYear" class="block text-sm font-bold text-slate-800 mb-1.5">{{ 'CLIENTS.POA_YEAR' | translate }}</label>
+                                    <input type="number" pInputText id="poaYear" [(ngModel)]="formData.poaYear" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_POA_YEAR' | translate" />
+                                </div>
+                            </div>
+
+                            <!-- Row 2: Notary Office -->
+                            <div>
+                                <label for="poaOffice" class="block text-sm font-bold text-slate-800 mb-1.5">{{ 'CLIENTS.POA_OFFICE' | translate }}</label>
+                                <input type="text" pInputText id="poaOffice" [(ngModel)]="formData.poaOffice" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_POA_OFFICE' | translate" />
+                            </div>
+
+                            <!-- Row 3: POA Type (Compact) beside Capacity Details (Spacious) -->
+                            <div class="flex flex-col sm:flex-row items-start gap-4">
+                                <div class="w-full sm:w-56 shrink-0">
+                                    <label for="poaType" class="block text-sm font-bold text-slate-800 mb-1.5">{{ 'CLIENTS.POA_TYPE' | translate }}</label>
+                                    <p-select id="poaType" [(ngModel)]="formData.poaType" [options]="poaTypes" optionLabel="label" optionValue="value" class="w-full"></p-select>
+                                </div>
+
+                                @if (formData.poaType === 'صفة' || formData.poaType === 'نفسه وصفة') {
+                                    <div class="w-full flex-1">
+                                        <label for="poaCapacityDetails" class="block text-sm font-bold text-slate-800 mb-1.5">{{ 'CLIENTS.POA_CAPACITY_DETAILS' | translate }}</label>
+                                        <input type="text" pInputText id="poaCapacityDetails" [(ngModel)]="formData.poaCapacityDetails" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_CAPACITY_DETAILS' | translate" />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </p-tabpanel>
+
+            <!-- Tab 4: Relatives & Instructions -->
+            <p-tabpanel value="3">
+                <div class="space-y-5 pt-4">
+                    <div class="field">
+                        <label for="relativesInfo" class="block font-bold text-slate-800 text-sm mb-1.5">
+                            <i class="pi pi-users me-1.5 text-blue-600"></i>{{ 'CLIENTS.RELATIVES_INFO' | translate }}
+                        </label>
+                        <textarea pTextarea id="relativesInfo" [(ngModel)]="formData.relativesInfo" rows="3" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_RELATIVES' | translate"></textarea>
+                    </div>
+
+                    <div class="field">
+                        <label for="instructions" class="block font-bold text-slate-800 text-sm mb-1.5">
+                            <i class="pi pi-info-circle me-1.5 text-amber-600"></i>{{ 'CLIENTS.INSTRUCTIONS' | translate }}
+                        </label>
+                        <textarea pTextarea id="instructions" [(ngModel)]="formData.instructions" rows="3" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_INSTRUCTIONS' | translate"></textarea>
+                    </div>
+                </div>
+            </p-tabpanel>
+        </p-tabpanels>
+    </p-tabs>
 </div>
 
 <div class="flex justify-end gap-2 mt-6 border-t pt-4 border-slate-100">
     <p-button [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="cancel()"></p-button>
-    <p-button [label]="'COMMON.SAVE' | translate" icon="pi pi-check" (onClick)="save()" [disabled]="!formData.fullName || !isNationalIdValid()"></p-button>
+    <p-button [label]="'COMMON.SAVE' | translate" icon="pi pi-check" (onClick)="save()"></p-button>
 </div>

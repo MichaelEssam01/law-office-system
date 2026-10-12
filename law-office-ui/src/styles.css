@@ -25,6 +25,32 @@ body {
     margin-right: auto !important;
 }
 
+/* Ensure PrimeNG table cells and headers align correctly in RTL */
+[dir="rtl"] .p-datatable .p-datatable-thead > tr > th,
+[dir="rtl"] .p-datatable .p-datatable-tbody > tr > td,
+[dir="rtl"] .p-datatable .p-datatable-tfoot > tr > td {
+    text-align: right !important;
+}
+
+[dir="rtl"] .p-datatable th .p-column-header-content {
+    justify-content: flex-start !important;
+}
+
+[dir="rtl"] .p-datatable .p-sortable-column-icon {
+    margin-left: 0 !important;
+    margin-right: 0.5rem !important;
+}
+
+[dir="ltr"] .p-datatable .p-datatable-thead > tr > th,
+[dir="ltr"] .p-datatable .p-datatable-tbody > tr > td,
+[dir="ltr"] .p-datatable .p-datatable-tfoot > tr > td {
+    text-align: left !important;
+}
+
+[dir="ltr"] .p-datatable th .p-column-header-content {
+    justify-content: flex-start !important;
+}
+
 /* Ensure all inputs have visible text color */
 input, textarea {
     color: #0f172a !important;
@@ -34,6 +60,12 @@ input, textarea {
 .p-dialog-mask {
     backdrop-filter: blur(4px);
     background-color: rgba(15, 23, 42, 0.4) !important;
+}
+
+/* Dialog Scrollable Body & Sizing */
+.p-dialog .p-dialog-content {
+    overflow-y: auto !important;
+    max-height: calc(88vh - 4.5rem) !important;
 }
 
 /* Premium Paginator Styling */
@@ -115,7 +147,37 @@ input, textarea {
 .p-paginator .p-paginator-pages .p-paginator-page:not(.p-highlight):hover {
     background-color: #f1f5f9 !important;
     color: #1e293b !important;
-    transform: translateY(-1px);
+}
+
+/* Maintain stable RTL flip without rotation animation or hover overwrite */
+[dir="rtl"] .p-paginator .p-paginator-first,
+[dir="rtl"] .p-paginator .p-paginator-prev,
+[dir="rtl"] .p-paginator .p-paginator-next,
+[dir="rtl"] .p-paginator .p-paginator-last {
+    transform: rotate(180deg) !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+[dir="rtl"] .p-paginator .p-paginator-first:hover,
+[dir="rtl"] .p-paginator .p-paginator-prev:hover,
+[dir="rtl"] .p-paginator .p-paginator-next:hover,
+[dir="rtl"] .p-paginator .p-paginator-last:hover {
+    transform: rotate(180deg) !important;
+}
+
+[dir="ltr"] .p-paginator .p-paginator-first,
+[dir="ltr"] .p-paginator .p-paginator-prev,
+[dir="ltr"] .p-paginator .p-paginator-next,
+[dir="ltr"] .p-paginator .p-paginator-last {
+    transform: none !important;
+    transition: background-color 0.15s ease, color 0.15s ease !important;
+}
+
+[dir="ltr"] .p-paginator .p-paginator-first:hover,
+[dir="ltr"] .p-paginator .p-paginator-prev:hover,
+[dir="ltr"] .p-paginator .p-paginator-next:hover,
+[dir="ltr"] .p-paginator .p-paginator-last:hover {
+    transform: none !important;
 }
 
 .p-paginator .p-paginator-rpp-options,
@@ -143,6 +205,47 @@ input, textarea {
     z-index: 99999 !important;
 }
 
+/* Disable chevron rotation animation */
+.p-select .p-select-dropdown,
+.p-select .p-select-dropdown-icon,
+.p-select .p-icon,
+.p-select svg,
+.p-dropdown-trigger,
+.p-dropdown-trigger-icon {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+}
+
+/* Ensure paginator dropdown list is fully visible and not cut off by containers or modal bottoms */
+.p-paginator .p-select-overlay,
+.p-paginator .p-dropdown-panel,
+.p-paginator-rpp-options .p-select-overlay,
+.p-paginator-rpp-options .p-dropdown-panel,
+body > .p-select-overlay,
+body > .p-dropdown-panel {
+    max-height: 250px !important;
+    min-width: 4.5rem !important;
+    overflow-y: auto !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.18), 0 8px 10px -6px rgba(0, 0, 0, 0.12) !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 0.5rem !important;
+    background-color: #ffffff !important;
+    z-index: 99999 !important;
+}
+
+.p-paginator .p-select-list,
+.p-paginator .p-dropdown-items {
+    padding: 0.25rem !important;
+}
+
+.p-paginator .p-select-option,
+.p-paginator .p-dropdown-item {
+    padding: 0.35rem 0.65rem !important;
+    border-radius: 0.375rem !important;
+    font-size: 0.8125rem !important;
+}
+
 /* Minimal paginator style */
 .no-page-links .p-paginator-page,
 .no-page-links .p-paginator-pages {
@@ -154,6 +257,8 @@ input, textarea {
     align-items: center !important;
     justify-content: center !important;
     gap: 0.5rem !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
 }
 
 .no-page-links .p-paginator-first { order: 1 !important; }
@@ -169,22 +274,19 @@ input, textarea {
 .no-page-links .p-paginator-next { order: 4 !important; }
 .no-page-links .p-paginator-last { order: 5 !important; }
 
-/* Page size dropdown placed after all icons in center group */
-.no-page-links .p-paginator-rpp-options,
-.no-page-links .p-dropdown,
-.no-page-links p-select,
-.no-page-links .p-select { 
+/* Page size dropdown placed consistently after navigation */
+.no-page-links .p-paginator .p-paginator-rpp-options,
+.no-page-links .p-paginator .p-dropdown,
+.no-page-links .p-paginator p-select,
+.no-page-links .p-paginator .p-select { 
     order: 6 !important;
     position: relative !important;
-    margin-left: 0.75rem !important;
+    margin: 0 !important;
+    margin-inline-start: 0.75rem !important;
 }
 
-[dir="rtl"] .no-page-links .p-paginator-rpp-options,
-[dir="rtl"] .no-page-links .p-dropdown,
-[dir="rtl"] .no-page-links p-select,
-[dir="rtl"] .no-page-links .p-select { 
-    margin-left: 0 !important;
-    margin-right: 0.75rem !important;
+[dir="rtl"] .no-page-links .p-paginator .p-paginator-current {
+    margin: 0 0.5rem !important;
 }
 
 
@@ -214,4 +316,44 @@ input, textarea {
 
 .demo-paginator {
   width: 600px;
+}
+
+/* Global PrimeNG Rating Hover Highlighting */
+.p-rating {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+}
+
+.p-rating .p-rating-item {
+    cursor: pointer !important;
+    transition: transform 0.15s ease, color 0.15s ease !important;
+}
+
+.p-rating .p-rating-item:hover {
+    transform: scale(1.2) !important;
+}
+
+/* When hovering over the rating component, dim all stars first */
+.p-rating:hover .p-rating-item .p-rating-icon,
+.p-rating:hover .p-rating-item svg {
+    color: #cbd5e1 !important;
+    fill: #cbd5e1 !important;
+}
+
+/* Color every star up to and including the hovered star (using modern CSS :has sibling selector) */
+.p-rating:hover .p-rating-item:has(~ .p-rating-item:hover) .p-rating-icon,
+.p-rating:hover .p-rating-item:has(~ .p-rating-item:hover) svg,
+.p-rating .p-rating-item:hover .p-rating-icon,
+.p-rating .p-rating-item:hover svg {
+    color: #10b981 !important;
+    fill: #10b981 !important;
+}
+
+/* Active star state */
+.p-rating .p-rating-item[data-p-active="true"] .p-rating-icon,
+.p-rating .p-rating-item[data-p-active="true"] svg,
+.p-rating .p-rating-item.p-rating-item-active .p-rating-icon {
+    color: #10b981 !important;
+    fill: #10b981 !important;
 }

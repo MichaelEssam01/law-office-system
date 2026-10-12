@@ -118,11 +118,31 @@ public class ClientService : IClientService
 
         var client = new Client
         {
-            FullName = clientDto.FullName,
+            FirstName = clientDto.FirstName,
+            SecondName = clientDto.SecondName,
+            ThirdName = clientDto.ThirdName,
+            FourthName = clientDto.FourthName,
             Phone = clientDto.Phone,
+            HomeLandline = clientDto.HomeLandline,
+            WorkLandline = clientDto.WorkLandline,
             Email = clientDto.Email,
             Address = clientDto.Address,
-            NationalId = clientDto.NationalId
+            NationalId = clientDto.NationalId,
+            Job = clientDto.Job,
+            SolvencyRating = clientDto.SolvencyRating,
+            CommitmentRating = clientDto.CommitmentRating,
+            CooperationRating = clientDto.CooperationRating,
+            NetworkRating = clientDto.NetworkRating,
+            OtherRatings = clientDto.OtherRatings,
+            RelativesInfo = clientDto.RelativesInfo,
+            HasPowerOfAttorney = clientDto.HasPowerOfAttorney,
+            PoaNumber = clientDto.PoaNumber,
+            PoaLetter = clientDto.PoaLetter,
+            PoaYear = clientDto.PoaYear,
+            PoaOffice = clientDto.PoaOffice,
+            PoaType = clientDto.PoaType,
+            PoaCapacityDetails = clientDto.PoaCapacityDetails,
+            Instructions = clientDto.Instructions
         };
 
         await _clientRepository.AddAsync(client);
@@ -147,11 +167,31 @@ public class ClientService : IClientService
             }
         }
 
-        client.FullName = clientDto.FullName;
+        client.FirstName = clientDto.FirstName;
+        client.SecondName = clientDto.SecondName;
+        client.ThirdName = clientDto.ThirdName;
+        client.FourthName = clientDto.FourthName;
         client.Phone = clientDto.Phone;
+        client.HomeLandline = clientDto.HomeLandline;
+        client.WorkLandline = clientDto.WorkLandline;
         client.Email = clientDto.Email;
         client.Address = clientDto.Address;
         client.NationalId = clientDto.NationalId;
+        client.Job = clientDto.Job;
+        client.SolvencyRating = clientDto.SolvencyRating;
+        client.CommitmentRating = clientDto.CommitmentRating;
+        client.CooperationRating = clientDto.CooperationRating;
+        client.NetworkRating = clientDto.NetworkRating;
+        client.OtherRatings = clientDto.OtherRatings;
+        client.RelativesInfo = clientDto.RelativesInfo;
+        client.HasPowerOfAttorney = clientDto.HasPowerOfAttorney;
+        client.PoaNumber = clientDto.PoaNumber;
+        client.PoaLetter = clientDto.PoaLetter;
+        client.PoaYear = clientDto.PoaYear;
+        client.PoaOffice = clientDto.PoaOffice;
+        client.PoaType = clientDto.PoaType;
+        client.PoaCapacityDetails = clientDto.PoaCapacityDetails;
+        client.Instructions = clientDto.Instructions;
         client.UpdatedAt = DateTime.UtcNow;
 
         _clientRepository.Update(client);
@@ -176,11 +216,32 @@ public class ClientService : IClientService
         return new ClientDto
         {
             Id = client.Id,
+            FirstName = client.FirstName,
+            SecondName = client.SecondName,
+            ThirdName = client.ThirdName,
+            FourthName = client.FourthName,
             FullName = client.FullName,
             Phone = client.Phone,
+            HomeLandline = client.HomeLandline,
+            WorkLandline = client.WorkLandline,
             Email = client.Email,
             Address = client.Address,
-            NationalId = client.NationalId
+            NationalId = client.NationalId,
+            Job = client.Job,
+            SolvencyRating = client.SolvencyRating,
+            CommitmentRating = client.CommitmentRating,
+            CooperationRating = client.CooperationRating,
+            NetworkRating = client.NetworkRating,
+            OtherRatings = client.OtherRatings,
+            RelativesInfo = client.RelativesInfo,
+            HasPowerOfAttorney = client.HasPowerOfAttorney,
+            PoaNumber = client.PoaNumber,
+            PoaLetter = client.PoaLetter,
+            PoaYear = client.PoaYear,
+            PoaOffice = client.PoaOffice,
+            PoaType = client.PoaType,
+            PoaCapacityDetails = client.PoaCapacityDetails,
+            Instructions = client.Instructions
         };
     }
 }
