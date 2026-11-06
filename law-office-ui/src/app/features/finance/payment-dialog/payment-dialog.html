@@ -16,8 +16,26 @@
                     <label for="clientId" class="font-bold text-slate-700">{{ 'CASES.CLIENT' | translate }}</label>
                     <p-select id="clientId" [options]="clients()" [ngModel]="selectedClientId()" (onChange)="onClientChange($event)"
                               [ngModelOptions]="{standalone: true}"
-                              optionLabel="fullName" optionValue="id" [filter]="true" filterBy="fullName,nationalId"
+                              optionLabel="fullName" optionValue="id" [filter]="true" filterBy="fullName,nationalId,clientNumber"
                               [placeholder]="'CASES.ALL_CLIENTS' | translate" styleClass="w-full" appendTo="body">
+                        <ng-template pTemplate="selectedItem" let-selected>
+                            @if (selected) {
+                                <div class="flex items-center gap-2">
+                                    @if (selected.clientNumber) {
+                                        <span class="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">#{{ selected.clientNumber }}</span>
+                                    }
+                                    <span>{{ selected.fullName }}</span>
+                                </div>
+                            }
+                        </ng-template>
+                        <ng-template pTemplate="item" let-item>
+                            <div class="flex items-center justify-between w-full">
+                                <span>{{ item.fullName }}</span>
+                                @if (item.clientNumber) {
+                                    <span class="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">#{{ item.clientNumber }}</span>
+                                }
+                            </div>
+                        </ng-template>
                     </p-select>
                 </div>
             }
@@ -28,9 +46,7 @@
                 
                 @if (caseId()) {
                     <div class="w-full">
-                        <input pInputText [value]="getSelectedCase()?.caseNumber + ' - ' + getSelectedCase()?.title" 
-                               class="w-full bg-slate-200 border-slate-200 text-slate-500 font-medium cursor-not-allowed opacity-70 p-disabled" 
-                               readonly />
+                        <input id="caseId" pInputText title="Linked Case" placeholder="Linked Case" aria-label="Linked Case" [attr.aria-label]="'FINANCE.LINKED_CASE' | translate" [value]="getSelectedCase()?.caseNumber + ' - ' + getSelectedCase()?.title" class="w-full bg-slate-200 border-slate-200 text-slate-500 font-medium cursor-not-allowed opacity-70 p-disabled" readonly />
                     </div>
                 } @else {
                     <p-select id="caseId" [options]="filteredCases()" formControlName="caseId" 
@@ -114,21 +130,33 @@
         <div class="flex flex-col gap-2">
             <label for="method" class="font-bold text-slate-700">{{ 'FINANCE.PAYMENT_METHOD' | translate }}</label>
             <p-select id="method" [options]="methods()" formControlName="method" 
-                      optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-select>
+                      optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body">
+                <ng-template pTemplate="selectedItem" let-m>
+                    <div class="flex items-center gap-2">
+                        <i [class]="m?.icon || 'pi pi-wallet'" class="text-blue-600"></i>
+                        <span>{{ m?.label }}</span>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="item" let-m>
+                    <div class="flex items-center gap-2">
+                        <i [class]="m.icon || 'pi pi-wallet'" class="text-slate-500"></i>
+                        <span>{{ m.label }}</span>
+                    </div>
+                </ng-template>
+            </p-select>
         </div>
 
         <!-- Notes -->
         <div class="flex flex-col gap-2">
             <label for="notes" class="font-bold text-slate-700">{{ 'FINANCE.NOTES' | translate }}</label>
-            <textarea pTextarea id="notes" formControlName="notes" [rows]="2" [placeholder]="'CASES.NOTES_PLACEHOLDER' | translate"></textarea>
+            <textarea pTextarea id="notes" formControlName="notes" [rows]="2" title="Notes" placeholder="Notes" aria-label="Notes" [placeholder]="'CASES.NOTES_PLACEHOLDER' | translate" [attr.aria-label]="'FINANCE.NOTES' | translate"></textarea>
         </div>
     </form>
 
     <ng-template pTemplate="footer">
         <div class="flex justify-end gap-2" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
-            <button pButton [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="close()"></button>
-            <button pButton [label]="'FINANCE.ADD_PAYMENT' | translate" icon="pi pi-check" 
-                    class="p-button-success shadow-md" [loading]="saving()" (click)="save()"></button>
+            <button type="button" pButton [label]="'COMMON.CANCEL' | translate" title="Cancel" aria-label="Cancel" [title]="'COMMON.CANCEL' | translate" [attr.aria-label]="'COMMON.CANCEL' | translate" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="close()"></button>
+            <button type="button" pButton [label]="'FINANCE.ADD_PAYMENT' | translate" title="Add Payment" aria-label="Add Payment" [title]="'FINANCE.ADD_PAYMENT' | translate" [attr.aria-label]="'FINANCE.ADD_PAYMENT' | translate" icon="pi pi-check" class="p-button-success shadow-md" [loading]="saving()" (click)="save()"></button>
         </div>
     </ng-template>
 </p-dialog>

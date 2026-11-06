@@ -3,10 +3,11 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 export enum SessionStatus {
-  Scheduled = 0,
-  Completed = 1,
-  Postponed = 2,
-  Cancelled = 3
+  Scheduled = 0,             // مجدولة
+  Completed = 1,             // منتهية
+  Postponed = 2,             // مؤجلة
+  Cancelled = 3,             // ملغاة
+  ReservedForJudgment = 4    // محجوزة للحكم
 }
 
 export interface SessionListDto {
@@ -17,10 +18,25 @@ export interface SessionListDto {
   title: string;
   scheduledAt: string;
   courtName: string;
+  location?: string;
+  circuitNumber?: string;
   status: SessionStatus;
+  assignedLawyerId?: string;
+  assignedLawyerName?: string;
+  currentSessionRole?: string;
+  decisionKey?: string;
+  decisionText?: string;
 }
 
 export interface SessionDetailDto extends SessionListDto {
+  // الجلسة السابقة
+  previousSessionRole?: string;
+  postponementReason?: string;
+  previousSessionLawyerId?: string;
+  previousSessionLawyerName?: string;
+
+  // ما تم في الجلسة والملاحظات
+  sessionProceedings?: string;
   notes?: string;
   createdAt: string;
 }

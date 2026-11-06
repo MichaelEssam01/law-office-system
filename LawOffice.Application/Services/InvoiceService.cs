@@ -16,7 +16,7 @@ public class InvoiceService : IInvoiceService
         _unitOfWork = unitOfWork;
     }
 
-    public async Task<IEnumerable<InvoiceListDto>> GetInvoicesAsync(Guid? caseId = null, InvoiceStatus? status = null)
+    public async Task<IEnumerable<InvoiceListDto>> GetInvoicesAsync(Guid? caseId = null, InvoiceStatus? status = null, FinanceCategory? category = null)
     {
         var query = _unitOfWork.Repository<Invoice>().Query()
             .AsNoTracking()
@@ -27,6 +27,7 @@ public class InvoiceService : IInvoiceService
 
         if (caseId.HasValue) query = query.Where(i => i.CaseId == caseId.Value);
         if (status.HasValue) query = query.Where(i => i.Status == status.Value);
+        if (category.HasValue) query = query.Where(i => i.Category == category.Value);
 
         return await query
             .OrderByDescending(i => i.CreatedAt)
@@ -49,6 +50,7 @@ public class InvoiceService : IInvoiceService
                          i.DueDate < DateTime.UtcNow ? InvoiceStatus.Overdue :
                          i.Payments.Any() ? InvoiceStatus.PartiallyPaid :
                          i.Status,
+                Category = i.Category,
                 CreatedAt = i.CreatedAt
             })
             .ToListAsync();
@@ -79,14 +81,20 @@ public class InvoiceService : IInvoiceService
             RemainingAmount = i.Amount - i.Payments.Sum(p => p.Amount),
             DueDate = i.DueDate,
             Status = i.Status,
+            Category = i.Category,
             CreatedAt = i.CreatedAt,
             Notes = i.Notes,
             Payments = i.Payments.Select(p => new PaymentListDto
             {
                 Id = p.Id,
+                CaseId = p.CaseId,
+                CaseNumber = i.Case!.CaseNumber,
+                InvoiceId = p.InvoiceId,
+                InvoiceNumber = i.InvoiceNumber,
                 Amount = p.Amount,
                 PaymentDate = p.PaymentDate,
                 Method = p.Method,
+                Category = p.Category,
                 Notes = p.Notes
             })
         };
@@ -127,6 +135,7 @@ public class InvoiceService : IInvoiceService
             Title = dto.Title,
             Amount = dto.Amount,
             DueDate = dto.DueDate,
+            Category = dto.Category,
             Notes = dto.Notes,
             Status = InvoiceStatus.Unpaid,
             CreatedAt = DateTime.UtcNow,
@@ -147,6 +156,7 @@ public class InvoiceService : IInvoiceService
         invoice.Title = dto.Title;
         invoice.Amount = dto.Amount;
         invoice.DueDate = dto.DueDate;
+        invoice.Category = dto.Category;
         invoice.Notes = dto.Notes;
         invoice.Status = dto.Status;
         invoice.UpdatedAt = DateTime.UtcNow;

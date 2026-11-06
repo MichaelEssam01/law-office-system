@@ -10,6 +10,7 @@ public class Payment : BaseEntity
     public decimal Amount { get; set; }
     public DateTime PaymentDate { get; set; }
     public PaymentMethod Method { get; set; }
+    public FinanceCategory Category { get; set; } = FinanceCategory.Fees;
     public string? Notes { get; set; }
     
     public Guid CreatedBy { get; set; }

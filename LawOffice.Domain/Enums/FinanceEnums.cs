@@ -15,5 +15,12 @@ public enum PaymentMethod
     BankTransfer = 1,
     CreditCard = 2,
     Check = 3,
-    Other = 4
+    Other = 4,
+    ElectronicWallet = 5
+}
+
+public enum FinanceCategory
+{
+    Fees = 0,
+    Expenses = 1
 }

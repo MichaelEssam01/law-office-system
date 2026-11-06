@@ -11,6 +11,7 @@ public class Invoice : BaseEntity
     public decimal Amount { get; set; }
     public DateTime DueDate { get; set; }
     public InvoiceStatus Status { get; set; } = InvoiceStatus.Unpaid;
+    public FinanceCategory Category { get; set; } = FinanceCategory.Fees;
     public string? Notes { get; set; }
     
     public Guid CreatedBy { get; set; }

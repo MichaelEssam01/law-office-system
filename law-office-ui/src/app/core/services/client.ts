@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 export interface Client {
   id?: string;
+  clientNumber?: number;
   firstName?: string;
   secondName?: string;
   thirdName?: string;

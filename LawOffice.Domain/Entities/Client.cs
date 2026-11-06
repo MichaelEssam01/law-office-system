@@ -4,6 +4,9 @@ namespace LawOffice.Domain.Entities;
 
 public class Client : BaseEntity
 {
+    // Client Number (Incremental identity visible to users)
+    public int ClientNumber { get; set; }
+
     // Name Breakdown
     public string FirstName { get; set; } = string.Empty;
     public string SecondName { get; set; } = string.Empty;

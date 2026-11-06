@@ -75,17 +75,35 @@ namespace LawOffice.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("AssignedLawyerId")
+                    b.Property<DateTime?>("AgreementDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("ArchivingType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("AssignedLawyerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("CaseNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int?>("CaseType")
+                        .HasColumnType("int");
+
                     b.Property<Guid>("ClientId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("ClosedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CourtAction")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CourtCaseNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CourtFilingDate")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreatedAt")
@@ -98,10 +116,52 @@ namespace LawOffice.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ExternalAction")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FamilyCaseSubtype")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileColor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FileYear")
+                        .HasColumnType("int");
+
+                    b.Property<bool?>("HasCourtAction")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("HasExternalAction")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("HasOfficeAction")
+                        .HasColumnType("bit");
+
+                    b.Property<bool?>("HasOtherAction")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("JudgmentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("JudgmentResult")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("LitigationDegree")
+                        .HasColumnType("int");
+
                     b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OfficeAction")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherAction")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
@@ -110,12 +170,30 @@ namespace LawOffice.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<string>("Subject")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SuspensionDocumentsText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SuspensionOtherText")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SuspensionReason")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("Year")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("YearType")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -129,6 +207,61 @@ namespace LawOffice.Infrastructure.Migrations
                     b.ToTable("Cases");
                 });
 
+            modelBuilder.Entity("LawOffice.Domain.Entities.CaseParty", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("CaseId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DisputeNature")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("HasSameCapacityOthers")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OpponentLawyerName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherLawyerName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherPersonName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PartyType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CaseId");
+
+                    b.HasIndex("ClientId");
+
+                    b.ToTable("CaseParties");
+                });
+
             modelBuilder.Entity("LawOffice.Domain.Entities.Client", b =>
                 {
                     b.Property<Guid>("Id")
@@ -138,6 +271,12 @@ namespace LawOffice.Infrastructure.Migrations
                     b.Property<string>("Address")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ClientNumber")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClientNumber"));
 
                     b.Property<int?>("CommitmentRating")
                         .HasColumnType("int");
@@ -233,6 +372,9 @@ namespace LawOffice.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ClientNumber")
+                        .IsUnique();
+
                     b.ToTable("Clients");
                 });
 
@@ -300,6 +442,9 @@ namespace LawOffice.Infrastructure.Migrations
 
                     b.Property<Guid>("CaseId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -397,6 +542,9 @@ namespace LawOffice.Infrastructure.Migrations
 
                     b.Property<Guid>("CaseId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
 
                     b.Property<Guid?>("ClientId")
                         .HasColumnType("uniqueidentifier");
@@ -499,8 +647,14 @@ namespace LawOffice.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("AssignedLawyerId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("CaseId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CircuitNumber")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CourtName")
                         .IsRequired()
@@ -512,14 +666,38 @@ namespace LawOffice.Infrastructure.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("CurrentSessionRole")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DecisionKey")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DecisionText")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PostponementReason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("PreviousSessionLawyerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PreviousSessionRole")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("ScheduledAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("SessionProceedings")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -533,7 +711,11 @@ namespace LawOffice.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AssignedLawyerId");
+
                     b.HasIndex("CaseId");
+
+                    b.HasIndex("PreviousSessionLawyerId");
 
                     b.ToTable("Sessions");
                 });
@@ -885,8 +1067,7 @@ namespace LawOffice.Infrastructure.Migrations
                     b.HasOne("LawOffice.Domain.Entities.User", "AssignedLawyer")
                         .WithMany("Cases")
                         .HasForeignKey("AssignedLawyerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LawOffice.Domain.Entities.Client", "Client")
                         .WithMany("Cases")
@@ -895,6 +1076,24 @@ namespace LawOffice.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("AssignedLawyer");
+
+                    b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.CaseParty", b =>
+                {
+                    b.HasOne("LawOffice.Domain.Entities.Case", "Case")
+                        .WithMany("Parties")
+                        .HasForeignKey("CaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LawOffice.Domain.Entities.Client", "Client")
+                        .WithMany()
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Case");
 
                     b.Navigation("Client");
                 });
@@ -967,13 +1166,27 @@ namespace LawOffice.Infrastructure.Migrations
 
             modelBuilder.Entity("LawOffice.Domain.Entities.Session", b =>
                 {
+                    b.HasOne("LawOffice.Domain.Entities.User", "AssignedLawyer")
+                        .WithMany()
+                        .HasForeignKey("AssignedLawyerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("LawOffice.Domain.Entities.Case", "Case")
                         .WithMany("Sessions")
                         .HasForeignKey("CaseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("LawOffice.Domain.Entities.User", "PreviousSessionLawyer")
+                        .WithMany()
+                        .HasForeignKey("PreviousSessionLawyerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AssignedLawyer");
+
                     b.Navigation("Case");
+
+                    b.Navigation("PreviousSessionLawyer");
                 });
 
             modelBuilder.Entity("LawOffice.Domain.Entities.UserNotificationSetting", b =>
@@ -1054,6 +1267,8 @@ namespace LawOffice.Infrastructure.Migrations
                     b.Navigation("Documents");
 
                     b.Navigation("Invoices");
+
+                    b.Navigation("Parties");
 
                     b.Navigation("Payments");
 

@@ -30,3 +30,4 @@ law-office-ui/.editorconfig
 # Logs
 logs/
 *.log
+*.binlog

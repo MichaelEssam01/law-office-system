@@ -4,7 +4,7 @@
             <p-tab value="0" class="font-semibold text-base py-3">
                 <i class="pi pi-user ms-1 me-2 text-indigo-600"></i>{{ 'CLIENTS.CLIENT_DETAILS' | translate }}
                 @if (submitted && !isFormValid()) {
-                    <i class="pi pi-exclamation-circle text-red-500 ms-1" [title]="'COMMON.ERROR' | translate"></i>
+                    <i class="pi pi-exclamation-circle text-red-500 ms-1 cursor-help" [pTooltip]="'COMMON.REQUIRED_FIELDS_WARNING' | translate"></i>
                 }
             </p-tab>
             <p-tab value="1" class="font-semibold text-base py-3"><i class="pi pi-star ms-1 me-2 text-amber-500"></i>{{ 'CLIENTS.RATINGS_SECTION' | translate }}</p-tab>
@@ -16,6 +16,15 @@
             <!-- Tab 1: Basic Information -->
             <p-tabpanel value="0">
                 <div class="space-y-5 pt-4">
+                    <!-- Client Code Badge (if existing client) -->
+                    @if (formData.clientNumber) {
+                        <div class="flex items-center gap-2 p-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-sm">
+                            <i class="pi pi-hashtag text-blue-600 font-bold"></i>
+                            <span class="font-semibold">{{ 'CLIENTS.CLIENT_NUMBER' | translate }}:</span>
+                            <span class="font-mono font-bold text-base text-blue-700">#{{ formData.clientNumber }}</span>
+                        </div>
+                    }
+
                     <!-- 4-part Name Card -->
                     <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
                         <label class="block font-bold text-slate-800 text-sm">
@@ -23,27 +32,25 @@
                         </label>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">{{ 'CLIENTS.FIRST_NAME' | translate }} <span class="text-red-500">*</span></label>
-                                <input type="text" pInputText [(ngModel)]="formData.firstName" 
-                                       [placeholder]="'CLIENTS.FIRST_NAME' | translate" 
-                                       [class.ng-invalid]="submitted && !formData.firstName?.trim()"
-                                       [class.border-red-500]="submitted && !formData.firstName?.trim()"
-                                       class="w-full border-slate-300" required autofocus />
-                                @if (submitted && !formData.firstName?.trim()) {
-                                    <small class="text-red-500 font-medium block mt-1">{{ 'CLIENTS.FIRST_NAME_REQUIRED' | translate }}</small>
-                                }
+                                <label for="firstName" class="block text-xs font-semibold text-slate-600 mb-1">
+                                    {{ 'CLIENTS.FIRST_NAME' | translate }} <span class="text-red-500">*</span>
+                                    @if (submitted && !formData.firstName?.trim()) {
+                                        <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'CLIENTS.FIRST_NAME_REQUIRED' | translate"></i>
+                                    }
+                                </label>
+                                <input id="firstName" type="text" pInputText [(ngModel)]="formData.firstName" title="First Name" placeholder="First Name" aria-label="First Name" [placeholder]="'CLIENTS.FIRST_NAME' | translate" [attr.aria-label]="'CLIENTS.FIRST_NAME' | translate" [class.ng-invalid]="submitted && !formData.firstName?.trim()" [class.ng-dirty]="submitted && !formData.firstName?.trim()" [class.!border-red-500]="submitted && !formData.firstName?.trim()" class="w-full border-slate-300" required autofocus />
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">{{ 'CLIENTS.SECOND_NAME' | translate }}</label>
-                                <input type="text" pInputText [(ngModel)]="formData.secondName" [placeholder]="'CLIENTS.SECOND_NAME' | translate" class="w-full border-slate-300" />
+                                <label for="secondName" class="block text-xs font-semibold text-slate-600 mb-1">{{ 'CLIENTS.SECOND_NAME' | translate }}</label>
+                                <input id="secondName" type="text" pInputText [(ngModel)]="formData.secondName" title="Second Name" placeholder="Second Name" aria-label="Second Name" [placeholder]="'CLIENTS.SECOND_NAME' | translate" [attr.aria-label]="'CLIENTS.SECOND_NAME' | translate" class="w-full border-slate-300" />
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">{{ 'CLIENTS.THIRD_NAME' | translate }}</label>
-                                <input type="text" pInputText [(ngModel)]="formData.thirdName" [placeholder]="'CLIENTS.THIRD_NAME' | translate" class="w-full border-slate-300" />
+                                <label for="thirdName" class="block text-xs font-semibold text-slate-600 mb-1">{{ 'CLIENTS.THIRD_NAME' | translate }}</label>
+                                <input id="thirdName" type="text" pInputText [(ngModel)]="formData.thirdName" title="Third Name" placeholder="Third Name" aria-label="Third Name" [placeholder]="'CLIENTS.THIRD_NAME' | translate" [attr.aria-label]="'CLIENTS.THIRD_NAME' | translate" class="w-full border-slate-300" />
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-slate-600 mb-1">{{ 'CLIENTS.FOURTH_NAME' | translate }}</label>
-                                <input type="text" pInputText [(ngModel)]="formData.fourthName" [placeholder]="'CLIENTS.FOURTH_NAME' | translate" class="w-full border-slate-300" />
+                                <label for="fourthName" class="block text-xs font-semibold text-slate-600 mb-1">{{ 'CLIENTS.FOURTH_NAME' | translate }}</label>
+                                <input id="fourthName" type="text" pInputText [(ngModel)]="formData.fourthName" title="Fourth Name" placeholder="Fourth Name" aria-label="Fourth Name" [placeholder]="'CLIENTS.FOURTH_NAME' | translate" [attr.aria-label]="'CLIENTS.FOURTH_NAME' | translate" class="w-full border-slate-300" />
                             </div>
                         </div>
                     </div>
@@ -56,34 +63,25 @@
                                 @if (!hasNoNationalId) {
                                     <span class="text-red-500">*</span>
                                 }
+                                @if (!hasNoNationalId && ((formData.nationalId && !isNationalIdValid()) || (submitted && !formData.nationalId))) {
+                                    <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="(formData.nationalId && !isNationalIdValid() ? 'CLIENTS.NATIONAL_ID_INVALID' : 'CLIENTS.NATIONAL_ID_REQUIRED') | translate"></i>
+                                }
                             </label>
-                            <input type="text" pInputText id="nationalId" [(ngModel)]="formData.nationalId" 
-                                   [disabled]="hasNoNationalId"
-                                   [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_NATIONAL_ID' | translate"
-                                   [class.ng-invalid]="!hasNoNationalId && ((formData.nationalId && !isNationalIdValid()) || (submitted && !formData.nationalId))"
-                                   [class.border-red-500]="!hasNoNationalId && ((formData.nationalId && !isNationalIdValid()) || (submitted && !formData.nationalId))"
-                                   class="w-full border-slate-300" />
-                            
+                            <input type="text" pInputText id="nationalId" [(ngModel)]="formData.nationalId" [disabled]="hasNoNationalId" title="National ID" placeholder="National ID" aria-label="National ID" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_NATIONAL_ID' | translate" [attr.aria-label]="'CLIENTS.NATIONAL_ID' | translate" [class.ng-invalid]="!hasNoNationalId && ((formData.nationalId && !isNationalIdValid()) || (submitted && !formData.nationalId))" [class.ng-dirty]="!hasNoNationalId && ((formData.nationalId && !isNationalIdValid()) || (submitted && !formData.nationalId))" [class.!border-red-500]="!hasNoNationalId && ((formData.nationalId && !isNationalIdValid()) || (submitted && !formData.nationalId))" class="w-full border-slate-300" />
+
                             <div class="flex items-center gap-2 mt-2">
-                                <p-checkbox [(ngModel)]="hasNoNationalId" [binary]="true" inputId="noNationalId"
-                                            (onChange)="hasNoNationalId ? formData.nationalId = '' : ''"></p-checkbox>
+                                <p-checkbox [(ngModel)]="hasNoNationalId" [binary]="true" inputId="noNationalId" (onChange)="hasNoNationalId ? formData.nationalId = '' : ''"></p-checkbox>
                                 <label for="noNationalId" class="text-sm font-medium text-slate-600 cursor-pointer">
                                     {{ 'CLIENTS.NO_NATIONAL_ID' | translate }}
                                 </label>
                             </div>
-
-                            @if (!hasNoNationalId && submitted && !formData.nationalId) {
-                                <small class="text-red-500 font-medium block mt-1">{{ 'CLIENTS.NATIONAL_ID_REQUIRED' | translate }}</small>
-                            } @else if (!hasNoNationalId && formData.nationalId && !isNationalIdValid()) {
-                                <small class="text-red-500 font-medium block mt-1">{{ 'CLIENTS.NATIONAL_ID_INVALID' | translate }}</small>
-                            }
                         </div>
 
                         <div class="field">
                             <label for="job" class="block font-semibold text-slate-800 text-sm mb-1.5">
                                 <i class="pi pi-briefcase me-1.5 text-slate-500"></i>{{ 'CLIENTS.JOB' | translate }}
                             </label>
-                            <input type="text" pInputText id="job" [(ngModel)]="formData.job" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_JOB' | translate" />
+                            <input type="text" pInputText id="job" [(ngModel)]="formData.job" title="Job" placeholder="Job" aria-label="Job" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_JOB' | translate" [attr.aria-label]="'CLIENTS.JOB' | translate" />
                         </div>
                     </div>
 
@@ -93,7 +91,7 @@
                             <label class="block font-bold text-slate-800 text-sm">
                                 <i class="pi pi-phone me-1.5 text-emerald-600"></i>{{ 'CLIENTS.PHONE_SECTION' | translate }}
                             </label>
-                            <button type="button" pButton icon="pi pi-plus" [label]="'CLIENTS.ADD_PHONE_BUTTON' | translate" severity="secondary" size="small" [text]="true" (click)="addPhoneField()"></button>
+                            <button type="button" pButton icon="pi pi-plus" [label]="'CLIENTS.ADD_PHONE_BUTTON' | translate" title="Add Phone" aria-label="Add Phone" [title]="'CLIENTS.ADD_PHONE_BUTTON' | translate" [attr.aria-label]="'CLIENTS.ADD_PHONE_BUTTON' | translate" severity="secondary" size="small" [text]="true" (click)="addPhoneField()"></button>
                         </div>
 
                         <div class="space-y-2">
@@ -105,11 +103,7 @@
                                     </div>
                                     <!-- Phone Number Input -->
                                     <div class="flex-1">
-                                        <input type="text" pInputText [(ngModel)]="entry.number" 
-                                               [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'" 
-                                               [class.text-right]="appState.currentLang() === 'ar'"
-                                               [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_PHONE' | translate" 
-                                               class="w-full border-slate-300 text-sm" />
+                                        <input type="text" pInputText [(ngModel)]="entry.number" [id]="'phoneNumber_' + $index" title="Phone Number" placeholder="Phone Number" aria-label="Phone Number" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'" [class.text-right]="appState.currentLang() === 'ar'" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_PHONE' | translate" [attr.aria-label]="'CLIENTS.PLACEHOLDERS.ENTER_PHONE' | translate" class="w-full border-slate-300 text-sm" />
                                     </div>
                                     @if (phoneEntries.length > 1) {
                                         <p-button icon="pi pi-trash" severity="danger" [text]="true" [rounded]="true" (onClick)="removePhoneField($index)"></p-button>
@@ -125,13 +119,13 @@
                             <label for="email" class="block font-semibold text-slate-800 text-sm mb-1.5">
                                 <i class="pi pi-envelope me-1.5 text-slate-500"></i>{{ 'CLIENTS.EMAIL' | translate }}
                             </label>
-                            <input type="email" pInputText id="email" [(ngModel)]="formData.email" class="w-full border-slate-300" dir="ltr" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_EMAIL' | translate" />
+                            <input type="email" pInputText id="email" [(ngModel)]="formData.email" title="Email" placeholder="Email" aria-label="Email" class="w-full border-slate-300" dir="ltr" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_EMAIL' | translate" [attr.aria-label]="'CLIENTS.EMAIL' | translate" />
                         </div>
                         <div class="field">
                             <label for="address" class="block font-semibold text-slate-800 text-sm mb-1.5">
                                 <i class="pi pi-map-marker me-1.5 text-slate-500"></i>{{ 'CLIENTS.ADDRESS' | translate }}
                             </label>
-                            <input type="text" pInputText id="address" [(ngModel)]="formData.address" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_ADDRESS' | translate" />
+                            <input type="text" pInputText id="address" [(ngModel)]="formData.address" title="Address" placeholder="Address" aria-label="Address" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_ADDRESS' | translate" [attr.aria-label]="'CLIENTS.ADDRESS' | translate" />
                         </div>
                     </div>
                 </div>
@@ -147,10 +141,7 @@
                             <p class="text-xs text-slate-500 mb-2">{{ 'CLIENTS.PLACEHOLDERS.SOLVENCY_SUBTITLE' | translate }}</p>
                             <div class="flex items-center gap-1 py-1" (mouseleave)="hoverSolvency = 0">
                                 @for (star of [1, 2, 3, 4, 5]; track star) {
-                                    <button type="button" 
-                                            class="p-1 focus:outline-none transition-transform hover:scale-125"
-                                            (mouseenter)="hoverSolvency = star"
-                                            (click)="formData.solvencyRating = (formData.solvencyRating === star ? 0 : star)">
+                                    <button type="button" title="Solvency Rating" aria-label="Solvency Rating" [title]="('CLIENTS.SOLVENCY_RATING' | translate) + ' ' + star" [attr.aria-label]="('CLIENTS.SOLVENCY_RATING' | translate) + ' ' + star" class="p-1 focus:outline-none transition-transform hover:scale-125" (mouseenter)="hoverSolvency = star" (click)="formData.solvencyRating = (formData.solvencyRating === star ? 0 : star)">
                                         <i class="pi text-xl transition-colors cursor-pointer"
                                            [class.pi-star-fill]="star <= (hoverSolvency || formData.solvencyRating || 0)"
                                            [class.pi-star]="star > (hoverSolvency || formData.solvencyRating || 0)"
@@ -167,10 +158,7 @@
                             <p class="text-xs text-slate-500 mb-2">{{ 'CLIENTS.PLACEHOLDERS.COMMITMENT_SUBTITLE' | translate }}</p>
                             <div class="flex items-center gap-1 py-1" (mouseleave)="hoverCommitment = 0">
                                 @for (star of [1, 2, 3, 4, 5]; track star) {
-                                    <button type="button" 
-                                            class="p-1 focus:outline-none transition-transform hover:scale-125"
-                                            (mouseenter)="hoverCommitment = star"
-                                            (click)="formData.commitmentRating = (formData.commitmentRating === star ? 0 : star)">
+                                    <button type="button" title="Commitment Rating" aria-label="Commitment Rating" [title]="('CLIENTS.COMMITMENT_RATING' | translate) + ' ' + star" [attr.aria-label]="('CLIENTS.COMMITMENT_RATING' | translate) + ' ' + star" class="p-1 focus:outline-none transition-transform hover:scale-125" (mouseenter)="hoverCommitment = star" (click)="formData.commitmentRating = (formData.commitmentRating === star ? 0 : star)">
                                         <i class="pi text-xl transition-colors cursor-pointer"
                                            [class.pi-star-fill]="star <= (hoverCommitment || formData.commitmentRating || 0)"
                                            [class.pi-star]="star > (hoverCommitment || formData.commitmentRating || 0)"
@@ -187,10 +175,7 @@
                             <p class="text-xs text-slate-500 mb-2">{{ 'CLIENTS.PLACEHOLDERS.COOPERATION_SUBTITLE' | translate }}</p>
                             <div class="flex items-center gap-1 py-1" (mouseleave)="hoverCooperation = 0">
                                 @for (star of [1, 2, 3, 4, 5]; track star) {
-                                    <button type="button" 
-                                            class="p-1 focus:outline-none transition-transform hover:scale-125"
-                                            (mouseenter)="hoverCooperation = star"
-                                            (click)="formData.cooperationRating = (formData.cooperationRating === star ? 0 : star)">
+                                    <button type="button" title="Cooperation Rating" aria-label="Cooperation Rating" [title]="('CLIENTS.COOPERATION_RATING' | translate) + ' ' + star" [attr.aria-label]="('CLIENTS.COOPERATION_RATING' | translate) + ' ' + star" class="p-1 focus:outline-none transition-transform hover:scale-125" (mouseenter)="hoverCooperation = star" (click)="formData.cooperationRating = (formData.cooperationRating === star ? 0 : star)">
                                         <i class="pi text-xl transition-colors cursor-pointer"
                                            [class.pi-star-fill]="star <= (hoverCooperation || formData.cooperationRating || 0)"
                                            [class.pi-star]="star > (hoverCooperation || formData.cooperationRating || 0)"
@@ -207,10 +192,7 @@
                             <p class="text-xs text-slate-500 mb-2">{{ 'CLIENTS.PLACEHOLDERS.NETWORK_SUBTITLE' | translate }}</p>
                             <div class="flex items-center gap-1 py-1" (mouseleave)="hoverNetwork = 0">
                                 @for (star of [1, 2, 3, 4, 5]; track star) {
-                                    <button type="button" 
-                                            class="p-1 focus:outline-none transition-transform hover:scale-125"
-                                            (mouseenter)="hoverNetwork = star"
-                                            (click)="formData.networkRating = (formData.networkRating === star ? 0 : star)">
+                                    <button type="button" title="Network Rating" aria-label="Network Rating" [title]="('CLIENTS.NETWORK_RATING' | translate) + ' ' + star" [attr.aria-label]="('CLIENTS.NETWORK_RATING' | translate) + ' ' + star" class="p-1 focus:outline-none transition-transform hover:scale-125" (mouseenter)="hoverNetwork = star" (click)="formData.networkRating = (formData.networkRating === star ? 0 : star)">
                                         <i class="pi text-xl transition-colors cursor-pointer"
                                            [class.pi-star-fill]="star <= (hoverNetwork || formData.networkRating || 0)"
                                            [class.pi-star]="star > (hoverNetwork || formData.networkRating || 0)"
@@ -224,7 +206,7 @@
 
                     <div class="field">
                         <label for="otherRatings" class="block font-bold text-slate-800 text-sm mb-1.5">{{ 'CLIENTS.OTHER_RATINGS' | translate }}</label>
-                        <textarea pTextarea id="otherRatings" [(ngModel)]="formData.otherRatings" rows="3" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_OTHER_RATINGS' | translate"></textarea>
+                        <textarea pTextarea id="otherRatings" [(ngModel)]="formData.otherRatings" rows="3" title="Other Ratings" placeholder="Other Ratings" aria-label="Other Ratings" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_OTHER_RATINGS' | translate" [attr.aria-label]="'CLIENTS.OTHER_RATINGS' | translate"></textarea>
                     </div>
                 </div>
             </p-tabpanel>
@@ -245,22 +227,22 @@
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div>
                                     <label for="poaNumber" class="block text-sm font-bold text-slate-800 mb-1.5">{{ 'CLIENTS.POA_NUMBER' | translate }}</label>
-                                    <input type="text" pInputText id="poaNumber" [(ngModel)]="formData.poaNumber" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_POA_NUMBER' | translate" />
+                                    <input type="text" pInputText id="poaNumber" [(ngModel)]="formData.poaNumber" title="POA Number" placeholder="POA Number" aria-label="POA Number" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_POA_NUMBER' | translate" [attr.aria-label]="'CLIENTS.POA_NUMBER' | translate" />
                                 </div>
                                 <div>
                                     <label for="poaLetter" class="block text-sm font-bold text-slate-800 mb-1.5">{{ 'CLIENTS.POA_LETTER' | translate }}</label>
-                                    <input type="text" pInputText id="poaLetter" [(ngModel)]="formData.poaLetter" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_POA_LETTER' | translate" />
+                                    <input type="text" pInputText id="poaLetter" [(ngModel)]="formData.poaLetter" title="POA Letter" placeholder="POA Letter" aria-label="POA Letter" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_POA_LETTER' | translate" [attr.aria-label]="'CLIENTS.POA_LETTER' | translate" />
                                 </div>
                                 <div>
                                     <label for="poaYear" class="block text-sm font-bold text-slate-800 mb-1.5">{{ 'CLIENTS.POA_YEAR' | translate }}</label>
-                                    <input type="number" pInputText id="poaYear" [(ngModel)]="formData.poaYear" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_POA_YEAR' | translate" />
+                                    <input type="number" pInputText id="poaYear" [(ngModel)]="formData.poaYear" title="POA Year" placeholder="POA Year" aria-label="POA Year" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_POA_YEAR' | translate" [attr.aria-label]="'CLIENTS.POA_YEAR' | translate" />
                                 </div>
                             </div>
 
                             <!-- Row 2: Notary Office -->
                             <div>
                                 <label for="poaOffice" class="block text-sm font-bold text-slate-800 mb-1.5">{{ 'CLIENTS.POA_OFFICE' | translate }}</label>
-                                <input type="text" pInputText id="poaOffice" [(ngModel)]="formData.poaOffice" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_POA_OFFICE' | translate" />
+                                <input type="text" pInputText id="poaOffice" [(ngModel)]="formData.poaOffice" title="POA Office" placeholder="POA Office" aria-label="POA Office" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_POA_OFFICE' | translate" [attr.aria-label]="'CLIENTS.POA_OFFICE' | translate" />
                             </div>
 
                             <!-- Row 3: POA Type (Compact) beside Capacity Details (Spacious) -->
@@ -273,7 +255,7 @@
                                 @if (formData.poaType === 'صفة' || formData.poaType === 'نفسه وصفة') {
                                     <div class="w-full flex-1">
                                         <label for="poaCapacityDetails" class="block text-sm font-bold text-slate-800 mb-1.5">{{ 'CLIENTS.POA_CAPACITY_DETAILS' | translate }}</label>
-                                        <input type="text" pInputText id="poaCapacityDetails" [(ngModel)]="formData.poaCapacityDetails" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_CAPACITY_DETAILS' | translate" />
+                                        <input type="text" pInputText id="poaCapacityDetails" [(ngModel)]="formData.poaCapacityDetails" title="POA Capacity Details" placeholder="POA Capacity Details" aria-label="POA Capacity Details" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_CAPACITY_DETAILS' | translate" [attr.aria-label]="'CLIENTS.POA_CAPACITY_DETAILS' | translate" />
                                     </div>
                                 }
                             </div>
@@ -289,14 +271,14 @@
                         <label for="relativesInfo" class="block font-bold text-slate-800 text-sm mb-1.5">
                             <i class="pi pi-users me-1.5 text-blue-600"></i>{{ 'CLIENTS.RELATIVES_INFO' | translate }}
                         </label>
-                        <textarea pTextarea id="relativesInfo" [(ngModel)]="formData.relativesInfo" rows="3" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_RELATIVES' | translate"></textarea>
+                        <textarea pTextarea id="relativesInfo" [(ngModel)]="formData.relativesInfo" rows="3" title="Relatives Info" placeholder="Relatives Info" aria-label="Relatives Info" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_RELATIVES' | translate" [attr.aria-label]="'CLIENTS.RELATIVES_INFO' | translate"></textarea>
                     </div>
 
                     <div class="field">
                         <label for="instructions" class="block font-bold text-slate-800 text-sm mb-1.5">
                             <i class="pi pi-info-circle me-1.5 text-amber-600"></i>{{ 'CLIENTS.INSTRUCTIONS' | translate }}
                         </label>
-                        <textarea pTextarea id="instructions" [(ngModel)]="formData.instructions" rows="3" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_INSTRUCTIONS' | translate"></textarea>
+                        <textarea pTextarea id="instructions" [(ngModel)]="formData.instructions" rows="3" title="Instructions" placeholder="Instructions" aria-label="Instructions" class="w-full border-slate-300" [placeholder]="'CLIENTS.PLACEHOLDERS.ENTER_INSTRUCTIONS' | translate" [attr.aria-label]="'CLIENTS.INSTRUCTIONS' | translate"></textarea>
                     </div>
                 </div>
             </p-tabpanel>
@@ -304,7 +286,13 @@
     </p-tabs>
 </div>
 
-<div class="flex justify-end gap-2 mt-6 border-t pt-4 border-slate-100">
-    <p-button [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="cancel()"></p-button>
-    <p-button [label]="'COMMON.SAVE' | translate" icon="pi pi-check" (onClick)="save()"></p-button>
+<div class="flex items-center justify-between gap-2 mt-6 border-t pt-4 border-slate-100" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
+    <div class="flex items-center gap-2">
+        <button type="button" pButton [label]="'COMMON.PREVIOUS' | translate" [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-right' : 'pi pi-arrow-left'" title="Previous" aria-label="Previous" [attr.aria-label]="'COMMON.PREVIOUS' | translate" class="p-button-outlined p-button-secondary p-button-sm" [disabled]="activeTab === '0'" (click)="prevTab()"></button>
+        <button type="button" pButton [label]="'COMMON.NEXT' | translate" [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-left' : 'pi pi-arrow-right'" iconPos="right" title="Next" aria-label="Next" [attr.aria-label]="'COMMON.NEXT' | translate" class="p-button-outlined p-button-info p-button-sm" [disabled]="activeTab === '3'" (click)="nextTab()"></button>
+    </div>
+    <div class="flex items-center gap-2">
+        <p-button [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="cancel()"></p-button>
+        <p-button [label]="'COMMON.SAVE' | translate" icon="pi pi-check" (onClick)="save()"></p-button>
+    </div>
 </div>

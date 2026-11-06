@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -23,6 +24,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   standalone: true,
   imports: [
     CommonModule,
+    RouterModule,
     TableModule,
     ButtonModule,
     InputTextModule,
@@ -189,14 +191,42 @@ export class ClientsPage implements OnInit {
 
   getCaseStatusLabel(status: string): string {
     const keyMap: { [key: string]: string } = {
-      'Open': 'CASES.OPEN',
+      'InProgress': 'CASES.IN_PROGRESS',
+      '1': 'CASES.IN_PROGRESS',
+      'Open': 'CASES.IN_PROGRESS',
       'Pending': 'CASES.PENDING',
-      'Closed': 'CASES.CLOSED',
+      '2': 'CASES.PENDING',
+      'Finished': 'CASES.FINISHED',
+      '4': 'CASES.FINISHED',
+      'Closed': 'CASES.FINISHED',
+      'Suspended': 'CASES.SUSPENDED',
+      '5': 'CASES.SUSPENDED',
       'Judgment': 'CASES.JUDGMENT',
       'Appeal': 'CASES.APPEAL',
       'Cancelled': 'CASES.CANCELLED'
     };
     return keyMap[status] ? this.translate.instant(keyMap[status]) : status;
+  }
+
+  getCaseStatusSeverity(status: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' | undefined {
+    switch (status) {
+      case 'InProgress':
+      case '1':
+      case 'Open':
+        return 'info';
+      case 'Pending':
+      case '2':
+        return 'warn';
+      case 'Finished':
+      case '4':
+      case 'Closed':
+        return 'success';
+      case 'Suspended':
+      case '5':
+        return 'danger';
+      default:
+        return 'secondary';
+    }
   }
 
   getInvoiceStatusLabel(status: string): string {

@@ -1,114 +1,267 @@
 <p-dialog [header]="(session() ? 'SESSIONS.EDIT_SESSION' : 'SESSIONS.ADD_SESSION_NEW') | translate" 
           [(visible)]="visible" 
           [modal]="true" 
-          [breakpoints]="{ '960px': '75vw', '640px': '90vw' }" 
-          [style]="{ width: '500px' }" 
+          [breakpoints]="{ '1200px': '85vw', '960px': '92vw', '640px': '96vw' }" 
+          [style]="{ width: '920px', maxWidth: '96vw' }" 
           [draggable]="false" 
           [resizable]="false"
           styleClass="rtl-dialog">
     
     <form [formGroup]="sessionForm" class="flex flex-col gap-4 mt-2" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
-        <!-- Title -->
-        <div class="flex flex-col gap-2">
-            <label for="title" class="font-bold text-slate-700">{{ 'SESSIONS.SESSION_TITLE' | translate }}</label>
-            <input pInputText id="title" formControlName="title" [placeholder]="'SESSIONS.TITLE_PLACEHOLDER' | translate" 
-                   [class.p-invalid]="sessionForm.get('title')?.touched && sessionForm.get('title')?.invalid" />
-            @if (sessionForm.get('title')?.touched && sessionForm.get('title')?.invalid) {
-                <small class="text-red-500">{{ 'SESSIONS.TITLE_REQUIRED' | translate }}</small>
-            }
-        </div>
-
-        <!-- Case Selection -->
-        <div class="flex flex-col gap-2" [class.opacity-60]="caseId()">
-            <label for="caseId" class="font-bold text-slate-700">{{ 'SESSIONS.LINKED_CASE' | translate }}</label>
-            
-            @if (caseId()) {
-                <div class="w-full">
-                    <input pInputText [value]="getSelectedCase()?.caseNumber + ' - ' + getSelectedCase()?.title" 
-                           class="w-full bg-slate-200 border-slate-200 text-slate-500 font-medium cursor-not-allowed opacity-70 p-disabled" 
-                           readonly />
-                </div>
-            } @else {
-                <p-select id="caseId" [options]="cases()" formControlName="caseId" 
-                          optionLabel="title" optionValue="id" [filter]="true" filterBy="caseNumber,title"
-                          [placeholder]="'SESSIONS.SELECT_CASE' | translate" styleClass="w-full" appendTo="body"
-                          [class.p-invalid]="sessionForm.get('caseId')?.touched && sessionForm.get('caseId')?.invalid">
-                    <ng-template pTemplate="selectedItem">
-                        @if (getSelectedCase(); as selected) {
-                            <div class="flex items-center gap-2">
-                                <span class="font-mono text-blue-600 font-bold">{{ selected.caseNumber }}</span>
-                                <span>-</span>
-                                <span>{{ selected.title }}</span>
-                            </div>
-                        }
-                    </ng-template>
-                    <ng-template pTemplate="item" let-case>
-                        <div class="flex flex-col">
-                            <span class="font-mono text-blue-600 text-xs font-bold">{{ case.caseNumber }}</span>
-                            <span class="text-sm">{{ case.title }}</span>
-                        </div>
-                    </ng-template>
-                </p-select>
-                @if (sessionForm.get('caseId')?.touched && sessionForm.get('caseId')?.invalid) {
-                    <small class="text-red-500">{{ 'SESSIONS.CASE_REQUIRED' | translate }}</small>
+        
+        <!-- Row 1: Title & Linked Case -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Title -->
+            <div class="flex flex-col gap-1.5">
+                <label for="title" class="font-bold text-slate-700 text-sm">
+                    {{ 'SESSIONS.SESSION_TITLE' | translate }} <span class="text-red-500">*</span>
+                </label>
+                <input pInputText id="title" formControlName="title" title="Session Title" placeholder="Session Title" aria-label="Session Title" [attr.aria-label]="'SESSIONS.SESSION_TITLE' | translate" [placeholder]="'SESSIONS.TITLE_PLACEHOLDER' | translate" class="w-full" [class.p-invalid]="sessionForm.get('title')?.touched && sessionForm.get('title')?.invalid" />
+                @if (sessionForm.get('title')?.touched && sessionForm.get('title')?.invalid) {
+                    <small class="text-red-500 text-xs">{{ 'SESSIONS.TITLE_REQUIRED' | translate }}</small>
                 }
-            }
+            </div>
+
+            <!-- Case Selection -->
+            <div class="flex flex-col gap-1.5" [class.opacity-60]="caseId()">
+                <label for="caseId" class="font-bold text-slate-700 text-sm">
+                    {{ 'SESSIONS.LINKED_CASE' | translate }} <span class="text-red-500">*</span>
+                </label>
+                
+                @if (caseId()) {
+                    <div class="w-full">
+                        <input id="linkedCaseReadonly" pInputText [value]="getSelectedCase()?.caseNumber + ' - ' + getSelectedCase()?.title" title="Linked Case" placeholder="Linked Case" aria-label="Linked Case" [attr.aria-label]="'SESSIONS.LINKED_CASE' | translate" class="w-full bg-slate-100 border-slate-200 text-slate-600 font-medium cursor-not-allowed p-disabled" readonly />
+                    </div>
+                } @else {
+                    <p-select id="caseId" [options]="cases()" formControlName="caseId" 
+                              optionLabel="title" optionValue="id" [filter]="true" filterBy="caseNumber,courtCaseNumber,title"
+                              [placeholder]="'SESSIONS.SELECT_CASE' | translate" styleClass="w-full" appendTo="body"
+                              [class.p-invalid]="sessionForm.get('caseId')?.touched && sessionForm.get('caseId')?.invalid">
+                        <ng-template pTemplate="selectedItem">
+                            @if (getSelectedCase(); as selected) {
+                                <div class="flex items-center gap-2 truncate">
+                                    <span class="font-mono text-blue-600 font-bold text-xs">{{ selected.courtCaseNumber || selected.caseNumber }}</span>
+                                    <span>-</span>
+                                    <span class="truncate text-sm">{{ selected.title }}</span>
+                                </div>
+                            }
+                        </ng-template>
+                        <ng-template pTemplate="item" let-c>
+                            <div class="flex flex-col">
+                                <span class="font-mono text-blue-600 text-xs font-bold">{{ c.courtCaseNumber ? c.courtCaseNumber + ' (' + c.caseNumber + ')' : c.caseNumber }}</span>
+                                <span class="text-sm font-medium text-slate-800">{{ c.title }}</span>
+                                @if (c.clientName) {
+                                    <span class="text-xs text-slate-500">{{ c.clientName }}</span>
+                                }
+                            </div>
+                        </ng-template>
+                    </p-select>
+                    @if (sessionForm.get('caseId')?.touched && sessionForm.get('caseId')?.invalid) {
+                        <small class="text-red-500 text-xs">{{ 'SESSIONS.CASE_REQUIRED' | translate }}</small>
+                    }
+                }
+            </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
+        <!-- Row 2: Court (Full / Main) & Location + Circuit -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+            <!-- Court Name (6 cols) -->
+            <div class="flex flex-col gap-1.5 md:col-span-6">
+                <label for="courtName" class="font-bold text-slate-700 text-sm">
+                    {{ 'SESSIONS.COURT_NAME' | translate }} <span class="text-red-500">*</span>
+                </label>
+                <input pInputText id="courtName" formControlName="courtName" title="Court Name" placeholder="Court Name" aria-label="Court Name" [attr.aria-label]="'SESSIONS.COURT_NAME' | translate" [placeholder]="'SESSIONS.COURT_NAME_PLACEHOLDER' | translate" class="w-full" [class.p-invalid]="sessionForm.get('courtName')?.touched && sessionForm.get('courtName')?.invalid" />
+                @if (sessionForm.get('courtName')?.touched && sessionForm.get('courtName')?.invalid) {
+                    <small class="text-red-500 text-xs">{{ 'SESSIONS.COURT_NAME_REQUIRED' | translate }}</small>
+                }
+            </div>
+
+            <!-- Location (Room / Floor) (3 cols) -->
+            <div class="flex flex-col gap-1.5 md:col-span-3">
+                <label for="location" class="font-bold text-slate-700 text-sm">
+                    {{ 'SESSIONS.LOCATION_ROOM' | translate }}
+                </label>
+                <input pInputText id="location" formControlName="location" title="Location" placeholder="Location" aria-label="Location" [attr.aria-label]="'SESSIONS.LOCATION_ROOM' | translate" [placeholder]="'SESSIONS.LOCATION_ROOM_PLACEHOLDER' | translate" class="w-full" />
+            </div>
+
+            <!-- Circuit Number (3 cols) -->
+            <div class="flex flex-col gap-1.5 md:col-span-3">
+                <label for="circuitNumber" class="font-bold text-slate-700 text-sm">
+                    {{ 'SESSIONS.CIRCUIT_NUMBER' | translate }}
+                </label>
+                <input pInputText id="circuitNumber" formControlName="circuitNumber" title="Circuit Number" placeholder="Circuit Number" aria-label="Circuit Number" [attr.aria-label]="'SESSIONS.CIRCUIT_NUMBER' | translate" [placeholder]="'SESSIONS.CIRCUIT_NUMBER_PLACEHOLDER' | translate" class="w-full font-medium" />
+            </div>
+        </div>
+
+        <!-- Row 3: Date, Time & Status -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <!-- Date -->
-            <div class="flex flex-col gap-2">
-                <label for="scheduledDate" class="font-bold text-slate-700">{{ 'SESSIONS.DATE_TIME' | translate }}</label>
+            <div class="flex flex-col gap-1.5">
+                <label for="scheduledDate" class="font-bold text-slate-700 text-sm">
+                    {{ 'SESSIONS.DATE' | translate }} <span class="text-red-500">*</span>
+                </label>
                 <p-datepicker id="scheduledDate" formControlName="scheduledDate" [showIcon]="true"
                              dateFormat="dd/mm/yy" appendTo="body" styleClass="w-full"
                              [class.p-invalid]="sessionForm.get('scheduledDate')?.touched && sessionForm.get('scheduledDate')?.invalid"></p-datepicker>
                 @if (sessionForm.get('scheduledDate')?.touched && sessionForm.get('scheduledDate')?.invalid) {
-                    <small class="text-red-500">{{ 'SESSIONS.DATE_TIME_REQUIRED' | translate }}</small>
+                    <small class="text-red-500 text-xs">{{ 'SESSIONS.DATE_TIME_REQUIRED' | translate }}</small>
                 }
             </div>
 
             <!-- Time -->
-            <div class="flex flex-col gap-2">
-                <label for="scheduledTime" class="font-bold text-slate-700">{{ 'SESSIONS.TIME' | translate }}</label>
-                <input pInputText type="time" id="scheduledTime" formControlName="scheduledTime"
-                       [class.p-invalid]="sessionForm.get('scheduledTime')?.touched && sessionForm.get('scheduledTime')?.invalid" />
+            <div class="flex flex-col gap-1.5">
+                <label for="scheduledTime" class="font-bold text-slate-700 text-sm">
+                    {{ 'SESSIONS.TIME' | translate }} <span class="text-red-500">*</span>
+                </label>
+                <input pInputText type="time" id="scheduledTime" formControlName="scheduledTime" title="Scheduled Time" placeholder="Scheduled Time" aria-label="Scheduled Time" [attr.aria-label]="'SESSIONS.TIME' | translate" class="w-full" [class.p-invalid]="sessionForm.get('scheduledTime')?.touched && sessionForm.get('scheduledTime')?.invalid" />
                 @if (sessionForm.get('scheduledTime')?.touched && sessionForm.get('scheduledTime')?.invalid) {
-                    <small class="text-red-500">{{ 'SESSIONS.DATE_TIME_REQUIRED' | translate }}</small>
+                    <small class="text-red-500 text-xs">{{ 'SESSIONS.DATE_TIME_REQUIRED' | translate }}</small>
                 }
             </div>
-        </div>
 
-        <div class="grid grid-cols-2 gap-4">
             <!-- Status -->
-            <div class="flex flex-col gap-2">
-                <label for="status" class="font-bold text-slate-700">{{ 'SESSIONS.STATUS' | translate }}</label>
+            <div class="flex flex-col gap-1.5">
+                <label for="status" class="font-bold text-slate-700 text-sm">
+                    {{ 'SESSIONS.STATUS' | translate }} <span class="text-red-500">*</span>
+                </label>
                 <p-select id="status" [options]="statuses()" formControlName="status" 
-                          optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body"></p-select>
+                          optionValue="value" styleClass="w-full" appendTo="body">
+                    <ng-template pTemplate="selectedItem" let-selectedOption>
+                        {{ selectedOption?.labelKey | translate }}
+                    </ng-template>
+                    <ng-template pTemplate="item" let-option>
+                        {{ option?.labelKey | translate }}
+                    </ng-template>
+                </p-select>
             </div>
         </div>
 
-        <!-- Court Name -->
-        <div class="flex flex-col gap-2">
-            <label for="courtName" class="font-bold text-slate-700">{{ 'SESSIONS.LOCATION' | translate }}</label>
-            <input pInputText id="courtName" formControlName="courtName" [placeholder]="'SESSIONS.LOCATION_PLACEHOLDER' | translate"
-                   [class.p-invalid]="sessionForm.get('courtName')?.touched && sessionForm.get('courtName')?.invalid" />
-            @if (sessionForm.get('courtName')?.touched && sessionForm.get('courtName')?.invalid) {
-                <small class="text-red-500">{{ 'SESSIONS.LOCATION_REQUIRED' | translate }}</small>
-            }
+        <!-- Section: Current Session (الجلسة الحالية) -->
+        <div class="p-3.5 rounded-xl border border-blue-100 bg-blue-50/30 flex flex-col gap-3">
+            <div class="flex items-center gap-2 text-blue-800 font-bold text-sm">
+                <i class="pi pi-calendar-clock text-blue-600"></i>
+                <span>{{ 'SESSIONS.CURRENT_SESSION_SEC' | translate }}</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- Current Session Role -->
+                <div class="flex flex-col gap-1.5">
+                    <label for="currentSessionRole" class="font-semibold text-slate-700 text-xs">
+                        {{ 'SESSIONS.CURRENT_SESSION_ROLE' | translate }}
+                    </label>
+                    <input pInputText id="currentSessionRole" formControlName="currentSessionRole" title="Current Session Role" placeholder="Current Session Role" aria-label="Current Session Role" [attr.aria-label]="'SESSIONS.CURRENT_SESSION_ROLE' | translate" [placeholder]="'SESSIONS.CURRENT_SESSION_ROLE_PLACEHOLDER' | translate" class="w-full" />
+                </div>
+
+                <!-- Assigned Lawyer (Current) -->
+                <div class="flex flex-col gap-1.5">
+                    <label for="assignedLawyerId" class="font-semibold text-slate-700 text-xs">
+                        {{ 'SESSIONS.ASSIGNED_LAWYER' | translate }}
+                    </label>
+                    <p-select id="assignedLawyerId" [options]="lawyers()" formControlName="assignedLawyerId" 
+                              optionLabel="fullName" optionValue="id" [showClear]="true" [filter]="true"
+                              [placeholder]="'SESSIONS.SELECT_LAWYER' | translate" styleClass="w-full" appendTo="body"></p-select>
+                </div>
+            </div>
         </div>
+
+        <!-- Previous Session (الجلسة السابقة) -->
+        <div class="p-3.5 rounded-xl border border-amber-100 bg-amber-50/30 flex flex-col gap-3">
+            <div class="flex items-center gap-2 text-amber-800 font-bold text-sm">
+                <i class="pi pi-history text-amber-600"></i>
+                <span>{{ 'SESSIONS.PREVIOUS_SESSION_SEC' | translate }}</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                <!-- Previous Session Role (4 cols) -->
+                <div class="flex flex-col gap-1.5 md:col-span-4">
+                    <label for="previousSessionRole" class="font-semibold text-slate-700 text-xs">
+                        {{ 'SESSIONS.PREVIOUS_SESSION_ROLE' | translate }}
+                    </label>
+                    <input pInputText id="previousSessionRole" formControlName="previousSessionRole" title="Previous Session Role" placeholder="Previous Session Role" aria-label="Previous Session Role" [attr.aria-label]="'SESSIONS.PREVIOUS_SESSION_ROLE' | translate" [placeholder]="'SESSIONS.PREVIOUS_SESSION_ROLE_PLACEHOLDER' | translate" class="w-full" />
+                </div>
+
+                <!-- Postponement Reason (4 cols) -->
+                <div class="flex flex-col gap-1.5 md:col-span-4">
+                    <label for="postponementReason" class="font-semibold text-slate-700 text-xs">
+                        {{ 'SESSIONS.POSTPONEMENT_REASON' | translate }}
+                    </label>
+                    <input pInputText id="postponementReason" formControlName="postponementReason" title="Postponement Reason" placeholder="Postponement Reason" aria-label="Postponement Reason" [attr.aria-label]="'SESSIONS.POSTPONEMENT_REASON' | translate" [placeholder]="'SESSIONS.POSTPONEMENT_REASON_PLACEHOLDER' | translate" class="w-full" />
+                </div>
+
+                <!-- Previous Session Lawyer (4 cols) -->
+                <div class="flex flex-col gap-1.5 md:col-span-4">
+                    <label for="previousSessionLawyerId" class="font-semibold text-slate-700 text-xs">
+                        {{ 'SESSIONS.PREVIOUS_SESSION_LAWYER' | translate }}
+                    </label>
+                    <p-select id="previousSessionLawyerId" [options]="lawyers()" formControlName="previousSessionLawyerId" 
+                              optionLabel="fullName" optionValue="id" [showClear]="true" [filter]="true"
+                              [placeholder]="'SESSIONS.SELECT_LAWYER' | translate" styleClass="w-full" appendTo="body"></p-select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toggle outcome/decision section (when adding new session) -->
+        @if (!session()) {
+            <div class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-slate-50/70 hover:bg-slate-100/70 transition-colors cursor-pointer select-none"
+                 (click)="showOutcomeSection.set(!showOutcomeSection())">
+                <p-checkbox [binary]="true" [ngModel]="showOutcomeSection()" (ngModelChange)="showOutcomeSection.set($event)" 
+                            [ngModelOptions]="{standalone: true}"></p-checkbox>
+                <label class="font-bold text-slate-700 text-xs cursor-pointer flex items-center gap-1.5">
+                    <i class="pi pi-check-circle text-emerald-600"></i>
+                    <span>{{ 'SESSIONS.SHOW_OUTCOME_CHECKBOX' | translate }}</span>
+                </label>
+            </div>
+        }
+
+        <!-- Section: Session Proceedings & Decision (ما تم في الجلسة والقرار) -->
+        @if (showOutcomeSection()) {
+            <!-- Session Proceedings (ما تم في الجلسة) -->
+            <div class="flex flex-col gap-1.5">
+                <label for="sessionProceedings" class="font-bold text-slate-700 text-sm">
+                    {{ 'SESSIONS.SESSION_PROCEEDINGS' | translate }}
+                </label>
+                <textarea pTextarea id="sessionProceedings" formControlName="sessionProceedings" rows="2" title="Session Proceedings" placeholder="Session Proceedings" aria-label="Session Proceedings" [attr.aria-label]="'SESSIONS.SESSION_PROCEEDINGS' | translate" [placeholder]="'SESSIONS.SESSION_PROCEEDINGS_PLACEHOLDER' | translate" class="w-full"></textarea>
+            </div>
+
+            <!-- Section: Decision (قرار الجلسة) -->
+            <div class="p-3.5 rounded-xl border border-emerald-100 bg-emerald-50/30 flex flex-col gap-3">
+                <div class="flex items-center gap-2 text-emerald-800 font-bold text-sm">
+                    <i class="pi pi-check-circle text-emerald-600"></i>
+                    <span>{{ 'SESSIONS.DECISION_SEC' | translate }}</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                    <!-- Decision Key (5 cols) -->
+                    <div class="flex flex-col gap-1.5 md:col-span-5">
+                        <label for="decisionKey" class="font-semibold text-slate-700 text-xs">
+                            {{ 'SESSIONS.DECISION_KEY' | translate }}
+                        </label>
+                        <p-select id="decisionKey" [options]="decisionKeys()" formControlName="decisionKey" 
+                                  optionLabel="label" optionValue="value" [showClear]="true" [filter]="true"
+                                  [placeholder]="'SESSIONS.SELECT_DECISION' | translate" styleClass="w-full" appendTo="body"></p-select>
+                    </div>
+
+                    <!-- Decision Text (7 cols) -->
+                    <div class="flex flex-col gap-1.5 md:col-span-7">
+                        <label for="decisionText" class="font-semibold text-slate-700 text-xs">
+                            {{ 'SESSIONS.DECISION_TEXT' | translate }}
+                        </label>
+                        <input pInputText id="decisionText" formControlName="decisionText" title="Decision Text" placeholder="Decision Text" aria-label="Decision Text" [attr.aria-label]="'SESSIONS.DECISION_TEXT' | translate" [placeholder]="'SESSIONS.DECISION_TEXT_PLACEHOLDER' | translate" class="w-full" />
+                    </div>
+                </div>
+            </div>
+        }
 
         <!-- Notes -->
-        <div class="flex flex-col gap-2">
-            <label for="notes" class="font-bold text-slate-700">{{ 'CASES.NOTES_LABEL' | translate }}</label>
-            <textarea pTextarea id="notes" formControlName="notes" [rows]="3" [placeholder]="'SESSIONS.NOTES_PLACEHOLDER' | translate"></textarea>
+        <div class="flex flex-col gap-1.5">
+            <label for="notes" class="font-bold text-slate-700 text-sm">{{ 'COMMON.DESCRIPTION' | translate }} / {{ 'CASES.NOTES_LABEL' | translate }}</label>
+            <textarea pTextarea id="notes" formControlName="notes" rows="2" title="Notes" placeholder="Notes" aria-label="Notes" [attr.aria-label]="'CASES.NOTES_LABEL' | translate" [placeholder]="'SESSIONS.NOTES_PLACEHOLDER' | translate" class="w-full"></textarea>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex justify-end gap-3 mt-4 pt-3 border-t border-slate-100">
+            <button pButton type="button" [label]="'COMMON.CANCEL' | translate" title="Cancel" aria-label="Cancel" [attr.aria-label]="'COMMON.CANCEL' | translate" class="p-button-outlined p-button-secondary" (click)="close()"></button>
+            <button pButton type="submit" [label]="'COMMON.SAVE' | translate" title="Save" aria-label="Save" [attr.aria-label]="'COMMON.SAVE' | translate" class="p-button-primary shadow-sm" [loading]="saving()" (click)="save()"></button>
         </div>
     </form>
-
-    <ng-template pTemplate="footer">
-        <div class="flex justify-end gap-2">
-            <button pButton [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="close()"></button>
-            <button pButton [label]="(session() ? 'COMMON.SAVE' : 'COMMON.ADD') | translate" icon="pi pi-check" 
-                    class="p-button-primary shadow-md" [loading]="saving()" (click)="save()"></button>
-        </div>
-    </ng-template>
 </p-dialog>

@@ -16,6 +16,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { AppStateService } from '../../../core/services/app-state.service';
+import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-filter.directive';
 
 @Component({
   selector: 'app-documents-page',
@@ -27,6 +28,7 @@ import { AppStateService } from '../../../core/services/app-state.service';
     ButtonModule,
     InputTextModule,
     SelectModule,
+    AutoSelectFilterDirective,
     TooltipModule,
     FormsModule,
     ToastModule,

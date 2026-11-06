@@ -12,9 +12,10 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 import { CaseService, CaseListDto } from '../../../core/services/case.service';
 import { ClientService, Client } from '../../../core/services/client';
-import { InvoiceStatus, InvoiceListDto } from '../../../core/services/finance.service';
+import { InvoiceStatus, InvoiceListDto, FinanceCategory } from '../../../core/services/finance.service';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { AppStateService } from '../../../core/services/app-state.service';
+import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-filter.directive';
 
 @Component({
   selector: 'app-invoice-dialog',
@@ -29,6 +30,7 @@ import { AppStateService } from '../../../core/services/app-state.service';
     InputTextModule,
     InputNumberModule,
     SelectModule,
+    AutoSelectFilterDirective,
     DatePickerModule,
     TextareaModule,
     TranslateModule
@@ -48,6 +50,7 @@ export class InvoiceDialog {
   visible = model<boolean>(false);
   invoice = input<InvoiceListDto | null>(null);
   caseId = input<string | null>(null);
+  defaultCategory = input<FinanceCategory>(FinanceCategory.Fees);
   @Output() onSave = new EventEmitter<any>();
 
   invoiceForm: FormGroup;
@@ -75,6 +78,7 @@ export class InvoiceDialog {
       amount: [0, [Validators.required, Validators.min(1)]],
       dueDate: [new Date(), Validators.required],
       status: [InvoiceStatus.Unpaid],
+      category: [FinanceCategory.Fees, Validators.required],
       notes: ['']
     });
 
@@ -119,6 +123,7 @@ export class InvoiceDialog {
             this.selectedClientId.set(inv.clientId || null); // Note: Might need clientId in InvoiceListDto
             this.invoiceForm.patchValue({
               ...inv,
+              category: inv.category ?? FinanceCategory.Fees,
               dueDate: new Date(inv.dueDate)
             });
           } else {
@@ -132,6 +137,7 @@ export class InvoiceDialog {
               invoiceNumber: '',
               title: '',
               status: InvoiceStatus.Unpaid,
+              category: this.defaultCategory() ?? FinanceCategory.Fees,
               dueDate: new Date(),
               amount: 0,
               notes: ''

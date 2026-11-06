@@ -10,6 +10,7 @@ import { PasswordModule } from 'primeng/password';
 import { TooltipModule } from 'primeng/tooltip';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { UserManagementService } from '../../../core/services/user-management.service';
+import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-filter.directive';
 
 @Component({
   selector: 'app-user-management-dialog',
@@ -21,6 +22,7 @@ import { UserManagementService } from '../../../core/services/user-management.se
     ButtonModule, 
     InputTextModule, 
     SelectModule, 
+    AutoSelectFilterDirective,
     CheckboxModule,
     ToggleSwitchModule,
     PasswordModule,

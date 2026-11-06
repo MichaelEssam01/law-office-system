@@ -9,9 +9,10 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
 import { CaseService, CaseListDto } from '../../../core/services/case.service';
 import { ClientService, Client } from '../../../core/services/client';
-import { FinanceService, PaymentMethod, InvoiceListDto, FinancialSummaryDto, InvoiceStatus } from '../../../core/services/finance.service';
+import { FinanceService, PaymentMethod, InvoiceListDto, FinancialSummaryDto, InvoiceStatus, FinanceCategory } from '../../../core/services/finance.service';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { AppStateService } from '../../../core/services/app-state.service';
+import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-filter.directive';
 
 @Component({
   selector: 'app-payment-dialog',
@@ -24,6 +25,7 @@ import { AppStateService } from '../../../core/services/app-state.service';
     ButtonModule,
     InputNumberModule,
     SelectModule,
+    AutoSelectFilterDirective,
     DatePickerModule,
     TextareaModule,
     TranslateModule
@@ -78,6 +80,7 @@ export class PaymentDialog {
       amount: [0, [Validators.required, Validators.min(1)]],
       paymentDate: [new Date(), Validators.required],
       method: [PaymentMethod.Cash, Validators.required],
+      category: [FinanceCategory.Fees],
       notes: ['']
     });
 
@@ -90,14 +93,16 @@ export class PaymentDialog {
         'FINANCE.METHODS.BANK',
         'FINANCE.METHODS.CARD',
         'FINANCE.METHODS.CHECK',
+        'FINANCE.METHODS.WALLET',
         'FINANCE.METHODS.OTHER'
       ]).subscribe(translations => {
         this.methods.set([
-          { label: translations['FINANCE.METHODS.CASH'], value: PaymentMethod.Cash },
-          { label: translations['FINANCE.METHODS.BANK'], value: PaymentMethod.BankTransfer },
-          { label: translations['FINANCE.METHODS.CARD'], value: PaymentMethod.CreditCard },
-          { label: translations['FINANCE.METHODS.CHECK'], value: PaymentMethod.Check },
-          { label: translations['FINANCE.METHODS.OTHER'], value: PaymentMethod.Other }
+          { label: translations['FINANCE.METHODS.CASH'], value: PaymentMethod.Cash, icon: 'pi pi-money-bill' },
+          { label: translations['FINANCE.METHODS.BANK'], value: PaymentMethod.BankTransfer, icon: 'pi pi-building' },
+          { label: translations['FINANCE.METHODS.CARD'], value: PaymentMethod.CreditCard, icon: 'pi pi-credit-card' },
+          { label: translations['FINANCE.METHODS.CHECK'], value: PaymentMethod.Check, icon: 'pi pi-file-edit' },
+          { label: translations['FINANCE.METHODS.WALLET'], value: PaymentMethod.ElectronicWallet, icon: 'pi pi-mobile' },
+          { label: translations['FINANCE.METHODS.OTHER'], value: PaymentMethod.Other, icon: 'pi pi-wallet' }
         ]);
       });
     });
@@ -217,6 +222,9 @@ export class PaymentDialog {
       // Pre-set amount to remaining balance, with robust calculation
       const remaining = inv.remainingAmount ?? (inv.amount - inv.paidAmount);
       this.paymentForm.get('amount')?.setValue(remaining);
+      if (inv.category !== undefined && inv.category !== null) {
+        this.paymentForm.get('category')?.setValue(inv.category);
+      }
     }
   }
 

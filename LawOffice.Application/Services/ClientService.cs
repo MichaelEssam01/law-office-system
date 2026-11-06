@@ -216,6 +216,7 @@ public class ClientService : IClientService
         return new ClientDto
         {
             Id = client.Id,
+            ClientNumber = client.ClientNumber,
             FirstName = client.FirstName,
             SecondName = client.SecondName,
             ThirdName = client.ThirdName,

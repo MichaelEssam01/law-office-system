@@ -16,8 +16,8 @@ public class InvoicesController : ControllerBase
     public InvoicesController(IInvoiceService invoiceService) => _invoiceService = invoiceService;
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<InvoiceListDto>>> GetInvoices([FromQuery] Guid? caseId, [FromQuery] InvoiceStatus? status)
-        => Ok(await _invoiceService.GetInvoicesAsync(caseId, status));
+    public async Task<ActionResult<IEnumerable<InvoiceListDto>>> GetInvoices([FromQuery] Guid? caseId, [FromQuery] InvoiceStatus? status, [FromQuery] FinanceCategory? category)
+        => Ok(await _invoiceService.GetInvoicesAsync(caseId, status, category));
 
     [HttpGet("{id}")]
     public async Task<ActionResult<InvoiceDetailDto>> GetInvoice(Guid id)

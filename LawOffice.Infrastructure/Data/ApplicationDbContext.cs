@@ -13,6 +13,7 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
 
     public DbSet<Client> Clients { get; set; }
     public DbSet<Case> Cases { get; set; }
+    public DbSet<CaseParty> CaseParties { get; set; }
     public DbSet<Session> Sessions { get; set; }
     public DbSet<Invoice> Invoices { get; set; }
     public DbSet<Payment> Payments { get; set; }
@@ -28,6 +29,15 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     {
         base.OnModelCreating(modelBuilder);
 
+        // Client Configuration
+        modelBuilder.Entity<Client>(entity =>
+        {
+            entity.Property(c => c.ClientNumber)
+                .ValueGeneratedOnAdd();
+            entity.HasIndex(c => c.ClientNumber)
+                .IsUnique();
+        });
+
         // Case Configuration
         modelBuilder.Entity<Case>(entity =>
         {
@@ -41,8 +51,24 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
             entity.HasOne(c => c.AssignedLawyer)
                 .WithMany(u => u.Cases)
                 .HasForeignKey(c => c.AssignedLawyerId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(c => c.Parties)
+                .WithOne(p => p.Case)
+                .HasForeignKey(p => p.CaseId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // CaseParty Configuration
+        modelBuilder.Entity<CaseParty>(entity =>
+        {
+            entity.HasOne(p => p.Client)
+                .WithMany()
+                .HasForeignKey(p => p.ClientId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
 
         // Invoice Configuration
         modelBuilder.Entity<Invoice>(entity =>
@@ -72,12 +98,24 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // Session -> Case (One-to-Many)
-        modelBuilder.Entity<Session>()
-            .HasOne(s => s.Case)
-            .WithMany(c => c.Sessions)
-            .HasForeignKey(s => s.CaseId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // Session Configuration
+        modelBuilder.Entity<Session>(entity =>
+        {
+            entity.HasOne(s => s.Case)
+                .WithMany(c => c.Sessions)
+                .HasForeignKey(s => s.CaseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(s => s.AssignedLawyer)
+                .WithMany()
+                .HasForeignKey(s => s.AssignedLawyerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(s => s.PreviousSessionLawyer)
+                .WithMany()
+                .HasForeignKey(s => s.PreviousSessionLawyerId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
 
         // Document Configuration
         modelBuilder.Entity<Document>(entity =>

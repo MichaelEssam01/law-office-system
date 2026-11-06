@@ -9,6 +9,7 @@ import { FileUploadModule, FileUploadHandlerEvent } from 'primeng/fileupload';
 import { DocumentService, DocumentCategory } from '../../../core/services/document.service';
 import { AppStateService } from '../../../core/services/app-state.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-filter.directive';
 
 @Component({
   selector: 'app-document-upload-dialog',
@@ -20,6 +21,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
     DialogModule,
     ButtonModule,
     SelectModule,
+    AutoSelectFilterDirective,
     TextareaModule,
     FileUploadModule,
     TranslateModule

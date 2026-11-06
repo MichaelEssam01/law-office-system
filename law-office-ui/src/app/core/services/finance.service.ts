@@ -15,7 +15,13 @@ export enum PaymentMethod {
   BankTransfer = 1,
   CreditCard = 2,
   Check = 3,
-  Other = 4
+  Other = 4,
+  ElectronicWallet = 5
+}
+
+export enum FinanceCategory {
+  Fees = 0,
+  Expenses = 1
 }
 
 export interface InvoiceListDto {
@@ -32,6 +38,7 @@ export interface InvoiceListDto {
   remainingAmount: number;
   dueDate: string;
   status: InvoiceStatus;
+  category?: FinanceCategory;
   createdAt: string;
 }
 
@@ -44,6 +51,7 @@ export interface PaymentListDto {
   amount: number;
   paymentDate: string;
   method: PaymentMethod;
+  category?: FinanceCategory;
   notes?: string;
 }
 
@@ -54,6 +62,10 @@ export interface FinancialSummaryDto {
   totalCancelled: number;
   unpaidInvoicesCount: number;
   overdueInvoicesCount: number;
+  totalFeesInvoiced?: number;
+  totalFeesPaid?: number;
+  totalExpensesInvoiced?: number;
+  totalExpensesPaid?: number;
 }
 
 @Injectable({
@@ -64,10 +76,11 @@ export class FinanceService {
   private baseUrl = 'http://localhost:5137/api';
 
   // Invoices
-  async getInvoices(caseId?: string, status?: number): Promise<InvoiceListDto[]> {
+  async getInvoices(caseId?: string, status?: number, category?: number): Promise<InvoiceListDto[]> {
     let params = new HttpParams().set('_t', new Date().getTime().toString());
     if (caseId) params = params.set('caseId', caseId);
     if (status !== undefined) params = params.set('status', status.toString());
+    if (category !== undefined && category !== null) params = params.set('category', category.toString());
     
     return firstValueFrom(this.http.get<InvoiceListDto[]>(`${this.baseUrl}/invoices`, { params }));
   }

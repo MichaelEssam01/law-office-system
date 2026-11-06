@@ -5,7 +5,7 @@ namespace LawOffice.Application.Interfaces.Services;
 
 public interface IInvoiceService
 {
-    Task<IEnumerable<InvoiceListDto>> GetInvoicesAsync(Guid? caseId = null, InvoiceStatus? status = null);
+    Task<IEnumerable<InvoiceListDto>> GetInvoicesAsync(Guid? caseId = null, InvoiceStatus? status = null, FinanceCategory? category = null);
     Task<InvoiceDetailDto?> GetInvoiceByIdAsync(Guid id);
     Task<InvoiceDetailDto> CreateInvoiceAsync(CreateInvoiceDto dto, Guid createdBy);
     Task UpdateInvoiceAsync(Guid id, UpdateInvoiceDto dto);

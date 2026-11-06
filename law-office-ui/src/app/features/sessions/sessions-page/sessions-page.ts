@@ -18,6 +18,7 @@ import { CaseService, CaseListDto } from '../../../core/services/case.service';
 import { SessionDialog } from '../session-dialog/session-dialog';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { AppStateService } from '../../../core/services/app-state.service';
+import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-filter.directive';
 
 @Component({
   selector: 'app-sessions-page',
@@ -35,6 +36,7 @@ import { AppStateService } from '../../../core/services/app-state.service';
     ToastModule,
     ConfirmDialogModule,
     SelectModule,
+    AutoSelectFilterDirective,
     TooltipModule,
     SessionDialog,
     TranslateModule
@@ -66,24 +68,20 @@ export class SessionsPage implements OnInit {
   statuses = signal<any[]>([]);
 
   constructor() {
-    effect(() => {
-      // Trigger update when language changes
-      const lang = this.appState.currentLang();
-      this.updateStatusLabels();
-    });
+    this.updateStatusLabels();
   }
 
   updateStatusLabels() {
     this.statuses.set([
-      { label: this.translate.instant('SESSIONS.SCHEDULED'), value: '0' },
-      { label: this.translate.instant('SESSIONS.COMPLETED'), value: '1' },
-      { label: this.translate.instant('SESSIONS.POSTPONED'), value: '2' },
-      { label: this.translate.instant('SESSIONS.CANCELLED'), value: '3' }
+      { labelKey: 'SESSIONS.SCHEDULED', value: '0' },
+      { labelKey: 'SESSIONS.COMPLETED', value: '1' },
+      { labelKey: 'SESSIONS.POSTPONED', value: '2' },
+      { labelKey: 'SESSIONS.CANCELLED', value: '3' },
+      { labelKey: 'SESSIONS.RESERVED_FOR_JUDGMENT', value: '4' }
     ]);
   }
 
   async ngOnInit() {
-    this.updateStatusLabels();
     await Promise.all([
       this.loadSessions(),
       this.loadCases()
@@ -150,6 +148,10 @@ export class SessionsPage implements OnInit {
     }
   }
 
+  async recordOutcome(sessionItem: SessionListDto) {
+    await this.editSession(sessionItem);
+  }
+
   deleteSession(sessionItem: SessionListDto) {
     this.confirmationService.confirm({
       message: this.translate.instant('SESSIONS.DELETE_CONFIRM', { title: sessionItem.title }),
@@ -211,6 +213,7 @@ export class SessionsPage implements OnInit {
       case SessionStatus.Completed: return 'success';
       case SessionStatus.Postponed: return 'warn';
       case SessionStatus.Cancelled: return 'danger';
+      case SessionStatus.ReservedForJudgment: return 'contrast';
       default: return 'secondary';
     }
   }
@@ -221,6 +224,7 @@ export class SessionsPage implements OnInit {
       case SessionStatus.Completed: return this.translate.instant('SESSIONS.COMPLETED');
       case SessionStatus.Postponed: return this.translate.instant('SESSIONS.POSTPONED');
       case SessionStatus.Cancelled: return this.translate.instant('SESSIONS.CANCELLED');
+      case SessionStatus.ReservedForJudgment: return this.translate.instant('SESSIONS.RESERVED_FOR_JUDGMENT');
       default: return 'Unknown';
     }
   }

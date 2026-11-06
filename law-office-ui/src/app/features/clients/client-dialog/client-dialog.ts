@@ -8,10 +8,12 @@ import { SelectModule } from 'primeng/select';
 import { RatingModule } from 'primeng/rating';
 import { TextareaModule } from 'primeng/textarea';
 import { TabsModule } from 'primeng/tabs';
+import { TooltipModule } from 'primeng/tooltip';
 import { Client } from '../../../core/services/client';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { AppStateService } from '../../../core/services/app-state.service';
+import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-filter.directive';
 
 export interface PhoneEntry {
   number: string;
@@ -28,9 +30,11 @@ export interface PhoneEntry {
     ButtonModule, 
     CheckboxModule, 
     SelectModule,
+    AutoSelectFilterDirective,
     RatingModule,
     TextareaModule,
     TabsModule,
+    TooltipModule,
     TranslateModule
   ],
   templateUrl: './client-dialog.html',
@@ -157,6 +161,20 @@ export class ClientDialog implements OnInit {
   isFormValid(): boolean {
     const hasFirstName = !!(this.formData.firstName && this.formData.firstName.trim());
     return hasFirstName && this.isNationalIdValid();
+  }
+
+  nextTab() {
+    const curr = parseInt(this.activeTab, 10) || 0;
+    if (curr < 3) {
+      this.activeTab = String(curr + 1);
+    }
+  }
+
+  prevTab() {
+    const curr = parseInt(this.activeTab, 10) || 0;
+    if (curr > 0) {
+      this.activeTab = String(curr - 1);
+    }
   }
 
   save() {

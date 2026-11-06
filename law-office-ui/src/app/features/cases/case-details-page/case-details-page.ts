@@ -12,7 +12,16 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { AppStateService } from '../../../core/services/app-state.service';
-import { CaseService, CaseDetailDto, CaseStatus } from '../../../core/services/case.service';
+import { 
+  CaseService, 
+  CaseDetailDto, 
+  CaseStatus, 
+  CaseType, 
+  FamilyCaseSubtype, 
+  LitigationDegree, 
+  PartyCapacity, 
+  DisputeNature 
+} from '../../../core/services/case.service';
 import { SessionService, SessionListDto, SessionStatus, SessionDetailDto } from '../../../core/services/session.service';
 import { FinanceService, InvoiceListDto, PaymentListDto, FinancialSummaryDto, InvoiceStatus, PaymentMethod } from '../../../core/services/finance.service';
 import { DocumentService, DocumentDto, DocumentCategory } from '../../../core/services/document.service';
@@ -387,20 +396,107 @@ export class CaseDetailsPage implements OnInit {
   // Status Helpers
   getStatusSeverity(status: CaseStatus): "success" | "secondary" | "info" | "warn" | "danger" | "contrast" | undefined {
     switch (status) {
-      case CaseStatus.Open: return 'info';
+      case CaseStatus.InProgress: return 'info';
       case CaseStatus.Pending: return 'warn';
-      case CaseStatus.Closed: return 'success';
+      case CaseStatus.Finished: return 'success';
+      case CaseStatus.Suspended: return 'danger';
       default: return 'secondary';
     }
   }
 
   getStatusLabel(status: CaseStatus): string {
     switch (status) {
-      case CaseStatus.Open: return this.translate.instant('CASES.OPEN');
+      case CaseStatus.InProgress: return this.translate.instant('CASES.IN_PROGRESS');
       case CaseStatus.Pending: return this.translate.instant('CASES.PENDING');
-      case CaseStatus.Closed: return this.translate.instant('CASES.CLOSED');
+      case CaseStatus.Finished: return this.translate.instant('CASES.FINISHED');
+      case CaseStatus.Suspended: return this.translate.instant('CASES.SUSPENDED');
       default: return this.translate.instant('COMMON.UNKNOWN');
     }
+  }
+
+  getCaseTypeLabel(type?: CaseType | null): string {
+    if (type === undefined || type === null) return '';
+    const keys: Record<CaseType, string> = {
+      [CaseType.Administrative]: 'CASES.CASE_TYPES.ADMINISTRATIVE',
+      [CaseType.Family]: 'CASES.CASE_TYPES.FAMILY',
+      [CaseType.Economic]: 'CASES.CASE_TYPES.ECONOMIC',
+      [CaseType.Rents]: 'CASES.CASE_TYPES.RENTS',
+      [CaseType.Constitutional]: 'CASES.CASE_TYPES.CONSTITUTIONAL',
+      [CaseType.Commercial]: 'CASES.CASE_TYPES.COMMERCIAL',
+      [CaseType.Compensation]: 'CASES.CASE_TYPES.COMPENSATION',
+      [CaseType.Enforcement]: 'CASES.CASE_TYPES.ENFORCEMENT',
+      [CaseType.SignatureValidity]: 'CASES.CASE_TYPES.SIGNATURE_VALIDITY',
+      [CaseType.Labor]: 'CASES.CASE_TYPES.LABOR',
+      [CaseType.Civil]: 'CASES.CASE_TYPES.CIVIL',
+      [CaseType.CivilAppealed]: 'CASES.CASE_TYPES.CIVIL_APPEALED',
+      [CaseType.Urgent]: 'CASES.CASE_TYPES.URGENT',
+      [CaseType.Criminal]: 'CASES.CASE_TYPES.CRIMINAL',
+      [CaseType.Other]: 'CASES.CASE_TYPES.OTHER'
+    };
+    return keys[type] ? this.translate.instant(keys[type]) : '';
+  }
+
+  getOtherPersonsList(otherPersonName?: string | null, otherLawyerName?: string | null): { name: string, lawyer?: string }[] {
+    if (!otherPersonName) return [];
+    try {
+      const parsed = JSON.parse(otherPersonName);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {}
+    return [{ name: otherPersonName, lawyer: otherLawyerName || undefined }];
+  }
+
+  getFamilySubtypeLabel(subtype?: FamilyCaseSubtype | null): string {
+    if (subtype === undefined || subtype === null) return '';
+    const keys: Record<FamilyCaseSubtype, string> = {
+      [FamilyCaseSubtype.Financial]: 'CASES.FAMILY_SUBTYPES.FINANCIAL',
+      [FamilyCaseSubtype.Miscellaneous]: 'CASES.FAMILY_SUBTYPES.MISCELLANEOUS',
+      [FamilyCaseSubtype.Imprisonment]: 'CASES.FAMILY_SUBTYPES.IMPRISONMENT',
+      [FamilyCaseSubtype.Inheritance]: 'CASES.FAMILY_SUBTYPES.INHERITANCE'
+    };
+    return keys[subtype] ? this.translate.instant(keys[subtype]) : '';
+  }
+
+  getLitigationDegreeLabel(degree?: LitigationDegree | null): string {
+    if (degree === undefined || degree === null) return '';
+    const keys: Record<LitigationDegree, string> = {
+      [LitigationDegree.Summary]: 'CASES.LITIGATION_DEGREES.SUMMARY',
+      [LitigationDegree.FirstInstance]: 'CASES.LITIGATION_DEGREES.FIRST_INSTANCE',
+      [LitigationDegree.AdministrativeCourt]: 'CASES.LITIGATION_DEGREES.ADMINISTRATIVE_COURT',
+      [LitigationDegree.StateCouncil]: 'CASES.LITIGATION_DEGREES.STATE_COUNCIL',
+      [LitigationDegree.Appellate]: 'CASES.LITIGATION_DEGREES.APPELLATE',
+      [LitigationDegree.Cassation]: 'CASES.LITIGATION_DEGREES.CASSATION',
+      [LitigationDegree.Constitutional]: 'CASES.LITIGATION_DEGREES.CONSTITUTIONAL',
+      [LitigationDegree.Supreme]: 'CASES.LITIGATION_DEGREES.SUPREME',
+      [LitigationDegree.Other]: 'CASES.LITIGATION_DEGREES.OTHER'
+    };
+    return keys[degree] ? this.translate.instant(keys[degree]) : '';
+  }
+
+  getPartyCapacityLabel(capacity?: PartyCapacity | null): string {
+    if (capacity === undefined || capacity === null) return '';
+    const keys: Record<PartyCapacity, string> = {
+      [PartyCapacity.Plaintiff]: 'CASES.CAPACITIES.PLAINTIFF',
+      [PartyCapacity.Defendant]: 'CASES.CAPACITIES.DEFENDANT',
+      [PartyCapacity.OffensiveIntervener]: 'CASES.CAPACITIES.OFFENSIVE_INTERVENER',
+      [PartyCapacity.AdhesiveIntervener]: 'CASES.CAPACITIES.ADHESIVE_INTERVENER',
+      [PartyCapacity.JoinedParty]: 'CASES.CAPACITIES.JOINED_PARTY',
+      [PartyCapacity.Appellant]: 'CASES.CAPACITIES.APPELLANT',
+      [PartyCapacity.Appellee]: 'CASES.CAPACITIES.APPELLEE',
+      [PartyCapacity.Challenger]: 'CASES.CAPACITIES.CHALLENGER',
+      [PartyCapacity.Respondent]: 'CASES.CAPACITIES.RESPONDENT',
+      [PartyCapacity.Victim]: 'CASES.CAPACITIES.VICTIM',
+      [PartyCapacity.Accused]: 'CASES.CAPACITIES.ACCUSED',
+      [PartyCapacity.CivilRightPlaintiff]: 'CASES.CAPACITIES.CIVIL_RIGHT_PLAINTIFF',
+      [PartyCapacity.Other]: 'CASES.CAPACITIES.OTHER'
+    };
+    return keys[capacity] ? this.translate.instant(keys[capacity]) : '';
+  }
+
+  getDisputeNatureLabel(nature?: DisputeNature | null): string {
+    if (nature === undefined || nature === null) return '';
+    return nature === DisputeNature.Original 
+      ? this.translate.instant('CASES.DISPUTE_ORIGINAL') 
+      : this.translate.instant('CASES.DISPUTE_CONFRONTATIONAL');
   }
 
   getSessionStatusSeverity(status: SessionStatus): "success" | "secondary" | "info" | "warn" | "danger" | "contrast" | undefined {

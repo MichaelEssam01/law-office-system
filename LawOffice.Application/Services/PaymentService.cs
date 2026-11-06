@@ -41,6 +41,7 @@ public class PaymentService : IPaymentService
                 Amount = p.Amount,
                 PaymentDate = p.PaymentDate,
                 Method = p.Method,
+                Category = p.Category,
                 Notes = p.Notes
             })
             .ToListAsync();
@@ -65,6 +66,7 @@ public class PaymentService : IPaymentService
             Amount = p.Amount,
             PaymentDate = p.PaymentDate,
             Method = p.Method,
+            Category = p.Category,
             Notes = p.Notes
         };
     }
@@ -74,6 +76,8 @@ public class PaymentService : IPaymentService
         // Validation: Amount > 0
         if (dto.Amount <= 0) throw new Exception("Payment amount must be greater than 0");
 
+        var category = dto.Category;
+
         if (dto.InvoiceId.HasValue)
         {
             var invoice = await _unitOfWork.Repository<Invoice>().Query()
@@ -82,6 +86,8 @@ public class PaymentService : IPaymentService
             
             if (invoice == null) throw new Exception("Invoice not found");
             if (invoice.CaseId != dto.CaseId) throw new Exception("Invoice does not belong to the selected case");
+
+            category = invoice.Category;
 
             // Validation: Prevent overpayment for specific invoice
             var alreadyPaid = invoice.Payments.Sum(p => p.Amount);
@@ -108,6 +114,7 @@ public class PaymentService : IPaymentService
             Amount = dto.Amount,
             PaymentDate = dto.PaymentDate,
             Method = dto.Method,
+            Category = category,
             Notes = dto.Notes,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = createdBy
@@ -133,6 +140,7 @@ public class PaymentService : IPaymentService
         p.Amount = dto.Amount;
         p.PaymentDate = dto.PaymentDate;
         p.Method = dto.Method;
+        p.Category = dto.Category;
         p.Notes = dto.Notes;
         p.UpdatedAt = DateTime.UtcNow;
 

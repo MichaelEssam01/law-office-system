@@ -26,14 +26,26 @@ body {
 }
 
 /* Ensure PrimeNG table cells and headers align correctly in RTL */
-[dir="rtl"] .p-datatable .p-datatable-thead > tr > th,
-[dir="rtl"] .p-datatable .p-datatable-tbody > tr > td,
-[dir="rtl"] .p-datatable .p-datatable-tfoot > tr > td {
+[dir="rtl"] .p-datatable .p-datatable-thead > tr > th:not(.text-center),
+[dir="rtl"] .p-datatable .p-datatable-tbody > tr > td:not(.text-center),
+[dir="rtl"] .p-datatable .p-datatable-tfoot > tr > td:not(.text-center) {
     text-align: right !important;
 }
 
-[dir="rtl"] .p-datatable th .p-column-header-content {
+[dir="rtl"] .p-datatable th:not(.text-center) .p-column-header-content {
     justify-content: flex-start !important;
+}
+
+[dir="rtl"] .p-datatable th.text-center,
+[dir="rtl"] .p-datatable td.text-center,
+[dir="ltr"] .p-datatable th.text-center,
+[dir="ltr"] .p-datatable td.text-center {
+    text-align: center !important;
+}
+
+[dir="rtl"] .p-datatable th.text-center .p-column-header-content,
+[dir="ltr"] .p-datatable th.text-center .p-column-header-content {
+    justify-content: center !important;
 }
 
 [dir="rtl"] .p-datatable .p-sortable-column-icon {
@@ -41,13 +53,13 @@ body {
     margin-right: 0.5rem !important;
 }
 
-[dir="ltr"] .p-datatable .p-datatable-thead > tr > th,
-[dir="ltr"] .p-datatable .p-datatable-tbody > tr > td,
-[dir="ltr"] .p-datatable .p-datatable-tfoot > tr > td {
+[dir="ltr"] .p-datatable .p-datatable-thead > tr > th:not(.text-center),
+[dir="ltr"] .p-datatable .p-datatable-tbody > tr > td:not(.text-center),
+[dir="ltr"] .p-datatable .p-datatable-tfoot > tr > td:not(.text-center) {
     text-align: left !important;
 }
 
-[dir="ltr"] .p-datatable th .p-column-header-content {
+[dir="ltr"] .p-datatable th:not(.text-center) .p-column-header-content {
     justify-content: flex-start !important;
 }
 
@@ -357,3 +369,37 @@ body > .p-dropdown-panel {
     color: #10b981 !important;
     fill: #10b981 !important;
 }
+
+/* RTL DatePicker (Calendar) Navigation & Header Alignment */
+[dir="rtl"] .p-datepicker-header,
+html[dir="rtl"] .p-datepicker-header,
+body[dir="rtl"] .p-datepicker-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+[dir="rtl"] .p-datepicker-header .p-datepicker-title,
+html[dir="rtl"] .p-datepicker-header .p-datepicker-title,
+body[dir="rtl"] .p-datepicker-header .p-datepicker-title {
+    margin: 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.35rem !important;
+}
+
+/* In RTL, the previous button (past month) is on the right and points right (>).
+   The next button (future month) is on the left and points left (<). */
+[dir="rtl"] .p-datepicker-header .p-datepicker-prev-button svg,
+[dir="rtl"] .p-datepicker-header .p-datepicker-prev-button i,
+[dir="rtl"] .p-datepicker-header .p-datepicker-next-button svg,
+[dir="rtl"] .p-datepicker-header .p-datepicker-next-button i,
+html[dir="rtl"] .p-datepicker-header .p-datepicker-prev-button svg,
+html[dir="rtl"] .p-datepicker-header .p-datepicker-next-button svg {
+    transform: scaleX(-1) !important;
+}
+
+
+

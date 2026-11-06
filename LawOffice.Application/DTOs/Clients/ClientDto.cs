@@ -5,6 +5,7 @@ namespace LawOffice.Application.DTOs.Clients;
 public class ClientDto
 {
     public Guid Id { get; set; }
+    public int ClientNumber { get; set; }
     public string FirstName { get; set; } = string.Empty;
     public string SecondName { get; set; } = string.Empty;
     public string ThirdName { get; set; } = string.Empty;

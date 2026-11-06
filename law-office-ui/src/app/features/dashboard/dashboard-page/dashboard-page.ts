@@ -10,11 +10,12 @@ import { AppStateService } from '../../../core/services/app-state.service';
 
 import { SelectModule } from 'primeng/select';
 import { FormsModule } from '@angular/forms';
+import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-filter.directive';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, CardModule, ChartModule, ButtonModule, SelectModule, FormsModule, TranslateModule],
+  imports: [CommonModule, RouterModule, CardModule, ChartModule, ButtonModule, SelectModule, AutoSelectFilterDirective, FormsModule, TranslateModule],
   templateUrl: './dashboard-page.html'
 })
 export class DashboardPage implements OnInit, OnDestroy {

@@ -2,14 +2,39 @@
     <p-toast></p-toast>
     
     <!-- Header -->
-    <div class="flex justify-between items-center mb-8">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
             <h1 class="text-2xl font-bold text-slate-800">{{ 'FINANCE.TITLE' | translate }}</h1>
         </div>
         <div class="flex gap-2">
-            <button pButton [label]="'FINANCE.ADD_INVOICE' | translate" icon="pi pi-plus" class="p-button-primary shadow-md" (click)="openNewInvoice()"></button>
-            <button pButton [label]="'FINANCE.ADD_PAYMENT' | translate" icon="pi pi-money-bill" class="p-button-success shadow-md" (click)="openNewPayment()"></button>
+            @if (activeTab() === 'expenses') {
+                <button type="button" pButton [label]="'FINANCE.ADD_EXPENSE' | translate" icon="pi pi-receipt" title="Add Expense" aria-label="Add Expense" [attr.aria-label]="'FINANCE.ADD_EXPENSE' | translate" class="p-button-warning shadow-md" (click)="openNewInvoice(1)"></button>
+            } @else if (activeTab() === 'fees') {
+                <button type="button" pButton [label]="'FINANCE.ADD_FEE_INVOICE' | translate" icon="pi pi-briefcase" title="Add Fee Invoice" aria-label="Add Fee Invoice" [attr.aria-label]="'FINANCE.ADD_FEE_INVOICE' | translate" class="p-button-primary shadow-md" (click)="openNewInvoice(0)"></button>
+            } @else {
+                <button type="button" pButton [label]="'FINANCE.ADD_INVOICE' | translate" icon="pi pi-plus" title="Add Invoice" aria-label="Add Invoice" [attr.aria-label]="'FINANCE.ADD_INVOICE' | translate" class="p-button-primary shadow-md" (click)="openNewInvoice()"></button>
+            }
+            <button type="button" pButton [label]="'FINANCE.ADD_PAYMENT' | translate" icon="pi pi-money-bill" title="Add Payment" aria-label="Add Payment" [attr.aria-label]="'FINANCE.ADD_PAYMENT' | translate" class="p-button-success shadow-md" (click)="openNewPayment()"></button>
         </div>
+    </div>
+
+    <!-- Category Tabs Navigation -->
+    <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl w-fit mb-6">
+        <button type="button" (click)="setActiveTab('fees')" title="Fees" aria-label="Fees" [attr.aria-label]="'FINANCE.CATEGORIES.FEES' | translate" [class]="activeTab() === 'fees' ? 'bg-white text-blue-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'" class="px-4 py-2 rounded-xl text-sm transition-all flex items-center gap-2 cursor-pointer">
+            <i class="pi pi-briefcase text-sm"></i>
+            <span>{{ 'FINANCE.CATEGORIES.FEES' | translate }}</span>
+            <span class="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full font-bold">{{ feesCount() }}</span>
+        </button>
+        <button type="button" (click)="setActiveTab('expenses')" title="Expenses" aria-label="Expenses" [attr.aria-label]="'FINANCE.CATEGORIES.EXPENSES' | translate" [class]="activeTab() === 'expenses' ? 'bg-white text-amber-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'" class="px-4 py-2 rounded-xl text-sm transition-all flex items-center gap-2 cursor-pointer">
+            <i class="pi pi-receipt text-sm"></i>
+            <span>{{ 'FINANCE.CATEGORIES.EXPENSES' | translate }}</span>
+            <span class="bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full font-bold">{{ expensesCount() }}</span>
+        </button>
+        <button type="button" (click)="setActiveTab('all')" title="All" aria-label="All" [attr.aria-label]="'FINANCE.TABS.ALL' | translate" [class]="activeTab() === 'all' ? 'bg-white text-slate-800 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'" class="px-4 py-2 rounded-xl text-sm transition-all flex items-center gap-2 cursor-pointer">
+            <i class="pi pi-th-large text-sm"></i>
+            <span>{{ 'FINANCE.TABS.ALL' | translate }}</span>
+            <span class="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full font-bold">{{ invoices().length }}</span>
+        </button>
     </div>
 
     <!-- Summary Cards -->
@@ -21,7 +46,7 @@
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-xs text-slate-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">{{ 'FINANCE.TOTAL_INVOICED' | translate }}</p>
-                <h3 class="text-lg font-bold text-slate-800 whitespace-nowrap overflow-visible">{{ (summary()?.totalInvoiced || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h3>
+                <h3 class="text-lg font-bold text-slate-800 whitespace-nowrap overflow-visible">{{ (displayedSummary().totalInvoiced || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h3>
             </div>
         </div>
 
@@ -32,7 +57,7 @@
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-xs text-slate-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">{{ 'FINANCE.TOTAL_PAID' | translate }}</p>
-                <h3 class="text-lg font-bold text-slate-800 whitespace-nowrap overflow-visible">{{ (summary()?.totalPaid || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h3>
+                <h3 class="text-lg font-bold text-slate-800 whitespace-nowrap overflow-visible">{{ (displayedSummary().totalPaid || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h3>
             </div>
         </div>
 
@@ -43,7 +68,7 @@
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-xs text-slate-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">{{ 'FINANCE.REMAINING' | translate }}</p>
-                <h3 class="text-lg font-bold text-orange-600 whitespace-nowrap overflow-visible">{{ (summary()?.totalRemaining || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h3>
+                <h3 class="text-lg font-bold text-orange-600 whitespace-nowrap overflow-visible">{{ (displayedSummary().totalRemaining || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h3>
             </div>
         </div>
 
@@ -54,7 +79,7 @@
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-xs text-slate-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">{{ 'FINANCE.CANCELLED' | translate }}</p>
-                <h3 class="text-lg font-bold text-slate-600 whitespace-nowrap overflow-visible">{{ (summary()?.totalCancelled || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h3>
+                <h3 class="text-lg font-bold text-slate-600 whitespace-nowrap overflow-visible">{{ (displayedSummary().totalCancelled || 0) | currency:'EGP':'symbol-narrow':'1.0-0' }}</h3>
             </div>
         </div>
 
@@ -65,7 +90,7 @@
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-xs text-slate-500 font-medium whitespace-nowrap overflow-hidden text-ellipsis">{{ 'FINANCE.OVERDUE' | translate }}</p>
-                <h3 class="text-lg font-bold text-red-600 whitespace-nowrap overflow-visible">{{ summary()?.overdueInvoicesCount || 0 }}</h3>
+                <h3 class="text-lg font-bold text-red-600 whitespace-nowrap overflow-visible">{{ displayedSummary().overdueInvoicesCount || 0 }}</h3>
             </div>
         </div>
     </div>
@@ -73,26 +98,21 @@
     <!-- Invoices Table -->
     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm no-page-links">
         <div class="p-4 border-b border-slate-100 flex justify-between items-center">
-            <h2 class="text-lg font-bold text-slate-800">{{ 'FINANCE.INVOICES' | translate }}</h2>
+            <div class="flex items-center gap-2">
+                <i [class]="activeTab() === 'expenses' ? 'pi pi-receipt text-amber-600' : (activeTab() === 'fees' ? 'pi pi-briefcase text-blue-600' : 'pi pi-wallet text-slate-600')"></i>
+                <h2 class="text-lg font-bold text-slate-800">
+                    {{ (activeTab() === 'expenses' ? 'FINANCE.CATEGORIES.EXPENSES' : (activeTab() === 'fees' ? 'FINANCE.CATEGORIES.FEES' : 'FINANCE.INVOICES')) | translate }}
+                </h2>
+            </div>
             <div class="flex gap-2">
                 <div class="relative flex items-center">
                     <i class="pi pi-search absolute text-slate-400 pointer-events-none text-sm"
                        [class.right-3]="appState.currentLang() !== 'ar'"
                        [class.left-3]="appState.currentLang() === 'ar'"></i>
-                    <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
-                           [placeholder]="'COMMON.SEARCH' | translate" 
-                           class="w-full sm:w-64 p-inputtext-sm"
-                           [class.pr-9]="appState.currentLang() !== 'ar'"
-                           [class.pl-9]="appState.currentLang() === 'ar'"
-                           [class.pl-3]="appState.currentLang() !== 'ar'"
-                           [class.pr-3]="appState.currentLang() === 'ar'" />
+                    <input id="financeSearchInput" pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" title="Search" placeholder="Search" aria-label="Search" [placeholder]="'COMMON.SEARCH' | translate" [attr.aria-label]="'COMMON.SEARCH' | translate" class="w-full sm:w-64 p-inputtext-sm" [class.pr-9]="appState.currentLang() !== 'ar'" [class.pl-9]="appState.currentLang() === 'ar'" [class.pl-3]="appState.currentLang() !== 'ar'" [class.pr-3]="appState.currentLang() === 'ar'" />
                 </div>
 
-                <button pButton icon="pi pi-filter" 
-                        [class.p-button-primary]="selectedStatuses().length > 0"
-                        [class.p-button-outlined]="selectedStatuses().length === 0"
-                        class="p-button-secondary rounded-lg relative !overflow-visible"
-                        (click)="filterOp.toggle($event)">
+                <button type="button" pButton icon="pi pi-filter" title="Filter Status" aria-label="Filter Status" [attr.aria-label]="'CASES.STATUS' | translate" [class.p-button-primary]="selectedStatuses().length > 0" [class.p-button-outlined]="selectedStatuses().length === 0" class="p-button-secondary rounded-lg relative !overflow-visible" (click)="filterOp.toggle($event)">
                     @if (selectedStatuses().length > 0) {
                         <span class="absolute -top-1.5 -right-1.5 rtl:-left-1.5 rtl:right-auto bg-blue-600 text-white text-[10px] min-w-4 h-4 px-1 rounded-full flex items-center justify-center font-bold z-10 shadow-sm border border-white">
                             {{ selectedStatuses().length }}
@@ -105,7 +125,7 @@
                         <div class="text-xs font-bold text-slate-400 uppercase tracking-wider px-1 flex justify-between items-center">
                             <span>{{ 'CASES.STATUS' | translate }}</span>
                             @if (selectedStatuses().length > 0) {
-                                <button class="text-[10px] text-blue-600 hover:underline font-normal" (click)="clearStatusFilters()">
+                                <button type="button" title="Reset Filters" aria-label="Reset Filters" class="text-[10px] text-blue-600 hover:underline font-normal" (click)="clearStatusFilters()">
                                     {{ 'CASES.RESET_FILTERS' | translate }}
                                 </button>
                             }
@@ -127,7 +147,7 @@
             </div>
         </div>
         
-        <p-table #dt [value]="invoices()" [loading]="loading()" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5, 10, 30, 50]"
+        <p-table #dt [value]="filteredInvoices()" [loading]="loading()" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5, 10, 30, 50]"
                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                  styleClass="p-datatable-sm" dataKey="id" 
                  [globalFilterFields]="['invoiceNumber', 'clientName', 'caseNumber', 'caseTitle', 'title']"
@@ -138,6 +158,7 @@
                 <tr class="bg-slate-50 text-slate-700">
                     <th style="width: 3rem"></th>
                     <th class="p-4">{{ 'FINANCE.INVOICE_NUMBER' | translate }}</th>
+                    <th class="p-4">{{ 'FINANCE.CATEGORY' | translate }}</th>
                     <th class="p-4">{{ 'CASES.CLIENT' | translate }}</th>
                     <th class="p-4">{{ 'COMMON.TITLE' | translate }}</th>
                     <th class="p-4 text-center">{{ 'FINANCE.AMOUNT' | translate }}</th>
@@ -151,14 +172,18 @@
             <ng-template pTemplate="body" let-inv let-expanded="expanded">
                 <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                     <td class="p-4">
-                        <button type="button" pButton pRipple [pRowToggler]="inv" 
-                                class="p-button-text p-button-rounded p-button-sm p-button-plain" 
-                                [icon]="dt.isRowExpanded(inv) ? 'pi pi-chevron-down' : (appState.currentLang() === 'ar' ? 'pi pi-chevron-left' : 'pi pi-chevron-right')"></button>
+                        <button type="button" pButton pRipple [pRowToggler]="inv" title="Toggle Invoice Payments" aria-label="Toggle Invoice Payments" [attr.aria-label]="(dt.isRowExpanded(inv) ? 'COMMON.COLLAPSE_ALL' : 'COMMON.EXPAND_ALL') | translate" class="p-button-text p-button-rounded p-button-sm p-button-plain" [icon]="dt.isRowExpanded(inv) ? 'pi pi-chevron-down' : (appState.currentLang() === 'ar' ? 'pi pi-chevron-left' : 'pi pi-chevron-right')"></button>
                     </td>
                     <td class="p-4 font-mono font-bold text-blue-600">{{ inv.invoiceNumber }}</td>
+                    <td class="p-4">
+                        <p-tag [value]="getCategoryLabel(inv.category)" 
+                               [severity]="getCategorySeverity(inv.category)" 
+                               [icon]="getCategoryIcon(inv.category)" 
+                               styleClass="text-[11px] gap-1 font-bold"></p-tag>
+                    </td>
                     <td class="p-4 text-sm">
                         <div class="font-bold text-slate-800">{{ inv.clientName || 'N/A' }}</div>
-                        <div class="text-xs text-indigo-600 font-mono font-medium">{{ inv.caseNumber }} - {{ inv.caseTitle }}</div>
+                        <a [routerLink]="['/cases', inv.caseId]" class="text-xs text-indigo-600 font-mono font-semibold hover:underline cursor-pointer inline-block">{{ inv.caseNumber }} - {{ inv.caseTitle }}</a>
                     </td>
                     <td class="p-4">{{ inv.title }}</td>
                     <td class="p-4 text-center font-bold">{{ inv.amount | number:'1.0-0' }}</td>
@@ -172,8 +197,7 @@
                     </td>
                     <td class="p-4 text-center">
                         <div class="flex justify-center gap-1">
-                            <button pButton icon="pi pi-pencil" class="p-button-text p-button-info p-button-sm" 
-                                    [pTooltip]="'COMMON.EDIT' | translate" (click)="$event.stopPropagation(); editInvoice(inv)"></button>
+                            <button type="button" pButton icon="pi pi-pencil" title="Edit" aria-label="Edit" [attr.aria-label]="'COMMON.EDIT' | translate" class="p-button-text p-button-info p-button-sm" [pTooltip]="'COMMON.EDIT' | translate" (click)="$event.stopPropagation(); editInvoice(inv)"></button>
                         </div>
                     </td>
                 </tr>
@@ -246,6 +270,7 @@
     <!-- Invoice Dialog -->
     <app-invoice-dialog [(visible)]="displayInvoiceDialog" 
                         [invoice]="selectedInvoice()" 
+                        [defaultCategory]="defaultInvoiceCategory()"
                         (onSave)="onInvoiceSave($event)">
     </app-invoice-dialog>
 

@@ -7,33 +7,51 @@
         <div>
             <h1 class="text-2xl font-bold text-slate-800">{{ 'CASES.TITLE' | translate }}</h1>
         </div>
-        <button pButton [label]="'CASES.ADD_CASE' | translate" icon="pi pi-plus" class="p-button-primary shadow-md" (click)="openNew()"></button>
+        <button type="button" pButton [label]="'CASES.ADD_CASE' | translate" icon="pi pi-plus" title="Add Case" aria-label="Add Case" [attr.aria-label]="'CASES.ADD_CASE' | translate" class="p-button-primary shadow-md" (click)="openNew()"></button>
     </div>
 
     <!-- Filters Area -->
     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
             <div class="flex flex-col gap-2">
-                <label class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
+                <label for="casesSearchInput" class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
                 <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
                     <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
-                    <input pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event); dt.filterGlobal($event, 'contains')"
-                           [placeholder]="'COMMON.SEARCH' | translate" class="w-full rounded-lg border-slate-200" />
+                    <input id="casesSearchInput" pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event); dt.filterGlobal($event, 'contains')" title="Search" placeholder="Search" aria-label="Search" [placeholder]="'CASES.SEARCH_PLACEHOLDER' | translate" [attr.aria-label]="'CASES.SEARCH_PLACEHOLDER' | translate" class="w-full rounded-lg border-slate-200" />
                 </p-iconField>
             </div>
             
             <div class="flex flex-col gap-2">
                 <label class="text-xs font-bold text-slate-500">{{ 'CASES.STATUS' | translate }}</label>
-                <p-select [options]="statuses()" [ngModel]="selectedStatus()" (ngModelChange)="selectedStatus.set($event); onFilterChange()"
+                <p-select [options]="statuses()" [ngModel]="selectedStatus()" (ngModelChange)="selectedStatus.set($event)"
                           optionValue="value" [placeholder]="'CASES.ALL_STATUSES' | translate" 
                           [showClear]="true" styleClass="w-full rounded-lg">
                     <ng-template pTemplate="selectedItem" let-selectedOption>
-                        {{ selectedOption?.labelKey | translate }}
+                        @if (selectedOption) {
+                            <div class="flex items-center gap-2">
+                                <i [class]="selectedOption.icon + ' text-xs'"></i>
+                                <span class="font-semibold">{{ selectedOption.labelKey | translate }}</span>
+                                <span [class]="selectedOption.badgeClass + ' px-2 py-0.5 rounded-full text-[11px] font-mono font-bold'">{{ getStatusCount(selectedOption.value) }}</span>
+                            </div>
+                        }
                     </ng-template>
                     <ng-template pTemplate="item" let-option>
-                        {{ option?.labelKey | translate }}
+                        <div class="flex items-center justify-between w-full gap-3">
+                            <div class="flex items-center gap-2">
+                                <i [class]="option.icon + ' text-xs'"></i>
+                                <span class="font-medium">{{ option?.labelKey | translate }}</span>
+                            </div>
+                            <span [class]="option.badgeClass + ' px-2 py-0.5 rounded-full text-[11px] font-mono font-bold'">{{ getStatusCount(option.value) }}</span>
+                        </div>
                     </ng-template>
                 </p-select>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-xs font-bold text-slate-500">{{ 'CASES.CASE_TYPE' | translate }}</label>
+                <p-select [options]="caseTypes()" [ngModel]="selectedCaseType()" (ngModelChange)="selectedCaseType.set($event)"
+                          optionLabel="label" optionValue="value" [placeholder]="'CASES.ALL_TYPES' | translate" 
+                          [showClear]="true" [filter]="true" styleClass="w-full rounded-lg"></p-select>
             </div>
 
             <div class="flex flex-col gap-2">
@@ -51,8 +69,7 @@
                                   optionLabel="fullName" optionValue="id" [placeholder]="'CASES.ALL_LAWYERS' | translate" 
                                   [showClear]="true" styleClass="w-full rounded-lg"></p-select>
                     </div>
-                    <button pButton icon="pi pi-filter-slash" class="p-button-outlined p-button-secondary p-button-sm self-end h-[42px]" 
-                            (click)="resetFilters()" [pTooltip]="'CASES.RESET_FILTERS' | translate"></button>
+                    <button type="button" pButton icon="pi pi-filter-slash" aria-label="Reset Filters" [attr.aria-label]="'CASES.RESET_FILTERS' | translate" class="p-button-outlined p-button-secondary p-button-sm self-end h-[42px]" (click)="resetFilters()" [pTooltip]="'CASES.RESET_FILTERS' | translate"></button>
                 </div>
             </div>
         </div>
@@ -62,48 +79,172 @@
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm no-page-links">
         <p-table #dt [value]="cases()" [loading]="loading()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
-                 [globalFilterFields]="['caseNumber', 'title', 'clientName', 'lawyerName']"
+                 [globalFilterFields]="['caseNumber', 'courtCaseNumber', 'fileNumber', 'title', 'clientName', 'opponentName', 'lawyerName']"
                  (onFilter)="cdr.detectChanges()"
                  styleClass="p-datatable-sm shadow-sm rounded-lg overflow-hidden" [rowHover]="true">
             
             <ng-template pTemplate="header">
-                <tr class="bg-slate-50 text-slate-700">
-                    <th pSortableColumn="caseNumber" class="p-4">{{ 'CASES.CASE_NUMBER' | translate }} <p-sortIcon field="caseNumber"></p-sortIcon></th>
-                    <th pSortableColumn="title" class="p-4">{{ 'CASES.TITLE' | translate }} <p-sortIcon field="title"></p-sortIcon></th>
-                    <th pSortableColumn="clientName" class="p-4">{{ 'CASES.CLIENT' | translate }} <p-sortIcon field="clientName"></p-sortIcon></th>
-                    <th pSortableColumn="lawyerName" class="p-4">{{ 'CASES.LAWYER' | translate }} <p-sortIcon field="lawyerName"></p-sortIcon></th>
-                    <th pSortableColumn="status" class="p-4">{{ 'CASES.STATUS' | translate }} <p-sortIcon field="status"></p-sortIcon></th>
-                    <th pSortableColumn="startDate" class="p-4 text-center">{{ 'COMMON.DATE' | translate }} <p-sortIcon field="startDate"></p-sortIcon></th>
-                    <th class="p-4 text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
+                <tr class="bg-slate-50 text-slate-700 text-xs uppercase tracking-wider">
+                    <th pSortableColumn="caseNumber" class="p-3.5">{{ 'CASES.CASE_NUMBER' | translate }} <p-sortIcon field="caseNumber"></p-sortIcon></th>
+                    <th pSortableColumn="title" class="p-3.5">{{ 'CASES.SUBJECT' | translate }} <p-sortIcon field="title"></p-sortIcon></th>
+                    <th class="p-3.5">{{ 'CASES.CASE_TYPE' | translate }}</th>
+                    <th pSortableColumn="clientName" class="p-3.5">{{ 'CASES.PARTIES_TAB' | translate }} <p-sortIcon field="clientName"></p-sortIcon></th>
+                    <th pSortableColumn="lawyerName" class="p-3.5">{{ 'CASES.LAWYER' | translate }} <p-sortIcon field="lawyerName"></p-sortIcon></th>
+                    <th pSortableColumn="status" class="p-3.5 text-center">{{ 'CASES.STATUS' | translate }} <p-sortIcon field="status"></p-sortIcon></th>
+                    <th pSortableColumn="startDate" class="p-3.5 text-center">{{ 'COMMON.DATE' | translate }} <p-sortIcon field="startDate"></p-sortIcon></th>
+                    <th class="p-3.5 text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
                 </tr>
             </ng-template>
 
             <ng-template pTemplate="body" let-case>
-                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
-                    <td class="p-4 font-mono font-bold text-blue-600">
-                        <a [routerLink]="['/cases', case.id]" class="hover:underline cursor-pointer">{{ case.caseNumber }}</a>
-                    </td>
-                    <td class="p-4 font-medium text-slate-800">
-                        <a [routerLink]="['/cases', case.id]" class="hover:text-blue-600 cursor-pointer">{{ case.title }}</a>
-                    </td>
-                    <td class="p-4">{{ case.clientName }}</td>
-                    <td class="p-4">
-                        <div class="flex items-center gap-2">
-                            <i class="pi pi-user text-xs text-slate-400"></i>
-                            <span>{{ case.lawyerName }}</span>
+                <tr class="border-b border-slate-100 hover:bg-slate-50/80 transition-colors">
+                    <!-- Case Number, Court Case Number + Year, & Office File -->
+                    <td class="p-3.5">
+                        <div class="flex flex-col gap-1">
+                            @if (case.courtCaseNumber) {
+                                <a [routerLink]="['/cases', case.id]" class="font-bold text-slate-900 hover:text-blue-600 cursor-pointer font-mono text-sm">
+                                    {{ case.courtCaseNumber }}@if (case.year) {<span> / {{ case.year }}{{ case.yearType === 1 ? ' ق' : '' }}</span>}
+                                </a>
+                                <span class="font-mono text-xs text-blue-600 font-medium">
+                                    {{ case.caseNumber }}
+                                </span>
+                            } @else {
+                                <a [routerLink]="['/cases', case.id]" class="font-mono font-bold text-blue-600 hover:underline cursor-pointer text-sm">
+                                    {{ case.caseNumber }}
+                                </a>
+                            }
+                            @if (case.fileNumber) {
+                                <span class="inline-flex items-center gap-1 text-[10px] text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded w-fit font-mono">
+                                    <i class="pi pi-folder text-[10px] text-amber-600"></i>
+                                    {{ case.fileNumber }}@if (case.fileYear) {/{{ case.fileYear }}}
+                                </span>
+                            }
                         </div>
                     </td>
-                    <td class="p-4">
-                        <p-tag [value]="getStatusLabel(case.status)" [severity]="getStatusSeverity(case.status)" styleClass="text-xs"></p-tag>
+
+                    <!-- Subject / Title & Active Required Actions -->
+                    <td class="p-3.5">
+                        <div class="flex flex-col gap-1.5">
+                            <a [routerLink]="['/cases', case.id]" class="font-semibold text-slate-800 hover:text-blue-600 cursor-pointer block leading-snug">
+                                {{ case.title }}
+                            </a>
+                            @if (case.hasOfficeAction || case.hasCourtAction || case.hasExternalAction || case.hasOtherAction) {
+                                <div class="flex flex-wrap items-center gap-1">
+                                    @if (case.hasOfficeAction) {
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 font-medium">{{ 'CASES.ACTION_OFFICE' | translate }}</span>
+                                    }
+                                    @if (case.hasCourtAction) {
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 font-medium">{{ 'CASES.ACTION_COURT' | translate }}</span>
+                                    }
+                                    @if (case.hasExternalAction) {
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 font-medium">{{ 'CASES.ACTION_EXTERNAL' | translate }}</span>
+                                    }
+                                    @if (case.hasOtherAction) {
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200 font-medium">{{ 'CASES.ACTION_OTHER' | translate }}</span>
+                                    }
+                                </div>
+                            }
+                        </div>
                     </td>
-                    <td class="p-4 text-center text-slate-600">
-                        {{ case.startDate | date:'dd/MM/yyyy' }}
+
+                    <!-- Case Type, Family Subtype & Litigation Degree -->
+                    <td class="p-3.5">
+                        <div class="flex flex-col gap-1 items-start">
+                            @if (case.caseType !== null && case.caseType !== undefined) {
+                                <div class="flex flex-wrap items-center gap-1">
+                                    <span class="text-xs px-2 py-0.5 rounded font-medium bg-slate-100 text-slate-700 border border-slate-200">
+                                        {{ getCaseTypeKey(case.caseType) | translate }}
+                                    </span>
+                                    @if (case.caseType === 1 && case.familyCaseSubtype !== null && case.familyCaseSubtype !== undefined) {
+                                        <span class="text-[10px] px-1.5 py-0.5 rounded font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                                            {{ getFamilySubtypeKey(case.familyCaseSubtype) | translate }}
+                                        </span>
+                                    }
+                                </div>
+                            }
+                            @if (case.litigationDegree !== null && case.litigationDegree !== undefined) {
+                                <span class="text-[11px] text-slate-500 font-medium">
+                                    {{ getLitigationDegreeKey(case.litigationDegree) | translate }}
+                                </span>
+                            }
+                            @if (case.caseType === null && case.caseType === undefined && case.litigationDegree === null && case.litigationDegree === undefined) {
+                                <span class="text-slate-300">-</span>
+                            }
+                        </div>
                     </td>
-                    <td class="p-4 text-center">
-                        <div class="flex justify-center gap-2">
-                            <button pButton icon="pi pi-eye" class="p-button-text p-button-info p-button-sm" [routerLink]="['/cases', case.id]"></button>
-                            <button pButton icon="pi pi-pencil" class="p-button-text p-button-secondary p-button-sm" (click)="editCase(case)"></button>
-                            <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" (click)="deleteCase(case)"></button>
+
+                    <!-- Client & Opponent -->
+                    <td class="p-3.5">
+                        <div class="flex flex-col gap-1">
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] font-bold border border-blue-100 shrink-0">
+                                    <i class="pi pi-user text-[10px]"></i>
+                                </div>
+                                <span class="font-medium text-slate-800 text-sm leading-tight">{{ case.clientName }}</span>
+                                @if (case.clientNumber) {
+                                    <span class="text-[10px] font-mono font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">#{{ case.clientNumber }}</span>
+                                }
+                            </div>
+                            @if (case.opponentName) {
+                                <div class="flex items-center gap-1.5 text-xs text-slate-500">
+                                    <span class="text-[10px] px-1 py-0.2 rounded bg-rose-50 text-rose-600 font-semibold border border-rose-100">
+                                        {{ 'CASES.VS_SHORT' | translate }}
+                                    </span>
+                                    <span class="text-slate-600 truncate max-w-[140px]">{{ case.opponentName }}</span>
+                                </div>
+                            }
+                        </div>
+                    </td>
+
+                    <!-- Assigned Lawyer -->
+                    <td class="p-3.5">
+                        @if (case.lawyerName) {
+                            <div class="flex items-center gap-2">
+                                <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-bold border border-emerald-100">
+                                    <i class="pi pi-briefcase text-xs"></i>
+                                </div>
+                                <span class="text-slate-700 text-sm">{{ case.lawyerName }}</span>
+                            </div>
+                        } @else {
+                            <span class="text-slate-400 text-xs">-</span>
+                        }
+                    </td>
+
+                    <!-- Status, Archiving & Suspension Reason -->
+                    <td class="p-3.5 text-center">
+                        <div class="flex flex-col items-center gap-1">
+                            <p-tag [value]="getStatusLabel(case.status)" [severity]="getStatusSeverity(case.status)" styleClass="text-xs font-medium"></p-tag>
+                            @if (case.status === 4 && case.archivingType !== null && case.archivingType !== undefined) {
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-medium">
+                                    {{ getArchivingTypeKey(case.archivingType) | translate }}
+                                </span>
+                            }
+                            @if ((case.status === 2 || case.status === 5) && case.suspensionReason) {
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 max-w-[130px] truncate" [pTooltip]="case.suspensionReason">
+                                    {{ case.suspensionReason }}
+                                </span>
+                            }
+                        </div>
+                    </td>
+
+                    <!-- Start Date & Closed Date -->
+                    <td class="p-3.5 text-center">
+                        <div class="flex flex-col items-center gap-0.5 font-mono text-xs">
+                            <span class="text-slate-700 font-medium text-sm">{{ case.startDate | date:'dd/MM/yyyy' }}</span>
+                            @if (case.closedDate) {
+                                <span class="text-[10px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200" [pTooltip]="'CASES.CLOSED_DATE' | translate">
+                                    {{ case.closedDate | date:'dd/MM/yyyy' }}
+                                </span>
+                            }
+                        </div>
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="p-3.5 text-center">
+                        <div class="flex justify-center items-center gap-1">
+                            <button type="button" pButton icon="pi pi-eye" aria-label="View" [attr.aria-label]="'COMMON.VIEW' | translate" class="p-button-text p-button-rounded p-button-info p-button-sm" [routerLink]="['/cases', case.id]" [pTooltip]="'COMMON.VIEW' | translate"></button>
+                            <button type="button" pButton icon="pi pi-pencil" aria-label="Edit" [attr.aria-label]="'COMMON.EDIT' | translate" class="p-button-text p-button-rounded p-button-secondary p-button-sm" (click)="editCase(case)" [pTooltip]="'COMMON.EDIT' | translate"></button>
+                            <button type="button" pButton icon="pi pi-trash" aria-label="Delete" [attr.aria-label]="'COMMON.DELETE' | translate" class="p-button-text p-button-rounded p-button-danger p-button-sm" (click)="deleteCase(case)" [pTooltip]="'COMMON.DELETE' | translate"></button>
                         </div>
                     </td>
                 </tr>
@@ -111,7 +252,7 @@
 
             <ng-template pTemplate="emptymessage">
                 <tr>
-                    <td colspan="7" class="p-12 text-center text-slate-500">
+                    <td colspan="8" class="p-12 text-center text-slate-500">
                         <div class="flex flex-col items-center gap-3">
                             <i class="pi pi-inbox text-4xl text-slate-200"></i>
                             <p>{{ 'DASHBOARD.NO_RECORDS_FOUND' | translate }}</p>

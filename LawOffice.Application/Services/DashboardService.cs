@@ -20,7 +20,7 @@ public class DashboardService : IDashboardService
         // 1. Basic Counts
         stats.TotalClients = await _unitOfWork.Repository<Client>().Query().CountAsync();
         stats.TotalCases = await _unitOfWork.Repository<Case>().Query().CountAsync();
-        stats.OpenCasesCount = await _unitOfWork.Repository<Case>().Query().CountAsync(c => c.Status == CaseStatus.Open);
+        stats.OpenCasesCount = await _unitOfWork.Repository<Case>().Query().CountAsync(c => c.Status == CaseStatus.InProgress);
         stats.UpcomingSessionsCount = await _unitOfWork.Repository<Session>().Query()
             .CountAsync(s => s.ScheduledAt >= DateTime.UtcNow && s.Status == SessionStatus.Scheduled);
         stats.TotalDocuments = await _unitOfWork.Repository<Document>().Query().CountAsync();

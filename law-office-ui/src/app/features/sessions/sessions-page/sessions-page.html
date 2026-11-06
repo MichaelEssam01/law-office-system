@@ -8,26 +8,32 @@
             <h1 class="text-2xl font-bold text-slate-800">{{ 'SIDEBAR.SESSIONS' | translate }}</h1>
             <p class="text-slate-500">{{ 'SESSIONS.SUBTITLE' | translate }}</p>
         </div>
-        <button pButton [label]="'SESSIONS.ADD_SESSION' | translate" icon="pi pi-plus" class="p-button-primary shadow-md" (click)="openNew()"></button>
+        <button type="button" pButton [label]="'SESSIONS.ADD_SESSION' | translate" icon="pi pi-plus" title="Add Session" aria-label="Add Session" [attr.aria-label]="'SESSIONS.ADD_SESSION' | translate" class="p-button-primary shadow-md" (click)="openNew()"></button>
     </div>
 
     <!-- Filters Area -->
     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div class="flex flex-col gap-2">
-                <label class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
+                <label for="sessionsSearchInput" class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
                 <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
                     <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
-                    <input pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event); dt.filterGlobal($event, 'contains')"
-                           [placeholder]="'SESSIONS.SEARCH_PLACEHOLDER' | translate" class="w-full rounded-lg border-slate-200" />
+                    <input id="sessionsSearchInput" pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event); dt.filterGlobal($event, 'contains')" title="Search" placeholder="Search" aria-label="Search" [placeholder]="'SESSIONS.SEARCH_PLACEHOLDER' | translate" [attr.aria-label]="'SESSIONS.SEARCH_PLACEHOLDER' | translate" class="w-full rounded-lg border-slate-200" />
                 </p-iconField>
             </div>
             
             <div class="flex flex-col gap-2">
                 <label class="text-xs font-bold text-slate-500">{{ 'SESSIONS.STATUS' | translate }}</label>
                 <p-select [options]="statuses()" [ngModel]="selectedStatus()" (ngModelChange)="selectedStatus.set($event); onFilterChange()"
-                          optionLabel="label" optionValue="value" [placeholder]="'SESSIONS.ALL_STATUSES' | translate" 
-                          [showClear]="true" styleClass="w-full rounded-lg"></p-select>
+                          optionValue="value" [placeholder]="'SESSIONS.ALL_STATUSES' | translate" 
+                          [showClear]="true" styleClass="w-full rounded-lg">
+                    <ng-template pTemplate="selectedItem" let-selectedOption>
+                        {{ selectedOption?.labelKey | translate }}
+                    </ng-template>
+                    <ng-template pTemplate="item" let-option>
+                        {{ option?.labelKey | translate }}
+                    </ng-template>
+                </p-select>
             </div>
 
             <div class="flex flex-col gap-2 md:col-span-1">
@@ -46,8 +52,7 @@
             </div>
 
             <div class="flex justify-end">
-                <button pButton icon="pi pi-filter-slash" class="p-button-outlined p-button-secondary h-[42px] px-4" 
-                        (click)="resetFilters()" [pTooltip]="'SESSIONS.RESET_FILTERS' | translate"></button>
+                <button type="button" pButton icon="pi pi-filter-slash" title="Reset Filters" aria-label="Reset Filters" [attr.aria-label]="'SESSIONS.RESET_FILTERS' | translate" class="p-button-outlined p-button-secondary h-[42px] px-4" (click)="resetFilters()" [pTooltip]="'SESSIONS.RESET_FILTERS' | translate"></button>
             </div>
         </div>
     </div>
@@ -74,10 +79,10 @@
                 <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
                     <td class="p-4 font-medium text-slate-800">{{ session.title }}</td>
                     <td class="p-4">
-                        <a [routerLink]="['/cases', session.caseId]" class="text-blue-600 hover:underline font-bold">
+                        <a [routerLink]="['/cases', session.caseId]" class="text-blue-600 hover:underline font-bold block">
                             {{ session.caseNumber }}
                         </a>
-                        <div class="text-xs text-slate-400">{{ session.caseTitle }}</div>
+                        <a [routerLink]="['/cases', session.caseId]" class="text-xs text-slate-500 hover:text-blue-600 hover:underline block">{{ session.caseTitle }}</a>
                     </td>
                     <td class="p-4 text-center">
                         <div class="flex flex-col">
@@ -86,18 +91,36 @@
                         </div>
                     </td>
                     <td class="p-4">
-                        <div class="flex items-center gap-2">
-                            <i class="pi pi-map-marker text-red-400"></i>
-                            <span>{{ session.courtName }}</span>
+                        <div class="flex flex-col gap-0.5">
+                            <div class="flex items-center gap-1.5 font-medium text-slate-800 text-sm">
+                                <i class="pi pi-building text-slate-400 text-xs"></i>
+                                <span>{{ session.courtName }}</span>
+                            </div>
+                            <div class="flex items-center gap-2 text-xs text-slate-500 font-normal">
+                                @if (session.circuitNumber) {
+                                    <span class="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded border border-slate-200">
+                                        {{ session.circuitNumber }}
+                                    </span>
+                                }
+                                @if (session.location) {
+                                    <span class="text-slate-500 flex items-center gap-1">
+                                        <i class="pi pi-map-marker text-[10px] text-red-400"></i>
+                                        {{ session.location }}
+                                    </span>
+                                }
+                            </div>
                         </div>
                     </td>
                     <td class="p-4">
                         <p-tag [value]="getStatusLabel(session.status)" [severity]="getStatusSeverity(session.status)" styleClass="text-xs"></p-tag>
                     </td>
                     <td class="p-4 text-center">
-                        <div class="flex justify-center gap-2">
-                            <button pButton icon="pi pi-pencil" class="p-button-text p-button-secondary p-button-sm" (click)="editSession(session)"></button>
-                            <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" (click)="deleteSession(session)"></button>
+                        <div class="flex justify-center gap-1.5">
+                            @if (session.status === 0 || !session.decisionText) {
+                                <button type="button" pButton icon="pi pi-check-square" title="Record Outcome" aria-label="Record Outcome" [attr.aria-label]="'SESSIONS.RECORD_OUTCOME' | translate" class="p-button-text p-button-success p-button-sm" (click)="recordOutcome(session)" [pTooltip]="'SESSIONS.RECORD_OUTCOME' | translate"></button>
+                            }
+                            <button type="button" pButton icon="pi pi-pencil" title="Edit" aria-label="Edit" [attr.aria-label]="'COMMON.EDIT' | translate" class="p-button-text p-button-secondary p-button-sm" (click)="editSession(session)" [pTooltip]="'COMMON.EDIT' | translate"></button>
+                            <button type="button" pButton icon="pi pi-trash" title="Delete" aria-label="Delete" [attr.aria-label]="'COMMON.DELETE' | translate" class="p-button-text p-button-danger p-button-sm" (click)="deleteSession(session)" [pTooltip]="'COMMON.DELETE' | translate"></button>
                         </div>
                     </td>
                 </tr>

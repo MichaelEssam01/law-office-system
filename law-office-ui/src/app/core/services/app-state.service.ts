@@ -1,6 +1,7 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { SettingsService, SystemSettingDto } from './settings.service';
 import { TranslateService } from '@ngx-translate/core';
+import { PrimeNG } from 'primeng/config';
 
 @Injectable({
   providedIn: 'root'
@@ -8,6 +9,7 @@ import { TranslateService } from '@ngx-translate/core';
 export class AppStateService {
   private settingsService = inject(SettingsService);
   private translate = inject(TranslateService);
+  private primeng = inject(PrimeNG);
   
   currentLang = signal<'ar' | 'en'>('ar');
   isSidebarOpen = signal(false);
@@ -23,10 +25,8 @@ export class AppStateService {
 
   constructor() {
     this.loadSettings();
-    const savedLang = localStorage.getItem('lang') as 'ar' | 'en';
-    if (savedLang) {
-      this.setLanguage(savedLang);
-    }
+    const savedLang = (localStorage.getItem('lang') as 'ar' | 'en') || 'ar';
+    this.setLanguage(savedLang);
   }
 
   setLanguage(lang: 'ar' | 'en') {
@@ -35,6 +35,35 @@ export class AppStateService {
     localStorage.setItem('lang', lang);
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = lang;
+    this.updatePrimeNGLocale(lang);
+  }
+
+  private updatePrimeNGLocale(lang: 'ar' | 'en') {
+    if (lang === 'ar') {
+      this.primeng.setTranslation({
+        dayNames: ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'],
+        dayNamesShort: ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'],
+        dayNamesMin: ['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'],
+        monthNames: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+        monthNamesShort: ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'],
+        today: 'اليوم',
+        clear: 'مسح',
+        dateFormat: 'dd/mm/yy',
+        firstDayOfWeek: 6 // Saturday starts the week in Arabic calendar
+      });
+    } else {
+      this.primeng.setTranslation({
+        dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        dayNamesShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        dayNamesMin: ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'],
+        monthNames: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        monthNamesShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        today: 'Today',
+        clear: 'Clear',
+        dateFormat: 'dd/mm/yy',
+        firstDayOfWeek: 0
+      });
+    }
   }
 
   toggleLanguage() {

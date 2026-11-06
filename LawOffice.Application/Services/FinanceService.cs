@@ -40,6 +40,19 @@ public class FinanceService : IFinanceService
         var overdueCount = activeInvoices.Count(i => i.Status == InvoiceStatus.Overdue || 
                                                      (i.Status != InvoiceStatus.Paid && i.DueDate < now));
 
+        var feesInvoices = allInvoices.Where(i => i.Category == FinanceCategory.Fees).ToList();
+        var expensesInvoices = allInvoices.Where(i => i.Category == FinanceCategory.Expenses).ToList();
+
+        var totalFeesPaid = await _unitOfWork.Repository<Payment>().Query()
+            .AsNoTracking()
+            .Where(p => p.Category == FinanceCategory.Fees)
+            .SumAsync(p => (decimal?)p.Amount) ?? 0m;
+
+        var totalExpensesPaid = await _unitOfWork.Repository<Payment>().Query()
+            .AsNoTracking()
+            .Where(p => p.Category == FinanceCategory.Expenses)
+            .SumAsync(p => (decimal?)p.Amount) ?? 0m;
+
         return new FinancialSummaryDto
         {
             TotalInvoiced = totalInvoiced,
@@ -47,7 +60,11 @@ public class FinanceService : IFinanceService
             TotalRemaining = totalRemaining,
             TotalCancelled = totalCancelled,
             UnpaidInvoicesCount = unpaidCount,
-            OverdueInvoicesCount = overdueCount
+            OverdueInvoicesCount = overdueCount,
+            TotalFeesInvoiced = feesInvoices.Sum(i => i.Amount),
+            TotalFeesPaid = totalFeesPaid,
+            TotalExpensesInvoiced = expensesInvoices.Sum(i => i.Amount),
+            TotalExpensesPaid = totalExpensesPaid
         };
     }
 
@@ -76,6 +93,17 @@ public class FinanceService : IFinanceService
         var overdueCount = activeInvoices.Count(i => i.Status == InvoiceStatus.Overdue || 
                                                      (i.Status != InvoiceStatus.Paid && i.DueDate < now));
 
+        var feesInvoices = caseInvoices.Where(i => i.Category == FinanceCategory.Fees).ToList();
+        var expensesInvoices = caseInvoices.Where(i => i.Category == FinanceCategory.Expenses).ToList();
+
+        var totalFeesPaid = await _unitOfWork.Repository<Payment>().Query()
+            .Where(p => p.CaseId == caseId && p.Category == FinanceCategory.Fees)
+            .SumAsync(p => (decimal?)p.Amount) ?? 0m;
+
+        var totalExpensesPaid = await _unitOfWork.Repository<Payment>().Query()
+            .Where(p => p.CaseId == caseId && p.Category == FinanceCategory.Expenses)
+            .SumAsync(p => (decimal?)p.Amount) ?? 0m;
+
         return new FinancialSummaryDto
         {
             TotalInvoiced = totalInvoiced,
@@ -83,7 +111,11 @@ public class FinanceService : IFinanceService
             TotalRemaining = totalRemaining,
             TotalCancelled = totalCancelled,
             UnpaidInvoicesCount = unpaidCount,
-            OverdueInvoicesCount = overdueCount
+            OverdueInvoicesCount = overdueCount,
+            TotalFeesInvoiced = feesInvoices.Sum(i => i.Amount),
+            TotalFeesPaid = totalFeesPaid,
+            TotalExpensesInvoiced = expensesInvoices.Sum(i => i.Amount),
+            TotalExpensesPaid = totalExpensesPaid
         };
     }
 }

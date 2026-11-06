@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Table, TableModule } from 'primeng/table';
@@ -14,7 +14,7 @@ import { InputIconModule } from 'primeng/inputicon';
 import { FormsModule } from '@angular/forms';
 import { PopoverModule } from 'primeng/popover';
 import { CheckboxModule } from 'primeng/checkbox';
-import { FinanceService, InvoiceListDto, FinancialSummaryDto, InvoiceStatus } from '../../../core/services/finance.service';
+import { FinanceService, InvoiceListDto, FinancialSummaryDto, InvoiceStatus, FinanceCategory } from '../../../core/services/finance.service';
 import { InvoiceDialog } from '../invoice-dialog/invoice-dialog';
 import { PaymentDialog } from '../payment-dialog/payment-dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -56,6 +56,47 @@ export class FinancePage implements OnInit {
   invoices = signal<any[]>([]);
   loading = signal(true);
   selectedStatuses = signal<number[]>([]);
+  activeTab = signal<'fees' | 'expenses' | 'all'>('fees');
+  defaultInvoiceCategory = signal<FinanceCategory>(FinanceCategory.Fees);
+
+  feesCount = computed(() => this.invoices().filter(i => (i.category ?? FinanceCategory.Fees) === FinanceCategory.Fees).length);
+  expensesCount = computed(() => this.invoices().filter(i => i.category === FinanceCategory.Expenses).length);
+
+  filteredInvoices = computed(() => {
+    const all = this.invoices();
+    const tab = this.activeTab();
+    if (tab === 'fees') {
+      return all.filter(i => (i.category ?? FinanceCategory.Fees) === FinanceCategory.Fees);
+    }
+    if (tab === 'expenses') {
+      return all.filter(i => i.category === FinanceCategory.Expenses);
+    }
+    return all;
+  });
+
+  displayedSummary = computed(() => {
+    const tab = this.activeTab();
+    const all = this.invoices();
+    const filtered = tab === 'fees'
+      ? all.filter(i => (i.category ?? FinanceCategory.Fees) === FinanceCategory.Fees)
+      : tab === 'expenses'
+      ? all.filter(i => i.category === FinanceCategory.Expenses)
+      : all;
+
+    const totalInvoiced = filtered.reduce((sum, i) => sum + (i.amount || 0), 0);
+    const totalPaid = filtered.reduce((sum, i) => sum + (i.paidAmount || 0), 0);
+    const totalRemaining = filtered.reduce((sum, i) => sum + (i.remainingAmount || 0), 0);
+    const totalCancelled = filtered.filter(i => i.status === InvoiceStatus.Cancelled).reduce((sum, i) => sum + (i.remainingAmount || 0), 0);
+    const overdueCount = filtered.filter(i => i.status === InvoiceStatus.Overdue).length;
+
+    return {
+      totalInvoiced,
+      totalPaid,
+      totalRemaining,
+      totalCancelled,
+      overdueInvoicesCount: overdueCount
+    };
+  });
 
   statuses = [
     { label: 'FINANCE.UNPAID', value: InvoiceStatus.Unpaid, color: 'text-amber-600 bg-amber-50 border-amber-200' },
@@ -124,7 +165,14 @@ export class FinancePage implements OnInit {
     }
   }
 
-  openNewInvoice() {
+  setActiveTab(tab: 'fees' | 'expenses' | 'all') {
+    this.activeTab.set(tab);
+    this.cdr.detectChanges();
+  }
+
+  openNewInvoice(category?: FinanceCategory) {
+    const targetCategory = category ?? (this.activeTab() === 'expenses' ? FinanceCategory.Expenses : FinanceCategory.Fees);
+    this.defaultInvoiceCategory.set(targetCategory);
     this.selectedInvoice.set(null);
     this.displayInvoiceDialog.set(true);
   }
@@ -231,6 +279,7 @@ export class FinancePage implements OnInit {
       case 1: return this.translate.instant('FINANCE.METHODS.BANK');
       case 2: return this.translate.instant('FINANCE.METHODS.CARD');
       case 3: return this.translate.instant('FINANCE.METHODS.CHECK');
+      case 5: return this.translate.instant('FINANCE.METHODS.WALLET');
       default: return this.translate.instant('FINANCE.METHODS.OTHER');
     }
   }
@@ -242,8 +291,23 @@ export class FinancePage implements OnInit {
       case 1: return 'pi pi-building';   // Bank Transfer
       case 2: return 'pi pi-credit-card';// Card
       case 3: return 'pi pi-file-edit';  // Check
+      case 5: return 'pi pi-mobile';     // Electronic Wallet
       default: return 'pi pi-wallet';
     }
+  }
+
+  getCategoryLabel(category?: number): string {
+    return (category === FinanceCategory.Expenses)
+      ? this.translate.instant('FINANCE.CATEGORIES.EXPENSES')
+      : this.translate.instant('FINANCE.CATEGORIES.FEES');
+  }
+
+  getCategoryIcon(category?: number): string {
+    return (category === FinanceCategory.Expenses) ? 'pi pi-receipt' : 'pi pi-briefcase';
+  }
+
+  getCategorySeverity(category?: number): 'warn' | 'info' {
+    return (category === FinanceCategory.Expenses) ? 'warn' : 'info';
   }
 
   getStatusSeverity(status: InvoiceStatus): "success" | "secondary" | "info" | "warn" | "danger" | "contrast" | undefined {

@@ -1,72 +1,622 @@
 <p-dialog [header]="(case ? 'CASES.EDIT_CASE' : 'CASES.ADD_CASE_NEW') | translate" 
           [(visible)]="visible" 
           [modal]="true" 
-          [style]="{ width: '600px' }" 
+          [style]="{ width: '940px', maxWidth: '96vw' }" 
           [draggable]="false" 
           [resizable]="false"
           (onHide)="close()">
     
-    <form [formGroup]="caseForm" class="flex flex-col gap-4 p-4" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="flex flex-col gap-2">
-                <label for="status" class="font-semibold text-slate-700">{{ 'CASES.STATUS' | translate }}</label>
-                <p-select id="status" [options]="statuses()" optionValue="value" formControlName="status" [placeholder]="'CASES.SELECT_STATUS' | translate" styleClass="w-full" appendTo="body">
-                    <ng-template pTemplate="selectedItem" let-selectedOption>
-                        {{ selectedOption?.labelKey | translate }}
-                    </ng-template>
-                    <ng-template pTemplate="item" let-option>
-                        {{ option?.labelKey | translate }}
-                    </ng-template>
-                </p-select>
-            </div>
+    <form [formGroup]="caseForm" class="flex flex-col gap-4 p-2 md:p-4" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
+        <p-tabs [(value)]="activeTab">
+            <p-tablist>
+                <p-tab [value]="0">
+                    <i class="pi pi-briefcase me-2"></i>
+                    <span>{{ 'CASES.CASE_DETAILS_TITLE' | translate }}</span>
+                    @if (hasTab0Errors()) {
+                        <i class="pi pi-exclamation-circle text-red-500 ms-1.5" [pTooltip]="'COMMON.REQUIRED_FIELDS_WARNING' | translate"></i>
+                    }
+                </p-tab>
+                <p-tab [value]="1">
+                    <i class="pi pi-building me-2"></i>
+                    <span>{{ 'CASES.COURT_INFO' | translate }}</span>
+                </p-tab>
+                <p-tab [value]="2">
+                    <i class="pi pi-users me-2"></i>
+                    <span>{{ 'CASES.PARTIES_TAB' | translate }}</span>
+                    @if (hasTab2Errors()) {
+                        <i class="pi pi-exclamation-circle text-red-500 ms-1.5" [pTooltip]="'COMMON.REQUIRED_FIELDS_WARNING' | translate"></i>
+                    }
+                </p-tab>
+                <p-tab [value]="3">
+                    <i class="pi pi-folder me-2"></i>
+                    <span>{{ 'CASES.FILE_INFO' | translate }}</span>
+                </p-tab>
+                <p-tab [value]="4">
+                    <i class="pi pi-check-circle me-2"></i>
+                    <span>{{ 'CASES.OUTCOMES_TAB' | translate }}</span>
+                </p-tab>
+            </p-tablist>
 
-            <div class="flex flex-col gap-2">
-                <label for="startDate" class="font-semibold text-slate-700">{{ 'CASES.START_DATE' | translate }}</label>
-                <p-datepicker id="startDate" formControlName="startDate" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full" appendTo="body"></p-datepicker>
-            </div>
-        </div>
-        
-        <div class="flex flex-col gap-2">
-            <label for="title" class="font-semibold text-slate-700">{{ 'CASES.TITLE_LABEL' | translate }}</label>
-            <input pInputText id="title" formControlName="title" [placeholder]="'CASES.TITLE_PLACEHOLDER' | translate" />
-        </div>
+            <p-tabpanels>
+                <!-- Tab 0: Basic & Workflow Actions -->
+                <p-tabpanel [value]="0">
+                    <div class="flex flex-col gap-4 pt-4">
+                        <!-- Subject / Title -->
+                        <div class="flex flex-col gap-2">
+                            <label for="title" class="font-semibold text-slate-700 flex items-center gap-1">
+                                <span>{{ 'CASES.SUBJECT' | translate }}</span>
+                                <span class="text-red-500">*</span>
+                                @if (isFieldInvalid('title')) {
+                                    <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                                }
+                            </label>
+                            <input pInputText id="title" formControlName="title" title="Subject" placeholder="Subject" aria-label="Subject" [attr.aria-label]="'CASES.SUBJECT' | translate" [placeholder]="'CASES.SUBJECT_PLACEHOLDER' | translate" [ngClass]="isFieldInvalid('title') ? '!border-red-500 ng-invalid ng-dirty' : ''" class="w-full" />
+                        </div>
 
-        <div class="flex flex-col gap-2">
-            <label for="description" class="font-semibold text-slate-700">{{ 'COMMON.DESCRIPTION' | translate }}</label>
-            <textarea pTextarea id="description" formControlName="description" rows="3" [placeholder]="'CASES.DESCRIPTION_PLACEHOLDER' | translate"></textarea>
-        </div>
+                        <!-- Status & Conditional Archiving Type -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-2">
+                                <label for="status" class="font-semibold text-slate-700 flex items-center gap-1">
+                                    <span>{{ 'CASES.STATUS' | translate }}</span>
+                                    <span class="text-red-500">*</span>
+                                    @if (isFieldInvalid('status')) {
+                                        <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                                    }
+                                </label>
+                                <p-select id="status" [options]="statuses()" optionValue="value" formControlName="status" [placeholder]="'CASES.SELECT_STATUS' | translate" [styleClass]="'w-full ' + (isFieldInvalid('status') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                    <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                    <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                </p-select>
+                            </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="flex flex-col gap-2">
-                <label for="clientId" class="font-semibold text-slate-700">{{ 'CASES.CLIENT' | translate }}</label>
-                <p-select id="clientId" [options]="clients()" optionLabel="fullName" optionValue="id" 
-                            formControlName="clientId" [placeholder]="'CASES.SELECT_CLIENT' | translate" [filter]="true" styleClass="w-full" appendTo="body"></p-select>
-            </div>
-            
-            <div class="flex flex-col gap-2">
-                <label for="assignedLawyerId" class="font-semibold text-slate-700">{{ 'CASES.LAWYER_ASSIGNED' | translate }}</label>
-                <p-select id="assignedLawyerId" [options]="lawyers()" optionLabel="fullName" optionValue="id" 
-                            formControlName="assignedLawyerId" [placeholder]="'CASES.SELECT_LAWYER' | translate" styleClass="w-full" appendTo="body"></p-select>
-            </div>
-        </div>
+                            @if (isFinishedStatus()) {
+                                <div class="flex flex-col gap-2 animate-fadeIn">
+                                    <label for="archivingType" class="font-semibold text-slate-700">{{ 'CASES.ARCHIVING_TYPE' | translate }}</label>
+                                    <p-select id="archivingType" [options]="archivingTypes()" optionValue="value" formControlName="archivingType" 
+                                              [placeholder]="'CASES.ARCHIVING_TYPE' | translate" styleClass="w-full" appendTo="body">
+                                        <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                        <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                    </p-select>
+                                </div>
+                            }
+                        </div>
 
-        @if (isClosedStatus()) {
-            <div class="flex flex-col gap-2">
-                <label for="closedDate" class="font-semibold text-slate-700">{{ 'CASES.CLOSE_DATE' | translate }}</label>
-                <p-datepicker id="closedDate" formControlName="closedDate" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full" appendTo="body"></p-datepicker>
-            </div>
-        }
+                        <!-- Workflow Actions & Suspension/Stop Reasons (متداولة / معلقة / موقوفة) -->
+                        @if (isInProgressStatus() || isPendingStatus() || isSuspendedStatus()) {
+                            <div class="p-4 rounded-xl border flex flex-col gap-4 animate-fadeIn" [class]="isInProgressStatus() ? 'bg-sky-50/60 border-sky-200' : (isPendingStatus() ? 'bg-amber-50/60 border-amber-200' : 'bg-rose-50/60 border-rose-200')">
+                                <!-- MultiSelect Dropdown for Required Actions -->
+                                <div class="flex flex-col gap-2">
+                                    <label for="selectedRequiredActions" class="font-bold text-sm flex items-center gap-2" [class]="isInProgressStatus() ? 'text-sky-800' : (isPendingStatus() ? 'text-amber-800' : 'text-rose-800')">
+                                        <i class="pi" [class]="isInProgressStatus() ? 'pi-list-check text-sky-600' : (isPendingStatus() ? 'pi-clock text-amber-600' : 'pi-pause-circle text-rose-600')"></i>
+                                        <span>{{ 'CASES.REQUIRED_ACTIONS' | translate }}</span>
+                                    </label>
+                                    <p-multiselect id="selectedRequiredActions" [options]="requiredActionOptions()" optionValue="value" formControlName="selectedRequiredActions" (onChange)="onRequiredActionsChange()" [placeholder]="'CASES.SELECT_REQUIRED_ACTIONS' | translate" [showToggleAll]="false" [filter]="false" display="chip" styleClass="w-full" appendTo="body">
+                                        <ng-template pTemplate="selectedItems" let-items>
+                                            @if (items && items.length > 0) {
+                                                <div class="flex flex-wrap gap-1.5">
+                                                    @for (val of items; track val) {
+                                                        <span class="px-2 py-0.5 text-xs font-semibold rounded bg-blue-100 text-blue-800">
+                                                            @if (val === 'office') { {{ 'CASES.ACTION_OFFICE' | translate }} }
+                                                            @else if (val === 'court') { {{ 'CASES.ACTION_COURT' | translate }} }
+                                                            @else if (val === 'external') { {{ 'CASES.ACTION_EXTERNAL' | translate }} }
+                                                            @else if (val === 'other') { {{ 'CASES.ACTION_OTHER' | translate }} }
+                                                        </span>
+                                                    }
+                                                </div>
+                                            } @else {
+                                                <span class="text-slate-400">{{ 'CASES.SELECT_REQUIRED_ACTIONS' | translate }}</span>
+                                            }
+                                        </ng-template>
+                                        <ng-template pTemplate="item" let-opt>
+                                            <span>{{ opt?.labelKey | translate }}</span>
+                                        </ng-template>
+                                    </p-multiselect>
+                                </div>
 
-        <div class="flex flex-col gap-2">
-            <label for="notes" class="font-semibold text-slate-700">{{ 'CASES.NOTES_LABEL' | translate }}</label>
-            <textarea pTextarea id="notes" formControlName="notes" rows="2" [placeholder]="'CASES.NOTES_PLACEHOLDER' | translate"></textarea>
-        </div>
+                                <!-- Dynamic Textboxes for Selected Required Actions -->
+                                @if (isActionSelected('office') || isActionSelected('court') || isActionSelected('external') || isActionSelected('other')) {
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                        @if (isActionSelected('office')) {
+                                            <div class="flex flex-col gap-1 animate-fadeIn">
+                                                <label for="action_office" class="text-xs font-semibold text-slate-700">{{ 'CASES.ACTION_OFFICE' | translate }}</label>
+                                                <input pInputText id="action_office" formControlName="officeAction" aria-label="Office Action" [attr.aria-label]="'CASES.ACTION_OFFICE' | translate" title="Office Action" [title]="'CASES.ACTION_OFFICE' | translate" placeholder="Office Action" [placeholder]="'CASES.ACTION_OFFICE_PLACEHOLDER' | translate" class="w-full" />
+                                            </div>
+                                        }
+                                        @if (isActionSelected('court')) {
+                                            <div class="flex flex-col gap-1 animate-fadeIn">
+                                                <label for="action_court" class="text-xs font-semibold text-slate-700">{{ 'CASES.ACTION_COURT' | translate }}</label>
+                                                <input pInputText id="action_court" formControlName="courtAction" aria-label="Court Action" [attr.aria-label]="'CASES.ACTION_COURT' | translate" title="Court Action" [title]="'CASES.ACTION_COURT' | translate" placeholder="Court Action" [placeholder]="'CASES.ACTION_COURT_PLACEHOLDER' | translate" class="w-full" />
+                                            </div>
+                                        }
+                                        @if (isActionSelected('external')) {
+                                            <div class="flex flex-col gap-1 animate-fadeIn">
+                                                <label for="action_external" class="text-xs font-semibold text-slate-700">{{ 'CASES.ACTION_EXTERNAL' | translate }}</label>
+                                                <input pInputText id="action_external" formControlName="externalAction" aria-label="External Action" [attr.aria-label]="'CASES.ACTION_EXTERNAL' | translate" title="External Action" [title]="'CASES.ACTION_EXTERNAL' | translate" placeholder="External Action" [placeholder]="'CASES.ACTION_EXTERNAL_PLACEHOLDER' | translate" class="w-full" />
+                                            </div>
+                                        }
+                                        @if (isActionSelected('other')) {
+                                            <div class="flex flex-col gap-1 animate-fadeIn">
+                                                <label for="action_other" class="text-xs font-semibold text-slate-700">{{ 'CASES.ACTION_OTHER' | translate }}</label>
+                                                <input pInputText id="action_other" formControlName="otherAction" aria-label="Other Action" [attr.aria-label]="'CASES.ACTION_OTHER' | translate" title="Other Action" [title]="'CASES.ACTION_OTHER' | translate" placeholder="Other Action" [placeholder]="'CASES.ACTION_OTHER_PLACEHOLDER' | translate" class="w-full" />
+                                            </div>
+                                        }
+                                    </div>
+                                }
+
+                                <!-- 2. معلقة (Pending): Suspension Reason MultiSelect Dropdown + Conditional Textboxes -->
+                                @if (isPendingStatus()) {
+                                    <div class="pt-3 border-t border-amber-200 flex flex-col gap-3">
+                                        <div class="flex flex-col gap-1">
+                                            <label for="selectedSuspensionReasons" class="font-bold text-amber-900 text-xs">{{ 'CASES.SUSPENSION_REASON' | translate }}</label>
+                                            <p-multiselect id="selectedSuspensionReasons" [options]="suspensionReasons()" optionValue="value" formControlName="selectedSuspensionReasons" [placeholder]="'CASES.SELECT_SUSPENSION_REASONS' | translate" [showToggleAll]="false" [filter]="false" display="chip" styleClass="w-full" appendTo="body">
+                                                <ng-template pTemplate="selectedItems" let-items>
+                                                    @if (items && items.length > 0) {
+                                                        <div class="flex flex-wrap gap-1.5">
+                                                            @for (val of items; track val) {
+                                                                <span class="px-2 py-0.5 text-xs font-semibold rounded bg-amber-100 text-amber-800">{{ val }}</span>
+                                                            }
+                                                        </div>
+                                                    } @else {
+                                                        <span class="text-slate-400">{{ 'CASES.SELECT_SUSPENSION_REASONS' | translate }}</span>
+                                                    }
+                                                </ng-template>
+                                                <ng-template pTemplate="item" let-opt>
+                                                    <span>{{ opt?.labelKey | translate }}</span>
+                                                </ng-template>
+                                            </p-multiselect>
+                                        </div>
+
+                                        @if (isDocumentsSuspension()) {
+                                            <div class="flex flex-col gap-1 animate-fadeIn">
+                                                <label for="suspensionDocumentsText" class="text-xs font-semibold text-slate-700">{{ 'CASES.DOCUMENTS_DETAILS' | translate }}</label>
+                                                <input pInputText id="suspensionDocumentsText" formControlName="suspensionDocumentsText" aria-label="Documents Details" [attr.aria-label]="'CASES.DOCUMENTS_DETAILS' | translate" title="Documents Details" placeholder="Documents Details" [placeholder]="'CASES.DOCUMENTS_DETAILS_PLACEHOLDER' | translate" class="w-full" />
+                                            </div>
+                                        }
+
+                                        @if (isOtherSuspension()) {
+                                            <div class="flex flex-col gap-1 animate-fadeIn">
+                                                <label for="suspensionOtherText" class="text-xs font-semibold text-slate-700">{{ 'CASES.OTHER_DETAILS' | translate }}</label>
+                                                <input pInputText id="suspensionOtherText" formControlName="suspensionOtherText" aria-label="Other Details" [attr.aria-label]="'CASES.OTHER_DETAILS' | translate" title="Other Details" placeholder="Other Details" [placeholder]="'CASES.OTHER_DETAILS_PLACEHOLDER' | translate" class="w-full" />
+                                            </div>
+                                        }
+                                    </div>
+                                }
+
+                                <!-- 3. موقوفة (Suspended): Free Text Stop Reason -->
+                                @if (isSuspendedStatus()) {
+                                    <div class="pt-3 border-t border-rose-200 flex flex-col gap-1">
+                                        <label for="suspensionReasonText" class="font-bold text-rose-900 text-xs">{{ 'CASES.STOP_REASON' | translate }}</label>
+                                        <input pInputText id="suspensionReasonText" formControlName="suspensionReason" aria-label="Suspension Reason" [attr.aria-label]="'CASES.STOP_REASON' | translate" title="Suspension Reason" placeholder="Suspension Reason" [placeholder]="'CASES.STOP_REASON_PLACEHOLDER' | translate" class="w-full" />
+                                    </div>
+                                }
+                            </div>
+                        }
+
+                        <!-- Dates: Agreement Date, Start Date, Court Filing Date, Closed Date -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="flex flex-col gap-2">
+                                <label for="agreementDate" class="font-semibold text-slate-700">{{ 'CASES.AGREEMENT_DATE' | translate }}</label>
+                                <p-datepicker id="agreementDate" formControlName="agreementDate" [showIcon]="true" dateFormat="dd/mm/yy" [maxDate]="today" styleClass="w-full" appendTo="body"></p-datepicker>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="startDate" class="font-semibold text-slate-700 flex items-center gap-1">
+                                    <span>{{ 'CASES.START_DATE' | translate }}</span>
+                                    <span class="text-red-500">*</span>
+                                    @if (isFieldInvalid('startDate')) {
+                                        <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                                    }
+                                </label>
+                                <p-datepicker id="startDate" formControlName="startDate" [showIcon]="true" dateFormat="dd/mm/yy" [styleClass]="'w-full ' + (isFieldInvalid('startDate') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body"></p-datepicker>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="courtFilingDate" class="font-semibold text-slate-700">{{ 'CASES.COURT_FILING_DATE' | translate }}</label>
+                                <p-datepicker id="courtFilingDate" formControlName="courtFilingDate" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full" appendTo="body"></p-datepicker>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="closedDate" class="font-semibold text-slate-700">{{ 'CASES.CLOSED_DATE' | translate }}</label>
+                                <p-datepicker id="closedDate" formControlName="closedDate" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full" appendTo="body"></p-datepicker>
+                            </div>
+                        </div>
+
+                        <!-- Case Type (REQUIRED) & Family Subtype -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-2">
+                                <label for="caseType" class="font-semibold text-slate-700 flex items-center gap-1">
+                                    <span>{{ 'CASES.CASE_TYPE' | translate }}</span>
+                                    <span class="text-red-500">*</span>
+                                    @if (isFieldInvalid('caseType')) {
+                                        <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                                    }
+                                </label>
+                                <p-select id="caseType" [options]="caseTypes()" optionValue="value" formControlName="caseType" [placeholder]="'CASES.CASE_TYPE' | translate" [showClear]="true" [styleClass]="'w-full ' + (isFieldInvalid('caseType') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                    <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                    <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                </p-select>
+                            </div>
+
+                            @if (isFamilyType()) {
+                                <div class="flex flex-col gap-2 animate-fadeIn">
+                                    <label for="familyCaseSubtype" class="font-semibold text-slate-700">{{ 'CASES.FAMILY_SUBTYPE' | translate }}</label>
+                                    <p-select id="familyCaseSubtype" [options]="familySubtypes()" optionValue="value" formControlName="familyCaseSubtype" 
+                                              [placeholder]="'CASES.FAMILY_SUBTYPE' | translate" [showClear]="true" styleClass="w-full" appendTo="body">
+                                        <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                        <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                    </p-select>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Primary Client (REQUIRED) & Assigned Lawyer (NOT REQUIRED) -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-2">
+                                <label for="clientId" class="font-semibold text-slate-700 flex items-center gap-1">
+                                    <span>{{ 'CASES.SELECT_CLIENT' | translate }}</span>
+                                    <span class="text-red-500">*</span>
+                                    @if (isFieldInvalid('clientId')) {
+                                        <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                                    }
+                                </label>
+                                <p-select id="clientId" [options]="clients()" optionLabel="fullName" optionValue="id" formControlName="clientId" [placeholder]="'CASES.SELECT_CLIENT' | translate" [filter]="true" filterBy="fullName,nationalId,clientNumber" [styleClass]="'w-full ' + (isFieldInvalid('clientId') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                    <ng-template pTemplate="selectedItem" let-selected>
+                                        @if (selected) {
+                                            <div class="flex items-center gap-2">
+                                                @if (selected.clientNumber) {
+                                                    <span class="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">#{{ selected.clientNumber }}</span>
+                                                }
+                                                <span>{{ selected.fullName }}</span>
+                                            </div>
+                                        }
+                                    </ng-template>
+                                    <ng-template pTemplate="item" let-item>
+                                        <div class="flex items-center justify-between w-full">
+                                            <span>{{ item.fullName }}</span>
+                                            @if (item.clientNumber) {
+                                                <span class="font-mono text-xs font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">#{{ item.clientNumber }}</span>
+                                            }
+                                        </div>
+                                    </ng-template>
+                                </p-select>
+                            </div>
+                            
+                            <div class="flex flex-col gap-2">
+                                <label for="assignedLawyerId" class="font-semibold text-slate-700">
+                                    {{ 'CASES.LAWYER_ASSIGNED' | translate }}
+                                </label>
+                                <p-select id="assignedLawyerId" [options]="lawyers()" optionLabel="fullName" optionValue="id" 
+                                          formControlName="assignedLawyerId" [placeholder]="'CASES.SELECT_LAWYER' | translate" 
+                                          [showClear]="true" styleClass="w-full" appendTo="body"></p-select>
+                            </div>
+                        </div>
+                    </div>
+                </p-tabpanel>
+
+                <!-- Tab 1: Court Info -->
+                <p-tabpanel [value]="1">
+                    <div class="flex flex-col gap-4 pt-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-2">
+                                <label for="courtCaseNumber" class="font-semibold text-slate-700">{{ 'CASES.COURT_CASE_NUMBER' | translate }}</label>
+                                <input pInputText id="courtCaseNumber" formControlName="courtCaseNumber" 
+                                       title="Court Case Number" placeholder="Court Case Number"
+                                       [placeholder]="'CASES.COURT_CASE_NUMBER_PLACEHOLDER' | translate" class="w-full" />
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="litigationDegree" class="font-semibold text-slate-700">{{ 'CASES.LITIGATION_DEGREE' | translate }}</label>
+                                <p-select id="litigationDegree" [options]="litigationDegrees()" optionValue="value" formControlName="litigationDegree" 
+                                          [placeholder]="'CASES.LITIGATION_DEGREE' | translate" [showClear]="true" styleClass="w-full" appendTo="body">
+                                    <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                    <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                </p-select>
+                            </div>
+                        </div>
+
+                        <!-- Year: Gregorian vs Judicial -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <div class="flex flex-col gap-2">
+                                <label for="yearType" class="font-semibold text-slate-700">{{ 'CASES.YEAR_TYPE' | translate }}</label>
+                                <p-select id="yearType" [options]="yearTypes()" optionValue="value" formControlName="yearType" 
+                                          styleClass="w-full" appendTo="body">
+                                    <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                    <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                </p-select>
+                            </div>
+
+                            <div class="flex flex-col gap-2">
+                                <label for="year" class="font-semibold text-slate-700">
+                                    {{ 'CASES.YEAR' | translate }} 
+                                    @if (isJudicialYear()) {
+                                        <span class="text-xs text-slate-400 font-normal">{{ 'CASES.JUDICIAL_YEAR_HINT' | translate }}</span>
+                                    }
+                                </label>
+                                @if (isJudicialYear()) {
+                                    <p-inputNumber id="year" formControlName="year" [max]="999" [min]="1" [useGrouping]="false" styleClass="w-full"></p-inputNumber>
+                                } @else {
+                                    <p-select id="year" [options]="gregorianYears" formControlName="year" [filter]="true" styleClass="w-full" appendTo="body"></p-select>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </p-tabpanel>
+
+                <!-- Tab 2: Parties (Clients & Opponents) -->
+                <p-tabpanel [value]="2">
+                    <div class="flex flex-col gap-6 pt-4">
+                        <!-- Clients Section -->
+                        <div class="border border-blue-100 bg-blue-50/30 rounded-xl p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="flex items-center gap-2">
+                                    <i class="pi pi-user text-blue-600 font-bold"></i>
+                                    <h3 class="font-bold text-slate-800">{{ 'CASES.CLIENTS_SECTION' | translate }}</h3>
+                                </div>
+                                <button type="button" pButton icon="pi pi-plus" [label]="'CASES.ADD_CLIENT_PARTY' | translate" title="Add Client Party" aria-label="Add Client Party" class="p-button-outlined p-button-sm p-button-primary" (click)="addClientParty()"></button>
+                            </div>
+
+                            @if (clientParties.length === 0) {
+                                <div class="p-4 text-center text-slate-400 text-sm border border-dashed rounded-lg">
+                                    {{ 'CASES.CLIENT_PARTIES_EMPTY' | translate }}
+                                </div>
+                            }
+
+                            <div class="flex flex-col gap-3">
+                                @for (clientParty of clientParties.controls; track $index) {
+                                    <div [formGroup]="$any(clientParty)" class="p-3 bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col gap-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs font-bold text-blue-700">{{ 'CASES.CLIENT_PARTY_PREFIX' | translate }}{{ $index + 1 }}</span>
+                                            <button type="button" pButton icon="pi pi-trash" title="Delete" aria-label="Delete" class="p-button-text p-button-danger p-button-xs" (click)="removeClientParty($index)"></button>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            <div class="flex flex-col gap-1">
+                                                <label [for]="'clientPartySelect_' + $index" class="text-xs font-semibold text-slate-600 flex items-center gap-1">
+                                                    <span>{{ 'CASES.CLIENT' | translate }}</span>
+                                                    <span class="text-red-500">*</span>
+                                                    @if (isPartyFieldInvalid(clientParty, 'clientId')) {
+                                                        <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                                                    }
+                                                </label>
+                                                <p-select [id]="'clientPartySelect_' + $index" [options]="clients()" optionLabel="fullName" optionValue="id" formControlName="clientId" (onChange)="onClientSelectForParty($event, $index)" [filter]="true" [placeholder]="'CASES.SELECT_CLIENT' | translate" [styleClass]="'w-full ' + (isPartyFieldInvalid(clientParty, 'clientId') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body"></p-select>
+                                            </div>
+
+                                            <div class="flex flex-col gap-1">
+                                                <label [for]="'clientPartyCapacity_' + $index" class="text-xs font-semibold text-slate-600 flex items-center gap-1">
+                                                    <span>{{ 'CASES.CLIENT_CAPACITY' | translate }}</span>
+                                                    <span class="text-red-500">*</span>
+                                                    @if (isPartyFieldInvalid(clientParty, 'capacity')) {
+                                                        <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                                                    }
+                                                </label>
+                                                <p-select [id]="'clientPartyCapacity_' + $index" [options]="capacities()" optionValue="value" formControlName="capacity" [styleClass]="'w-full ' + (isPartyFieldInvalid(clientParty, 'capacity') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                                    <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                                    <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                                </p-select>
+                                            </div>
+
+                                            <div class="flex flex-col gap-1">
+                                                <label [for]="'clientPartyDispute_' + $index" class="text-xs font-semibold text-slate-600 flex items-center gap-1">
+                                                    <span>{{ 'CASES.DISPUTE_NATURE' | translate }}</span>
+                                                    <span class="text-red-500">*</span>
+                                                    @if (isPartyFieldInvalid(clientParty, 'disputeNature')) {
+                                                        <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                                                    }
+                                                </label>
+                                                <p-select [id]="'clientPartyDispute_' + $index" [options]="disputeNatures()" optionValue="value" formControlName="disputeNature" [styleClass]="'w-full ' + (isPartyFieldInvalid(clientParty, 'disputeNature') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                                    <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                                    <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                                </p-select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Checkbox: Same Capacity Others -->
+                                        <div class="pt-2 border-t border-slate-100 flex flex-col gap-2">
+                                            <div class="flex items-center gap-2">
+                                                <p-checkbox formControlName="hasSameCapacityOthers" [binary]="true" [inputId]="'sameCap_' + $index"
+                                                            (onChange)="onToggleSameCapacity($index)"></p-checkbox>
+                                                <label [for]="'sameCap_' + $index" class="text-xs font-semibold text-slate-700 cursor-pointer flex items-center gap-1.5">
+                                                    <span>{{ 'CASES.SAME_CAPACITY_OTHERS' | translate }}</span>
+                                                    <i class="pi pi-info-circle text-blue-500" [pTooltip]="'CASES.OTHER_PLAINTIFF_TOOLTIP' | translate"></i>
+                                                </label>
+                                            </div>
+
+                                            @if (clientParty.get('hasSameCapacityOthers')?.value) {
+                                                <div class="flex flex-col gap-2.5 p-3 bg-slate-50 rounded-lg border border-slate-200 mt-1 animate-fadeIn">
+                                                    <div class="flex justify-between items-center">
+                                                        <span class="text-xs text-slate-600 font-semibold">{{ 'CASES.SAME_CAPACITY_OTHERS' | translate }}</span>
+                                                        <button type="button" pButton icon="pi pi-plus" [label]="'CASES.ADD_OTHER_PERSON' | translate" title="Add Other Person" aria-label="Add Other Person" class="p-button-outlined p-button-xs p-button-info" (click)="addOtherPersonToClient($index)"></button>
+                                                    </div>
+
+                                                    @for (otherP of getOtherPersonsArray($index).controls; track subIndex; let subIndex = $index) {
+                                                        <div [formGroup]="$any(otherP)" class="grid grid-cols-1 md:grid-cols-12 gap-2 items-center bg-white p-2 rounded border border-slate-100">
+                                                            <div class="md:col-span-6 flex flex-col gap-1">
+                                                                <label [for]="'otherPName_' + $index + '_' + subIndex" class="text-xs text-slate-500">{{ 'CASES.OTHER_PERSON_NAME' | translate }}</label>
+                                                                <input pInputText [id]="'otherPName_' + $index + '_' + subIndex" formControlName="name" 
+                                                                       aria-label="Person Name"
+                                                                       [attr.aria-label]="'CASES.OTHER_PERSON_NAME' | translate"
+                                                                       title="Person Name" placeholder="Person Name"
+                                                                       class="w-full text-xs" 
+                                                                       [placeholder]="'CASES.OTHER_PERSON_NAME' | translate" />
+                                                            </div>
+                                                            <div class="md:col-span-5 flex flex-col gap-1">
+                                                                <label [for]="'otherPLawyer_' + $index + '_' + subIndex" class="text-xs text-slate-500">{{ 'CASES.OTHER_LAWYER_NAME' | translate }}</label>
+                                                                <input pInputText [id]="'otherPLawyer_' + $index + '_' + subIndex" formControlName="lawyer" 
+                                                                       aria-label="Lawyer Name"
+                                                                       [attr.aria-label]="'CASES.OTHER_LAWYER_NAME' | translate"
+                                                                       title="Lawyer Name" placeholder="Lawyer Name"
+                                                                       class="w-full text-xs" 
+                                                                       [placeholder]="'CASES.OTHER_LAWYER_NAME' | translate" />
+                                                            </div>
+                                                            <div class="md:col-span-1 flex justify-center items-end pt-3">
+                                                                <button type="button" pButton icon="pi pi-times" title="Remove" aria-label="Remove" class="p-button-text p-button-danger p-button-xs" (click)="removeOtherPersonFromClient($index, subIndex)"></button>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Opponents Section -->
+                        <div class="border border-red-100 bg-red-50/20 rounded-xl p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="flex items-center gap-2">
+                                    <i class="pi pi-shield text-red-600 font-bold"></i>
+                                    <h3 class="font-bold text-slate-800">{{ 'CASES.OPPONENTS_SECTION' | translate }}</h3>
+                                </div>
+                                <button type="button" pButton icon="pi pi-plus" [label]="'CASES.ADD_OPPONENT_PARTY' | translate" title="Add Opponent" aria-label="Add Opponent" class="p-button-outlined p-button-sm p-button-danger" (click)="addOpponentParty()"></button>
+                            </div>
+
+                            @if (opponentParties.length === 0) {
+                                <div class="p-4 text-center text-slate-400 text-sm border border-dashed rounded-lg">
+                                    {{ 'CASES.OPPONENT_PARTIES_EMPTY' | translate }}
+                                </div>
+                            }
+
+                            <div class="flex flex-col gap-3">
+                                @for (oppParty of opponentParties.controls; track $index) {
+                                    <div [formGroup]="$any(oppParty)" class="p-3 bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col gap-3">
+                                        <div class="flex justify-between items-center">
+                                            <span class="text-xs font-bold text-red-700">{{ 'CASES.OPPONENT_PARTY_PREFIX' | translate }}{{ $index + 1 }}</span>
+                                            <button type="button" pButton icon="pi pi-trash" title="Delete" aria-label="Delete" class="p-button-text p-button-danger p-button-xs" (click)="removeOpponentParty($index)"></button>
+                                        </div>
+
+                                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                            <div class="flex flex-col gap-1">
+                                                <label [for]="'oppPartyName_' + $index" class="text-xs font-semibold text-slate-600 flex items-center gap-1">
+                                                    <span>{{ 'CASES.PARTY_NAME' | translate }}</span>
+                                                    <span class="text-red-500">*</span>
+                                                    @if (isPartyFieldInvalid(oppParty, 'name')) {
+                                                        <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                                                    }
+                                                </label>
+                                                <input pInputText [id]="'oppPartyName_' + $index" formControlName="name" aria-label="Opponent Name" [attr.aria-label]="'CASES.PARTY_NAME' | translate" title="Opponent Name" placeholder="Opponent Name" [placeholder]="'CASES.OPPONENT_NAME_PLACEHOLDER' | translate" [ngClass]="isPartyFieldInvalid(oppParty, 'name') ? '!border-red-500 ng-invalid ng-dirty' : ''" class="w-full" />
+                                            </div>
+
+                                            <div class="flex flex-col gap-1">
+                                                <label [for]="'oppCapacity_' + $index" class="text-xs font-semibold text-slate-600 flex items-center gap-1">
+                                                    <span>{{ 'CASES.OPPONENT_CAPACITY' | translate }}</span>
+                                                    <span class="text-red-500">*</span>
+                                                    @if (isPartyFieldInvalid(oppParty, 'capacity')) {
+                                                        <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                                                    }
+                                                </label>
+                                                <p-select [id]="'oppCapacity_' + $index" [options]="capacities()" optionValue="value" formControlName="capacity" [styleClass]="'w-full ' + (isPartyFieldInvalid(oppParty, 'capacity') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                                    <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                                    <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                                </p-select>
+                                            </div>
+
+                                            <div class="flex flex-col gap-1">
+                                                <label [for]="'oppDispute_' + $index" class="text-xs font-semibold text-slate-600 flex items-center gap-1">
+                                                    <span>{{ 'CASES.DISPUTE_NATURE' | translate }}</span>
+                                                    <span class="text-red-500">*</span>
+                                                    @if (isPartyFieldInvalid(oppParty, 'disputeNature')) {
+                                                        <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                                                    }
+                                                </label>
+                                                <p-select [id]="'oppDispute_' + $index" [options]="disputeNatures()" optionValue="value" formControlName="disputeNature" [styleClass]="'w-full ' + (isPartyFieldInvalid(oppParty, 'disputeNature') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                                    <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                                    <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
+                                                </p-select>
+                                            </div>
+
+                                            <!-- Opponent's Lawyer (not required) -->
+                                            <div class="flex flex-col gap-1">
+                                                <label [for]="'oppLawyerName_' + $index" class="text-xs font-semibold text-slate-600">{{ 'CASES.OPPONENT_LAWYER' | translate }}</label>
+                                                <input pInputText [id]="'oppLawyerName_' + $index" formControlName="opponentLawyerName" 
+                                                       aria-label="Opponent Lawyer"
+                                                       [attr.aria-label]="'CASES.OPPONENT_LAWYER' | translate"
+                                                       title="Opponent Lawyer" placeholder="Opponent Lawyer"
+                                                       [placeholder]="'CASES.OPPONENT_LAWYER_PLACEHOLDER' | translate" class="w-full" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </p-tabpanel>
+
+                <!-- Tab 3: File Record -->
+                <p-tabpanel [value]="3">
+                    <div class="flex flex-col gap-4 pt-4">
+                        <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                            <h4 class="font-bold text-slate-700 mb-3 flex items-center gap-2">
+                                <i class="pi pi-folder text-amber-500"></i>
+                                <span>{{ 'CASES.FILE_INFO' | translate }}</span>
+                            </h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <div class="flex flex-col gap-1">
+                                    <label for="fileNumber" class="text-xs font-semibold text-slate-600">{{ 'CASES.FILE_NUMBER' | translate }}</label>
+                                    <input pInputText id="fileNumber" formControlName="fileNumber" 
+                                           title="File Number" placeholder="File Number"
+                                           [placeholder]="'CASES.FILE_NUMBER_PLACEHOLDER' | translate" class="w-full" />
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <label for="fileYear" class="text-xs font-semibold text-slate-600">{{ 'CASES.FILE_YEAR' | translate }}</label>
+                                    <p-inputNumber id="fileYear" formControlName="fileYear" [useGrouping]="false" styleClass="w-full"></p-inputNumber>
+                                </div>
+                                <div class="flex flex-col gap-1">
+                                    <label for="fileColor" class="text-xs font-semibold text-slate-600">{{ 'CASES.FILE_COLOR' | translate }}</label>
+                                    <input pInputText id="fileColor" formControlName="fileColor" 
+                                           title="File Color" placeholder="File Color"
+                                           [placeholder]="'CASES.FILE_COLOR_PLACEHOLDER' | translate" class="w-full" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </p-tabpanel>
+
+                <!-- Tab 4: Dedicated Outcomes (النتائج) -->
+                <p-tabpanel [value]="4">
+                    <div class="flex flex-col gap-4 pt-4">
+                        <div class="p-4 bg-emerald-50/50 rounded-xl border border-emerald-200 flex flex-col gap-4">
+                            <h4 class="font-bold text-emerald-800 flex items-center gap-2">
+                                <i class="pi pi-check-circle text-emerald-600"></i>
+                                <span>{{ 'CASES.OUTCOMES_TAB' | translate }}</span>
+                            </h4>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div class="md:col-span-2 flex flex-col gap-2">
+                                    <label for="judgmentResult" class="font-semibold text-slate-700">{{ 'CASES.JUDGMENT_RESULT' | translate }}</label>
+                                    <input pInputText id="judgmentResult" formControlName="judgmentResult" title="Judgment Result" placeholder="Judgment Result" aria-label="Judgment Result" [attr.aria-label]="'CASES.JUDGMENT_RESULT' | translate" [placeholder]="'CASES.JUDGMENT_RESULT_PLACEHOLDER' | translate" class="w-full" />
+                                </div>
+
+                                <div class="flex flex-col gap-2">
+                                    <label for="judgmentDate" class="font-semibold text-slate-700">{{ 'CASES.JUDGMENT_DATE' | translate }}</label>
+                                    <p-datepicker id="judgmentDate" formControlName="judgmentDate" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full" appendTo="body"></p-datepicker>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="flex flex-col gap-2">
+                            <label for="notes" class="font-semibold text-slate-700">{{ 'CASES.NOTES_LABEL' | translate }}</label>
+                            <textarea pTextarea id="notes" formControlName="notes" rows="4" 
+                                      title="Notes" placeholder="Notes"
+                                      [placeholder]="'CASES.NOTES_PLACEHOLDER' | translate" class="w-full"></textarea>
+                        </div>
+                    </div>
+                </p-tabpanel>
+            </p-tabpanels>
+        </p-tabs>
     </form>
 
     <ng-template pTemplate="footer">
-        <div class="flex justify-start gap-2 p-4">
-            <button pButton [label]="'COMMON.CANCEL' | translate" class="p-button-text p-button-secondary" (click)="close()"></button>
-            <button pButton [label]="'COMMON.SAVE' | translate" class="p-button-primary shadow-md px-6" [disabled]="caseForm.invalid" (click)="save()"></button>
+        <div class="flex items-center justify-between w-full p-4 border-t border-slate-100" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
+            <div class="flex items-center gap-2">
+                <button type="button" pButton [label]="'COMMON.PREVIOUS' | translate" [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-right' : 'pi pi-arrow-left'" title="Previous" aria-label="Previous" [attr.aria-label]="'COMMON.PREVIOUS' | translate" class="p-button-outlined p-button-secondary p-button-sm" [disabled]="activeTab() === 0" (click)="prevTab()"></button>
+                <button type="button" pButton [label]="'COMMON.NEXT' | translate" [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-left' : 'pi pi-arrow-right'" iconPos="right" title="Next" aria-label="Next" [attr.aria-label]="'COMMON.NEXT' | translate" class="p-button-outlined p-button-info p-button-sm" [disabled]="activeTab() === 4" (click)="nextTab()"></button>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" pButton [label]="'COMMON.CANCEL' | translate" title="Cancel" aria-label="Cancel" [attr.aria-label]="'COMMON.CANCEL' | translate" class="p-button-text p-button-secondary" (click)="close()"></button>
+                <button type="button" pButton [label]="'COMMON.SAVE' | translate" icon="pi pi-check" title="Save" aria-label="Save" [attr.aria-label]="'COMMON.SAVE' | translate" class="p-button-primary shadow-md px-6" (click)="save()"></button>
+            </div>
         </div>
     </ng-template>
 </p-dialog>

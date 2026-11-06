@@ -18,6 +18,7 @@ public class InvoiceListDto
     public decimal RemainingAmount { get; set; }
     public DateTime DueDate { get; set; }
     public InvoiceStatus Status { get; set; }
+    public FinanceCategory Category { get; set; } = FinanceCategory.Fees;
     public DateTime CreatedAt { get; set; }
 }
 
@@ -34,6 +35,7 @@ public class CreateInvoiceDto
     public string Title { get; set; } = string.Empty;
     public decimal Amount { get; set; }
     public DateTime DueDate { get; set; }
+    public FinanceCategory Category { get; set; } = FinanceCategory.Fees;
     public string? Notes { get; set; }
 }
 
@@ -44,6 +46,7 @@ public class UpdateInvoiceDto
     public DateTime DueDate { get; set; }
     public string? Notes { get; set; }
     public InvoiceStatus Status { get; set; }
+    public FinanceCategory Category { get; set; } = FinanceCategory.Fees;
 }
 
 // Payment DTOs
@@ -57,6 +60,7 @@ public class PaymentListDto
     public decimal Amount { get; set; }
     public DateTime PaymentDate { get; set; }
     public PaymentMethod Method { get; set; }
+    public FinanceCategory Category { get; set; } = FinanceCategory.Fees;
     public string? Notes { get; set; }
 }
 
@@ -67,6 +71,7 @@ public class CreatePaymentDto
     public decimal Amount { get; set; }
     public DateTime PaymentDate { get; set; }
     public PaymentMethod Method { get; set; }
+    public FinanceCategory Category { get; set; } = FinanceCategory.Fees;
     public string? Notes { get; set; }
 }
 
@@ -75,6 +80,7 @@ public class UpdatePaymentDto
     public decimal Amount { get; set; }
     public DateTime PaymentDate { get; set; }
     public PaymentMethod Method { get; set; }
+    public FinanceCategory Category { get; set; } = FinanceCategory.Fees;
     public string? Notes { get; set; }
 }
 
@@ -87,4 +93,8 @@ public class FinancialSummaryDto
     public decimal TotalCancelled { get; set; }
     public int UnpaidInvoicesCount { get; set; }
     public int OverdueInvoicesCount { get; set; }
+    public decimal TotalFeesInvoiced { get; set; }
+    public decimal TotalFeesPaid { get; set; }
+    public decimal TotalExpensesInvoiced { get; set; }
+    public decimal TotalExpensesPaid { get; set; }
 }

@@ -2,8 +2,9 @@ namespace LawOffice.Domain.Enums;
 
 public enum SessionStatus
 {
-    Scheduled = 0,
-    Completed = 1,
-    Postponed = 2,
-    Cancelled = 3
+    Scheduled = 0,             // مجدولة
+    Completed = 1,             // منتهية
+    Postponed = 2,             // مؤجلة
+    Cancelled = 3,             // ملغاة
+    ReservedForJudgment = 4    // محجوزة للحكم
 }
