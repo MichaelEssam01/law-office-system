@@ -378,6 +378,294 @@ namespace LawOffice.Infrastructure.Migrations
                     b.ToTable("Clients");
                 });
 
+            modelBuilder.Entity("LawOffice.Domain.Entities.Company", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("AgreementDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("AssignedLawyerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AuthorityDetails")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ClosedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CompanyCode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CompanyDuration")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CompanyNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CompanyType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ContractProcedure")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FileColor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FileYear")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("FilingDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherCompanyType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RegistrationPlace")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RegistryProcedure")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Result")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SubsequentProcedures")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TaxNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ValueAddedTax")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedLawyerId");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("CompanyCode")
+                        .IsUnique();
+
+                    b.ToTable("Companies");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.CompanyParty", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CompanyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DisputeNature")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("HasSameCapacityOthers")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OpponentLawyerName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherLawyerName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherPersonName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PartyType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("CompanyId");
+
+                    b.ToTable("CompanyParties");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.Contract", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("AgreementDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("AssignedLawyerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ClosedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ContractNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("ContractType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FileColor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FileYear")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherContractType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedLawyerId");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("ContractNumber")
+                        .IsUnique();
+
+                    b.ToTable("Contracts");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.ContractParty", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Capacity")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ContractId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("HasSameCapacityOthers")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OpponentLawyerName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherLawyerName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherPersonName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PartyType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("ContractId");
+
+                    b.ToTable("ContractParties");
+                });
+
             modelBuilder.Entity("LawOffice.Domain.Entities.Document", b =>
                 {
                     b.Property<Guid>("Id")
@@ -639,6 +927,125 @@ namespace LawOffice.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("RefreshTokens");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.Registration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AssignedLawyerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AuthorityName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ClientId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FileColor")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("FileYear")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OtherRequestType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RegistrationNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("RequestType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ResultAuthority")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ResultDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ResultNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedLawyerId");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("RegistrationNumber")
+                        .IsUnique();
+
+                    b.ToTable("Registrations");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.RegistrationProcedure", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("CompletedWork")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Obstacles")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ProcedureType")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("RegistrationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("RequiredAction")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ResponsibleLawyerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RegistrationId");
+
+                    b.HasIndex("ResponsibleLawyerId");
+
+                    b.ToTable("RegistrationProcedures");
                 });
 
             modelBuilder.Entity("LawOffice.Domain.Entities.Session", b =>
@@ -1098,6 +1505,78 @@ namespace LawOffice.Infrastructure.Migrations
                     b.Navigation("Client");
                 });
 
+            modelBuilder.Entity("LawOffice.Domain.Entities.Company", b =>
+                {
+                    b.HasOne("LawOffice.Domain.Entities.User", "AssignedLawyer")
+                        .WithMany()
+                        .HasForeignKey("AssignedLawyerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LawOffice.Domain.Entities.Client", "Client")
+                        .WithMany("Companies")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AssignedLawyer");
+
+                    b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.CompanyParty", b =>
+                {
+                    b.HasOne("LawOffice.Domain.Entities.Client", "Client")
+                        .WithMany()
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LawOffice.Domain.Entities.Company", "Company")
+                        .WithMany("Parties")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+
+                    b.Navigation("Company");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.Contract", b =>
+                {
+                    b.HasOne("LawOffice.Domain.Entities.User", "AssignedLawyer")
+                        .WithMany()
+                        .HasForeignKey("AssignedLawyerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LawOffice.Domain.Entities.Client", "Client")
+                        .WithMany("Contracts")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AssignedLawyer");
+
+                    b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.ContractParty", b =>
+                {
+                    b.HasOne("LawOffice.Domain.Entities.Client", "Client")
+                        .WithMany()
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LawOffice.Domain.Entities.Contract", "Contract")
+                        .WithMany("Parties")
+                        .HasForeignKey("ContractId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+
+                    b.Navigation("Contract");
+                });
+
             modelBuilder.Entity("LawOffice.Domain.Entities.Document", b =>
                 {
                     b.HasOne("LawOffice.Domain.Entities.Case", "Case")
@@ -1162,6 +1641,42 @@ namespace LawOffice.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.Registration", b =>
+                {
+                    b.HasOne("LawOffice.Domain.Entities.User", "AssignedLawyer")
+                        .WithMany()
+                        .HasForeignKey("AssignedLawyerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("LawOffice.Domain.Entities.Client", "Client")
+                        .WithMany("Registrations")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AssignedLawyer");
+
+                    b.Navigation("Client");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.RegistrationProcedure", b =>
+                {
+                    b.HasOne("LawOffice.Domain.Entities.Registration", "Registration")
+                        .WithMany("Procedures")
+                        .HasForeignKey("RegistrationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("LawOffice.Domain.Entities.User", "ResponsibleLawyer")
+                        .WithMany()
+                        .HasForeignKey("ResponsibleLawyerId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Registration");
+
+                    b.Navigation("ResponsibleLawyer");
                 });
 
             modelBuilder.Entity("LawOffice.Domain.Entities.Session", b =>
@@ -1279,12 +1794,33 @@ namespace LawOffice.Infrastructure.Migrations
                 {
                     b.Navigation("Cases");
 
+                    b.Navigation("Companies");
+
+                    b.Navigation("Contracts");
+
                     b.Navigation("Payments");
+
+                    b.Navigation("Registrations");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.Company", b =>
+                {
+                    b.Navigation("Parties");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.Contract", b =>
+                {
+                    b.Navigation("Parties");
                 });
 
             modelBuilder.Entity("LawOffice.Domain.Entities.Invoice", b =>
                 {
                     b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("LawOffice.Domain.Entities.Registration", b =>
+                {
+                    b.Navigation("Procedures");
                 });
 
             modelBuilder.Entity("LawOffice.Domain.Entities.User", b =>

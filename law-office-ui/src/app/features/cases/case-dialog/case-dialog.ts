@@ -101,7 +101,7 @@ export class CaseDialog implements OnInit, OnChanges {
 
     // Dates
     agreementDate: [null as Date | null],
-    startDate: [new Date(), Validators.required],
+    startDate: [null as Date | null, Validators.required],
     courtFilingDate: [null as Date | null],
     closedDate: [null as Date | null],
 
@@ -448,7 +448,7 @@ export class CaseDialog implements OnInit, OnChanges {
 
         // Dates
         agreementDate: this.case.agreementDate ? new Date(this.case.agreementDate) : null,
-        startDate: this.case.startDate ? new Date(this.case.startDate) : new Date(),
+        startDate: this.case.startDate ? new Date(this.case.startDate) : null,
         courtFilingDate: this.case.courtFilingDate ? new Date(this.case.courtFilingDate) : null,
         closedDate: this.case.closedDate ? new Date(this.case.closedDate) : null,
 
@@ -480,7 +480,7 @@ export class CaseDialog implements OnInit, OnChanges {
     } else {
       this.caseForm.reset({
         status: CaseStatus.InProgress,
-        startDate: new Date(),
+        startDate: null,
         yearType: YearType.Gregorian,
         year: new Date().getFullYear(),
         fileYear: new Date().getFullYear(),

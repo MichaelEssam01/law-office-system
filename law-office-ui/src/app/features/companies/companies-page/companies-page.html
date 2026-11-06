@@ -1,0 +1,260 @@
+<div class="p-6">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header Area -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">{{ 'COMPANIES.TITLE' | translate }}</h1>
+    </div>
+    <button
+      type="button"
+      pButton
+      [label]="'COMPANIES.ADD_COMPANY' | translate"
+      icon="pi pi-plus"
+      title="Add Company"
+      aria-label="Add Company"
+      [attr.aria-label]="'COMPANIES.ADD_COMPANY' | translate"
+      class="p-button-primary shadow-md"
+      (click)="showAddDialog()"
+    ></button>
+  </div>
+
+  <!-- Filters Area -->
+  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+      <div class="flex flex-col gap-2">
+        <label for="companiesSearchInput" class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
+        <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
+          <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+          <input
+            id="companiesSearchInput"
+            type="text"
+            pInputText
+            [ngModel]="searchTerm()"
+            (ngModelChange)="searchTerm.set($event)"
+            title="Search companies"
+            aria-label="Search companies"
+            placeholder="Search..."
+            [placeholder]="'COMPANIES.SEARCH_PLACEHOLDER' | translate"
+            [attr.aria-label]="'COMPANIES.SEARCH_PLACEHOLDER' | translate"
+            class="w-full rounded-lg border-slate-200"
+          />
+        </p-iconField>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-bold text-slate-500">{{ 'COMPANIES.STATUS' | translate }}</label>
+        <p-select
+          [options]="statuses()"
+          [ngModel]="selectedStatus()"
+          (ngModelChange)="selectedStatus.set($event)"
+          optionLabel="labelKey"
+          optionValue="value"
+          [placeholder]="'CASES.ALL_STATUSES' | translate"
+          [showClear]="true"
+          appendTo="body"
+          styleClass="w-full rounded-lg"
+        >
+          <ng-template pTemplate="selectedItem" let-selectedOption>
+            @if (selectedOption) {
+              <div class="flex items-center gap-2">
+                <i [class]="selectedOption.icon + ' text-xs'"></i>
+                <span class="font-semibold">{{ selectedOption.labelKey | translate }}</span>
+                <span [class]="selectedOption.badgeClass + ' px-2 py-0.5 rounded-full text-[11px] font-mono font-bold'">
+                  {{ getStatusCount(selectedOption.value) }}
+                </span>
+              </div>
+            }
+          </ng-template>
+          <ng-template pTemplate="item" let-status>
+            <div class="flex items-center justify-between w-full gap-3">
+              <div class="flex items-center gap-2">
+                <i [class]="status.icon + ' text-xs'"></i>
+                <span class="font-medium">{{ status.labelKey | translate }}</span>
+              </div>
+              <span [class]="status.badgeClass + ' px-2 py-0.5 rounded-full text-[11px] font-mono font-bold'">
+                {{ getStatusCount(status.value) }}
+              </span>
+            </div>
+          </ng-template>
+        </p-select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-bold text-slate-500">{{ 'COMPANIES.COMPANY_TYPE' | translate }}</label>
+        <p-select
+          [options]="companyTypes()"
+          [ngModel]="selectedCompanyType()"
+          (ngModelChange)="selectedCompanyType.set($event)"
+          optionLabel="label"
+          optionValue="value"
+          [filter]="true"
+          appAutoSelectFilter
+          [placeholder]="'COMPANIES.ALL_TYPES' | translate"
+          [showClear]="true"
+          appendTo="body"
+          styleClass="w-full rounded-lg"
+        ></p-select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-bold text-slate-500">{{ 'COMPANIES.CLIENT' | translate }}</label>
+        <p-select
+          [options]="clients()"
+          [ngModel]="selectedClient()"
+          (ngModelChange)="selectedClient.set($event); onFilterChange()"
+          optionLabel="fullName"
+          optionValue="id"
+          [filter]="true"
+          appAutoSelectFilter
+          filterBy="fullName,phone,clientNumber"
+          [placeholder]="'CASES.ALL_CLIENTS' | translate"
+          [showClear]="true"
+          appendTo="body"
+          styleClass="w-full rounded-lg"
+        ></p-select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <div class="flex gap-2">
+          <div class="flex-1 flex flex-col gap-2">
+            <label class="text-xs font-bold text-slate-500">{{ 'COMPANIES.LAWYER' | translate }}</label>
+            <p-select
+              [options]="lawyers()"
+              [ngModel]="selectedLawyer()"
+              (ngModelChange)="selectedLawyer.set($event); onFilterChange()"
+              optionLabel="fullName"
+              optionValue="id"
+              [filter]="true"
+              appAutoSelectFilter
+              filterBy="fullName"
+              [placeholder]="'CASES.ALL_LAWYERS' | translate"
+              [showClear]="true"
+              appendTo="body"
+              styleClass="w-full rounded-lg"
+            ></p-select>
+          </div>
+          <button
+            type="button"
+            pButton
+            icon="pi pi-filter-slash"
+            aria-label="Reset Filters"
+            [attr.aria-label]="'CASES.RESET_FILTERS' | translate"
+            class="p-button-outlined p-button-secondary p-button-sm self-end h-[42px]"
+            (click)="resetFilters()"
+            [pTooltip]="'CASES.RESET_FILTERS' | translate"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm no-page-links">
+    <p-table
+      #dt
+      [value]="companies()"
+      [loading]="loading()"
+      [rows]="10"
+      [paginator]="true"
+      [rowsPerPageOptions]="[5, 10, 30, 50]"
+      [showCurrentPageReport]="true"
+      [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
+      styleClass="p-datatable-sm shadow-sm rounded-lg overflow-hidden"
+      [rowHover]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr class="bg-slate-50 text-slate-700 text-xs uppercase tracking-wider">
+          <th pSortableColumn="companyCode" class="p-3.5">{{ 'COMPANIES.COMPANY_CODE' | translate }} <p-sortIcon field="companyCode"></p-sortIcon></th>
+          <th pSortableColumn="title" class="p-3.5">{{ 'COMPANIES.SUBJECT' | translate }} <p-sortIcon field="title"></p-sortIcon></th>
+          <th class="p-3.5">{{ 'COMPANIES.COMPANY_TYPE' | translate }}</th>
+          <th class="p-3.5">{{ 'COMPANIES.COMPANY_NUMBER' | translate }}</th>
+          <th pSortableColumn="clientName" class="p-3.5">{{ 'COMPANIES.CLIENT' | translate }} <p-sortIcon field="clientName"></p-sortIcon></th>
+          <th pSortableColumn="lawyerName" class="p-3.5">{{ 'COMPANIES.LAWYER' | translate }} <p-sortIcon field="lawyerName"></p-sortIcon></th>
+          <th pSortableColumn="status" class="p-3.5 text-center">{{ 'COMPANIES.STATUS' | translate }} <p-sortIcon field="status"></p-sortIcon></th>
+          <th class="p-3.5 text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-item>
+        <tr class="border-b border-slate-100 hover:bg-slate-50/80 transition-colors cursor-pointer" (click)="showEditDialog(item)">
+          <td class="p-3.5">
+            <div class="flex flex-col gap-1">
+              <span class="font-mono font-bold text-blue-600 text-sm">{{ item.companyCode }}</span>
+              @if (item.fileNumber) {
+                <span class="inline-flex items-center gap-1 text-[10px] text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded w-fit font-mono">
+                  <i class="pi pi-folder text-[10px] text-amber-600"></i>
+                  {{ item.fileNumber }}@if (item.fileYear) {/{{ item.fileYear }}}
+                </span>
+              }
+            </div>
+          </td>
+          <td class="p-3.5">
+            <div class="font-bold text-slate-900">{{ item.title }}</div>
+            @if (item.companyDuration) {
+              <div class="text-xs text-slate-500 mt-0.5">{{ 'COMPANIES.COMPANY_DURATION' | translate }}: {{ item.companyDuration }}</div>
+            }
+          </td>
+          <td class="p-3.5">
+            <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-xs">
+              {{ getCompanyTypeLabel(item.companyType, item.otherCompanyType) | translate }}
+            </span>
+          </td>
+          <td class="p-3.5 font-mono text-xs text-slate-700">{{ item.companyNumber || '---' }}</td>
+          <td class="p-3.5 text-slate-700 font-semibold text-sm">
+            <div class="flex items-center gap-2">
+              @if (item.clientNumber) {
+                <span class="font-mono text-[11px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-bold">#{{ item.clientNumber }}</span>
+              }
+              <span>{{ item.clientName }}</span>
+            </div>
+          </td>
+          <td class="p-3.5 text-slate-600 text-sm">{{ item.lawyerName || '---' }}</td>
+          <td class="p-3.5 text-center">
+            <p-tag [value]="getStatusLabel(item.status) | translate" [severity]="getStatusSeverity(item.status)" styleClass="!text-xs !px-2.5 !py-1 !rounded-lg font-bold"></p-tag>
+          </td>
+          <td class="p-3.5 text-center" (click)="$event.stopPropagation()">
+            <div class="flex items-center justify-center gap-1">
+              <p-button
+                icon="pi pi-pencil"
+                [text]="true"
+                [rounded]="true"
+                severity="info"
+                (onClick)="showEditDialog(item)"
+                styleClass="!w-9 !h-9"
+                [pTooltip]="'COMMON.EDIT' | translate"
+              ></p-button>
+              <p-button
+                icon="pi pi-trash"
+                [text]="true"
+                [rounded]="true"
+                severity="danger"
+                (onClick)="confirmDelete(item)"
+                styleClass="!w-9 !h-9"
+                [pTooltip]="'COMMON.DELETE' | translate"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8" class="!py-16 text-center">
+            <div class="flex flex-col items-center justify-center space-y-3 opacity-40">
+              <i class="pi pi-building text-5xl"></i>
+              <p class="text-lg font-medium">{{ 'COMMON.NO_DATA' | translate }}</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <app-company-dialog
+    [(visible)]="displayDialog"
+    [company]="selectedCompany()"
+    (onSave)="saveCompany($event)"
+  ></app-company-dialog>
+</div>

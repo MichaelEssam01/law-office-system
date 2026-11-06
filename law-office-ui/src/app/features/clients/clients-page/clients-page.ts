@@ -208,6 +208,63 @@ export class ClientsPage implements OnInit {
     return keyMap[status] ? this.translate.instant(keyMap[status]) : status;
   }
 
+  getContractStatusLabel(status: string): string {
+    if (status === 'Finished' || status === '2') return this.translate.instant('CONTRACTS.FINISHED');
+    return this.translate.instant('CONTRACTS.IN_DRAFTING');
+  }
+
+  getContractTypeLabel(type: string): string {
+    const keyMap: { [key: string]: string } = {
+      'Lease': 'CONTRACTS.TYPES.LEASE',
+      'Sale': 'CONTRACTS.TYPES.SALE',
+      'Gift': 'CONTRACTS.TYPES.GIFT',
+      'Partnership': 'CONTRACTS.TYPES.PARTNERSHIP',
+      'Mortgage': 'CONTRACTS.TYPES.MORTGAGE',
+      'Contracting': 'CONTRACTS.TYPES.CONTRACTING',
+      'Consulting': 'CONTRACTS.TYPES.CONSULTING',
+      'Employment': 'CONTRACTS.TYPES.EMPLOYMENT',
+      'Marriage': 'CONTRACTS.TYPES.MARRIAGE',
+      'Exploitation': 'CONTRACTS.TYPES.EXPLOITATION',
+      'Usufruct': 'CONTRACTS.TYPES.USUFRUCT',
+      'Other': 'CONTRACTS.TYPES.OTHER'
+    };
+    return keyMap[type] ? this.translate.instant(keyMap[type]) : type;
+  }
+
+  getRegistrationTypeLabel(type: string): string {
+    const keyMap: { [key: string]: string } = {
+      'InheritancePublication': 'REGISTRATIONS.REQUEST_TYPES.INHERITANCE_PUBLICATION',
+      'BareOwnershipSale': 'REGISTRATIONS.REQUEST_TYPES.BARE_OWNERSHIP_SALE',
+      'UsufructSale': 'REGISTRATIONS.REQUEST_TYPES.USUFRUCT_SALE',
+      'FullOwnershipSale': 'REGISTRATIONS.REQUEST_TYPES.FULL_OWNERSHIP_SALE',
+      'Lease': 'REGISTRATIONS.REQUEST_TYPES.LEASE',
+      'Mortgage': 'REGISTRATIONS.REQUEST_TYPES.MORTGAGE',
+      'AmicablePartition': 'REGISTRATIONS.REQUEST_TYPES.AMICABLE_PARTITION',
+      'PetitionPublication': 'REGISTRATIONS.REQUEST_TYPES.PETITION_PUBLICATION',
+      'JudgmentPublication': 'REGISTRATIONS.REQUEST_TYPES.JUDGMENT_PUBLICATION',
+      'Other': 'REGISTRATIONS.REQUEST_TYPES.OTHER'
+    };
+    return keyMap[type] ? this.translate.instant(keyMap[type]) : type;
+  }
+
+  getCompanyStatusLabel(status: string): string {
+    if (status === 'Finished' || status === '2') return this.translate.instant('COMPANIES.FINISHED');
+    return this.translate.instant('COMPANIES.ACTIVE');
+  }
+
+  getCompanyTypeLabel(type: string): string {
+    const keyMap: { [key: string]: string } = {
+      'GeneralPartnership': 'COMPANIES.TYPES.GENERAL_PARTNERSHIP',
+      'LimitedPartnership': 'COMPANIES.TYPES.LIMITED_PARTNERSHIP',
+      'PartnershipLimitedByShares': 'COMPANIES.TYPES.PARTNERSHIP_LIMITED_BY_SHARES',
+      'LimitedLiability': 'COMPANIES.TYPES.LIMITED_LIABILITY',
+      'JointStock': 'COMPANIES.TYPES.JOINT_STOCK',
+      'DeFacto': 'COMPANIES.TYPES.DE_FACTO',
+      'Other': 'COMPANIES.TYPES.OTHER'
+    };
+    return keyMap[type] ? this.translate.instant(keyMap[type]) : type;
+  }
+
   getCaseStatusSeverity(status: string): 'success' | 'secondary' | 'info' | 'warn' | 'danger' | 'contrast' | undefined {
     switch (status) {
       case 'InProgress':

@@ -145,6 +145,9 @@ builder.Services.AddScoped<LawOffice.Application.Interfaces.Repositories.IUnitOf
 builder.Services.AddScoped<LawOffice.Application.Interfaces.Services.IAuthService, LawOffice.Application.Services.AuthService>();
 builder.Services.AddScoped<LawOffice.Application.Interfaces.Services.IClientService, LawOffice.Application.Services.ClientService>();
 builder.Services.AddScoped<LawOffice.Application.Interfaces.Services.ICaseService, LawOffice.Application.Services.CaseService>();
+builder.Services.AddScoped<LawOffice.Application.Interfaces.Services.IContractService, LawOffice.Application.Services.ContractService>();
+builder.Services.AddScoped<LawOffice.Application.Interfaces.Services.IRegistrationService, LawOffice.Application.Services.RegistrationService>();
+builder.Services.AddScoped<LawOffice.Application.Interfaces.Services.ICompanyService, LawOffice.Application.Services.CompanyService>();
 builder.Services.AddScoped<LawOffice.Application.Interfaces.Services.ISessionService, LawOffice.Application.Services.SessionService>();
 builder.Services.AddScoped<LawOffice.Application.Interfaces.Services.IInvoiceService, LawOffice.Application.Services.InvoiceService>();
 builder.Services.AddScoped<LawOffice.Application.Interfaces.Services.IPaymentService, LawOffice.Application.Services.PaymentService>();

@@ -119,9 +119,44 @@ public class ClientWorksDto
 {
     public ClientDto Client { get; set; } = null!;
     public List<ClientCaseSummaryDto> Cases { get; set; } = new();
+    public List<ClientContractSummaryDto> Contracts { get; set; } = new();
+    public List<ClientRegistrationSummaryDto> Registrations { get; set; } = new();
+    public List<ClientCompanySummaryDto> Companies { get; set; } = new();
     public List<ClientSessionSummaryDto> Sessions { get; set; } = new();
     public List<ClientInvoiceSummaryDto> Invoices { get; set; } = new();
     public List<ClientDocumentSummaryDto> Documents { get; set; } = new();
+}
+
+public class ClientContractSummaryDto
+{
+    public Guid Id { get; set; }
+    public string ContractNumber { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public int Status { get; set; }
+    public int ContractType { get; set; }
+    public string LawyerName { get; set; } = string.Empty;
+    public DateTime StartDate { get; set; }
+}
+
+public class ClientRegistrationSummaryDto
+{
+    public Guid Id { get; set; }
+    public string RegistrationNumber { get; set; } = string.Empty;
+    public string AuthorityName { get; set; } = string.Empty;
+    public int RequestType { get; set; }
+    public string LawyerName { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; }
+}
+
+public class ClientCompanySummaryDto
+{
+    public Guid Id { get; set; }
+    public string CompanyCode { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public int Status { get; set; }
+    public int CompanyType { get; set; }
+    public string LawyerName { get; set; } = string.Empty;
+    public DateTime StartDate { get; set; }
 }
 
 public class ClientCaseSummaryDto

@@ -1,0 +1,615 @@
+<p-dialog 
+  [header]="company ? ('COMPANIES.EDIT_COMPANY' | translate) : ('COMPANIES.ADD_COMPANY_NEW' | translate)" 
+  [(visible)]="visible" 
+  (onHide)="close()"
+  [modal]="true" 
+  [style]="{ width: '920px', maxWidth: '96vw' }" 
+  [draggable]="false" 
+  [resizable]="false"
+  styleClass="p-fluid rounded-2xl overflow-hidden shadow-2xl"
+>
+  <form [formGroup]="companyForm" class="pt-2">
+    <p-tabs [value]="activeTab()" (valueChange)="activeTab.set($any($event))">
+      <p-tablist>
+        <p-tab [value]="0">
+          <div class="flex items-center gap-2 font-bold">
+            <i class="pi pi-building text-primary-600"></i>
+            <span>{{ 'COMPANIES.DETAILS_TAB' | translate }}</span>
+            @if (hasTabErrors(0)) {
+              <i class="pi pi-exclamation-circle text-red-500 ms-1.5" [pTooltip]="'COMMON.REQUIRED_FIELDS_WARNING' | translate"></i>
+            }
+          </div>
+        </p-tab>
+        <p-tab [value]="1">
+          <div class="flex items-center gap-2 font-bold">
+            <i class="pi pi-sitemap text-teal-600"></i>
+            <span>{{ 'COMPANIES.AUTHORITY_TAB' | translate }}</span>
+          </div>
+        </p-tab>
+        <p-tab [value]="2">
+          <div class="flex items-center gap-2 font-bold">
+            <i class="pi pi-users text-indigo-600"></i>
+            <span>{{ 'COMPANIES.PARTIES_TAB' | translate }}</span>
+            @if (hasTabErrors(2)) {
+              <i class="pi pi-exclamation-circle text-red-500 ms-1.5" [pTooltip]="'COMMON.REQUIRED_FIELDS_WARNING' | translate"></i>
+            }
+          </div>
+        </p-tab>
+        <p-tab [value]="3">
+          <div class="flex items-center gap-2 font-bold">
+            <i class="pi pi-folder-open text-amber-600"></i>
+            <span>{{ 'COMPANIES.FILE_TAB' | translate }}</span>
+          </div>
+        </p-tab>
+        <p-tab [value]="4">
+          <div class="flex items-center gap-2 font-bold">
+            <i class="pi pi-check-square text-emerald-600"></i>
+            <span>{{ 'COMPANIES.PROCEDURES_TAB' | translate }}</span>
+          </div>
+        </p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <!-- TAB 0: Company Details -->
+        <p-tabpanel [value]="0">
+          <div class="space-y-4 pt-3">
+            <!-- Subject (Required) -->
+            <div class="flex flex-col gap-1.5">
+              <label for="companyTitleInput" class="text-sm font-bold text-slate-700 flex items-center gap-1">
+                <span>{{ 'COMPANIES.SUBJECT' | translate }}</span>
+                <span class="text-red-500">*</span>
+                @if (isFieldInvalid('title')) {
+                  <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                }
+              </label>
+              <input
+                id="companyTitleInput"
+                pInputText
+                formControlName="title"
+                title="Subject"
+                placeholder="Subject"
+                [placeholder]="'COMPANIES.SUBJECT_PLACEHOLDER' | translate"
+                class="w-full !py-2.5 !px-3.5 !rounded-lg text-sm transition-colors"
+                [ngClass]="isFieldInvalid('title') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300'"
+              />
+            </div>
+
+            <!-- Status, Company Type, Other Type, Number & Duration -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+              <div class="md:col-span-3 flex flex-col gap-1.5">
+                <label class="text-sm font-bold text-slate-700 flex items-center gap-1">
+                  <span>{{ 'COMPANIES.STATUS' | translate }}</span>
+                  <span class="text-red-500">*</span>
+                  @if (isFieldInvalid('status')) {
+                    <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                  }
+                </label>
+                <p-select
+                  [options]="statuses()"
+                  formControlName="status"
+                  optionLabel="label"
+                  optionValue="value"
+                  appendTo="body"
+                  [styleClass]="'w-full !rounded-lg ' + (isFieldInvalid('status') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                ></p-select>
+              </div>
+
+              <div class="md:col-span-3 flex flex-col gap-1.5">
+                <label class="text-sm font-bold text-slate-700 flex items-center gap-1">
+                  <span>{{ 'COMPANIES.COMPANY_TYPE' | translate }}</span>
+                  <span class="text-red-500">*</span>
+                  @if (isFieldInvalid('companyType')) {
+                    <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                  }
+                </label>
+                <p-select
+                  [options]="companyTypes()"
+                  formControlName="companyType"
+                  optionLabel="label"
+                  optionValue="value"
+                  [filter]="true"
+                  appAutoSelectFilter
+                  appendTo="body"
+                  [placeholder]="'COMPANIES.COMPANY_TYPE' | translate"
+                  [styleClass]="'w-full !rounded-lg ' + (isFieldInvalid('companyType') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                ></p-select>
+              </div>
+
+              @if (companyForm.get('companyType')?.value === CompanyType.Other) {
+                <div class="md:col-span-2 flex flex-col gap-1.5">
+                  <label for="otherCompanyTypeInput" class="text-sm font-bold text-slate-700">{{ 'COMPANIES.OTHER_COMPANY_TYPE' | translate }}</label>
+                  <input id="otherCompanyTypeInput" pInputText formControlName="otherCompanyType" title="Other Company Type" placeholder="Other Company Type" [placeholder]="'COMPANIES.OTHER_COMPANY_TYPE_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white" />
+                </div>
+              }
+
+              <div class="md:col-span-2 flex flex-col gap-1.5">
+                <label for="companyNumberInput" class="text-sm font-bold text-slate-700">{{ 'COMPANIES.COMPANY_NUMBER' | translate }}</label>
+                <input id="companyNumberInput" pInputText formControlName="companyNumber" title="Company Number" placeholder="Company Number" [placeholder]="'COMPANIES.COMPANY_NUMBER_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white" />
+              </div>
+
+              <div class="md:col-span-2 flex flex-col gap-1.5">
+                <label for="companyDurationInput" class="text-sm font-bold text-slate-700">{{ 'COMPANIES.COMPANY_DURATION' | translate }}</label>
+                <input id="companyDurationInput" pInputText formControlName="companyDuration" title="Company Duration" placeholder="Company Duration" [placeholder]="'COMPANIES.COMPANY_DURATION_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white" />
+              </div>
+            </div>
+
+            <!-- Client (Required) & Lawyer -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-bold text-slate-700 flex items-center gap-1">
+                  <span>{{ 'COMPANIES.CLIENT' | translate }}</span>
+                  <span class="text-red-500">*</span>
+                  @if (isFieldInvalid('clientId')) {
+                    <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                  }
+                </label>
+                <p-select
+                  [options]="clients()"
+                  formControlName="clientId"
+                  optionLabel="fullName"
+                  optionValue="id"
+                  [filter]="true"
+                  appAutoSelectFilter
+                  filterBy="fullName,phone,clientNumber"
+                  appendTo="body"
+                  [placeholder]="'CASES.SELECT_CLIENT' | translate"
+                  [styleClass]="'w-full !rounded-lg ' + (isFieldInvalid('clientId') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                ></p-select>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-bold text-slate-700">{{ 'COMPANIES.LAWYER' | translate }}</label>
+                <p-select
+                  [options]="lawyers()"
+                  formControlName="assignedLawyerId"
+                  optionLabel="fullName"
+                  optionValue="id"
+                  [filter]="true"
+                  appAutoSelectFilter
+                  filterBy="fullName,email"
+                  [showClear]="true"
+                  appendTo="body"
+                  [placeholder]="'CASES.SELECT_LAWYER' | translate"
+                  styleClass="w-full !rounded-lg !border-slate-300"
+                ></p-select>
+              </div>
+            </div>
+
+            <!-- Dates like Cases -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 pt-2 border-t border-slate-100">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-bold text-slate-700">{{ 'COMPANIES.AGREEMENT_DATE' | translate }}</label>
+                <p-datepicker
+                  formControlName="agreementDate"
+                  appendTo="body"
+                  dateFormat="yy-mm-dd"
+                  [showIcon]="true"
+                  styleClass="w-full"
+                  inputStyleClass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm"
+                ></p-datepicker>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-bold text-slate-700 flex items-center gap-1">
+                  <span>{{ 'COMPANIES.START_DATE' | translate }}</span>
+                  <span class="text-red-500">*</span>
+                  @if (isFieldInvalid('startDate')) {
+                    <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                  }
+                </label>
+                <p-datepicker
+                  formControlName="startDate"
+                  appendTo="body"
+                  dateFormat="yy-mm-dd"
+                  [showIcon]="true"
+                  [styleClass]="'w-full ' + (isFieldInvalid('startDate') ? '!border-red-500 ng-invalid ng-dirty' : '')"
+                  [inputStyleClass]="'w-full !py-2 !px-3 !rounded-lg text-sm ' + (isFieldInvalid('startDate') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                ></p-datepicker>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-bold text-slate-700">{{ 'COMPANIES.FILING_DATE' | translate }}</label>
+                <p-datepicker
+                  formControlName="filingDate"
+                  appendTo="body"
+                  dateFormat="yy-mm-dd"
+                  [showIcon]="true"
+                  styleClass="w-full"
+                  inputStyleClass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm"
+                ></p-datepicker>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-bold text-slate-700">{{ 'COMPANIES.CLOSED_DATE' | translate }}</label>
+                <p-datepicker
+                  formControlName="closedDate"
+                  appendTo="body"
+                  dateFormat="yy-mm-dd"
+                  [showIcon]="true"
+                  styleClass="w-full"
+                  inputStyleClass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm"
+                ></p-datepicker>
+              </div>
+            </div>
+          </div>
+        </p-tabpanel>
+
+        <!-- TAB 1: Authority Details (فيها خانة واحدة txt field) -->
+        <p-tabpanel [value]="1">
+          <div class="space-y-4 pt-3">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2">
+              <label for="companyAuthorityInput" class="text-sm font-bold text-slate-700">{{ 'COMPANIES.AUTHORITY_DETAILS' | translate }}</label>
+              <input id="companyAuthorityInput" pInputText formControlName="authorityDetails" title="Authority Details" placeholder="Authority Details" [placeholder]="'COMPANIES.AUTHORITY_DETAILS_PLACEHOLDER' | translate" class="w-full !py-2.5 !px-3.5 !rounded-lg !border-slate-300 text-sm bg-white" />
+            </div>
+          </div>
+        </p-tabpanel>
+
+        <!-- TAB 2: Parties (Same as Cases) -->
+        <p-tabpanel [value]="2">
+          <div class="space-y-6 pt-3">
+            <!-- Client Parties Section -->
+            <div class="bg-blue-50/40 border border-blue-200/70 rounded-xl p-4 space-y-4">
+              <div class="flex items-center justify-between border-b border-blue-200/60 pb-3">
+                <div class="flex items-center gap-2">
+                  <i class="pi pi-user text-blue-600"></i>
+                  <h4 class="font-bold text-slate-800 text-sm m-0">{{ 'CASES.CLIENTS_SECTION' | translate }}</h4>
+                </div>
+                <p-button
+                  [label]="'CASES.ADD_CLIENT_PARTY' | translate"
+                  icon="pi pi-plus"
+                  size="small"
+                  [outlined]="true"
+                  (onClick)="addClientParty()"
+                  styleClass="!py-1.5 !px-3 !text-xs !rounded-lg"
+                ></p-button>
+              </div>
+
+              @if (clientParties.length === 0) {
+                <div class="text-center py-4 text-xs text-slate-400">
+                  {{ 'CASES.CLIENT_PARTIES_EMPTY' | translate }}
+                </div>
+              }
+
+              <div formArrayName="clientParties" class="space-y-3">
+                @for (party of clientParties.controls; track $index; let i = $index) {
+                  <div [formGroupName]="i" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-md">{{ 'CASES.CLIENT_PARTY_PREFIX' | translate }}{{ i + 1 }}</span>
+                      <button type="button" (click)="removeClientParty(i)" title="Delete" aria-label="Delete" [title]="'COMMON.DELETE' | translate" [attr.aria-label]="'COMMON.DELETE' | translate" class="text-red-500 hover:text-red-700 text-xs p-1">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div class="flex flex-col gap-1">
+                        <label class="text-xs font-bold text-slate-600 flex items-center gap-1">
+                          <span>{{ 'COMPANIES.CLIENT' | translate }}</span>
+                          <span class="text-red-500">*</span>
+                          @if (isPartyFieldInvalid(party, 'clientId')) {
+                            <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                          }
+                        </label>
+                        <p-select
+                          [options]="clients()"
+                          formControlName="clientId"
+                          optionLabel="fullName"
+                          optionValue="id"
+                          [filter]="true"
+                          appAutoSelectFilter
+                          appendTo="body"
+                          [placeholder]="'CASES.SELECT_CLIENT' | translate"
+                          [styleClass]="'w-full !rounded-lg text-xs ' + (isPartyFieldInvalid(party, 'clientId') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                        ></p-select>
+                      </div>
+
+                      <div class="flex flex-col gap-1">
+                        <label class="text-xs font-bold text-slate-600 flex items-center gap-1">
+                          <span>{{ 'CASES.CLIENT_CAPACITY' | translate }}</span>
+                          <span class="text-red-500">*</span>
+                          @if (isPartyFieldInvalid(party, 'capacity')) {
+                            <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                          }
+                        </label>
+                        <p-select
+                          [options]="partyCapacities()"
+                          formControlName="capacity"
+                          optionLabel="label"
+                          optionValue="value"
+                          [filter]="true"
+                          appAutoSelectFilter
+                          appendTo="body"
+                          [styleClass]="'w-full !rounded-lg text-xs ' + (isPartyFieldInvalid(party, 'capacity') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                        ></p-select>
+                      </div>
+
+                      <div class="flex flex-col gap-1">
+                        <label class="text-xs font-bold text-slate-600 flex items-center gap-1">
+                          <span>{{ 'CASES.DISPUTE_NATURE' | translate }}</span>
+                          <span class="text-red-500">*</span>
+                          @if (isPartyFieldInvalid(party, 'disputeNature')) {
+                            <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                          }
+                        </label>
+                        <p-select
+                          [options]="disputeNatures()"
+                          formControlName="disputeNature"
+                          optionLabel="label"
+                          optionValue="value"
+                          appendTo="body"
+                          [styleClass]="'w-full !rounded-lg text-xs ' + (isPartyFieldInvalid(party, 'disputeNature') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                        ></p-select>
+                      </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-100 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                          <p-checkbox formControlName="hasSameCapacityOthers" [binary]="true" [inputId]="'companySameCap_' + i" (onChange)="onSameCapacityOthersChange(party, $event.checked)"></p-checkbox>
+                          <label [for]="'companySameCap_' + i" class="text-xs font-bold text-slate-700 cursor-pointer">
+                            {{ 'CASES.SAME_CAPACITY_OTHERS' | translate }}
+                          </label>
+                        </div>
+
+                        @if (party.get('hasSameCapacityOthers')?.value) {
+                          <p-button
+                            [label]="'CASES.ADD_OTHER_PERSON' | translate"
+                            icon="pi pi-plus"
+                            size="small"
+                            [text]="true"
+                            (onClick)="addOtherPersonToParty(party)"
+                            styleClass="!py-1 !px-2 !text-xs"
+                          ></p-button>
+                        }
+                      </div>
+
+                      @if (party.get('hasSameCapacityOthers')?.value) {
+                        <div formArrayName="otherPersons" class="space-y-2 pt-1">
+                          @for (otherCtrl of getOtherPersonsArray(party).controls; track $index; let j = $index) {
+                            <div [formGroupName]="j" class="grid grid-cols-1 md:grid-cols-12 gap-3 bg-slate-50 p-2.5 rounded-lg border border-slate-200/70 items-end">
+                              <div class="md:col-span-5 flex flex-col gap-1">
+                                <label [for]="'companyOtherPerson_' + i + '_' + j" class="text-xs font-semibold text-slate-600">{{ 'CASES.OTHER_PERSON_NAME' | translate }}</label>
+                                <input [id]="'companyOtherPerson_' + i + '_' + j" pInputText formControlName="personName" title="Person Name" placeholder="Person Name" [placeholder]="'CASES.OTHER_PERSON_NAME' | translate" class="w-full !py-1.5 !px-2.5 !rounded-lg !border-slate-300 text-xs bg-white" />
+                              </div>
+                              <div class="md:col-span-6 flex flex-col gap-1">
+                                <label [for]="'companyOtherLawyer_' + i + '_' + j" class="text-xs font-semibold text-slate-600">{{ 'CASES.OTHER_LAWYER_NAME' | translate }}</label>
+                                <input [id]="'companyOtherLawyer_' + i + '_' + j" pInputText formControlName="lawyerName" title="Lawyer Name" placeholder="Lawyer Name" [placeholder]="'CASES.OTHER_LAWYER_NAME' | translate" class="w-full !py-1.5 !px-2.5 !rounded-lg !border-slate-300 text-xs bg-white" />
+                              </div>
+                              <div class="md:col-span-1 flex justify-end pb-1">
+                                <button type="button" (click)="removeOtherPersonFromParty(party, j)" title="Delete" aria-label="Delete" [title]="'COMMON.DELETE' | translate" [attr.aria-label]="'COMMON.DELETE' | translate" class="text-red-500 hover:text-red-700 text-xs p-1">
+                                  <i class="pi pi-trash"></i>
+                                </button>
+                              </div>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Opponents Section -->
+            <div class="bg-rose-50/40 border border-rose-200/70 rounded-xl p-4 space-y-4">
+              <div class="flex items-center justify-between border-b border-rose-200/60 pb-3">
+                <div class="flex items-center gap-2">
+                  <i class="pi pi-users text-rose-600"></i>
+                  <h4 class="font-bold text-slate-800 text-sm m-0">{{ 'CASES.OPPONENTS_SECTION' | translate }}</h4>
+                </div>
+                <p-button
+                  [label]="'CASES.ADD_OPPONENT_PARTY' | translate"
+                  icon="pi pi-plus"
+                  severity="danger"
+                  size="small"
+                  [outlined]="true"
+                  (onClick)="addOpponentParty()"
+                  styleClass="!py-1.5 !px-3 !text-xs !rounded-lg"
+                ></p-button>
+              </div>
+
+              @if (opponentParties.length === 0) {
+                <div class="text-center py-4 text-xs text-slate-400">
+                  {{ 'CASES.OPPONENT_PARTIES_EMPTY' | translate }}
+                </div>
+              }
+
+              <div formArrayName="opponentParties" class="space-y-3">
+                @for (opp of opponentParties.controls; track $index; let i = $index) {
+                  <div [formGroupName]="i" class="bg-white p-3.5 rounded-xl border border-slate-200 shadow-xs space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="text-xs font-bold text-rose-700 bg-rose-50 px-2.5 py-1 rounded-md">{{ 'CASES.OPPONENT_PARTY_PREFIX' | translate }}{{ i + 1 }}</span>
+                      <button type="button" (click)="removeOpponentParty(i)" title="Delete" aria-label="Delete" [title]="'COMMON.DELETE' | translate" [attr.aria-label]="'COMMON.DELETE' | translate" class="text-red-500 hover:text-red-700 text-xs p-1">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                      <div class="flex flex-col gap-1">
+                        <label [for]="'companyOppName_' + i" class="text-xs font-bold text-slate-600 flex items-center gap-1">
+                          <span>{{ 'CASES.PARTY_NAME' | translate }}</span>
+                          <span class="text-red-500">*</span>
+                          @if (isPartyFieldInvalid(opp, 'name')) {
+                            <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                          }
+                        </label>
+                        <input [id]="'companyOppName_' + i" pInputText formControlName="name" title="Opponent Name" placeholder="Opponent Name" [placeholder]="'CASES.OPPONENT_NAME_PLACEHOLDER' | translate" [ngClass]="isPartyFieldInvalid(opp, 'name') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300'" class="w-full !py-2 !px-3 !rounded-lg text-xs" />
+                      </div>
+
+                      <div class="flex flex-col gap-1">
+                        <label class="text-xs font-bold text-slate-600 flex items-center gap-1">
+                          <span>{{ 'CASES.OPPONENT_CAPACITY' | translate }}</span>
+                          <span class="text-red-500">*</span>
+                          @if (isPartyFieldInvalid(opp, 'capacity')) {
+                            <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                          }
+                        </label>
+                        <p-select
+                          [options]="partyCapacities()"
+                          formControlName="capacity"
+                          optionLabel="label"
+                          optionValue="value"
+                          [filter]="true"
+                          appAutoSelectFilter
+                          appendTo="body"
+                          [styleClass]="'w-full !rounded-lg text-xs ' + (isPartyFieldInvalid(opp, 'capacity') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                        ></p-select>
+                      </div>
+
+                      <div class="flex flex-col gap-1">
+                        <label class="text-xs font-bold text-slate-600 flex items-center gap-1">
+                          <span>{{ 'CASES.DISPUTE_NATURE' | translate }}</span>
+                          <span class="text-red-500">*</span>
+                          @if (isPartyFieldInvalid(opp, 'disputeNature')) {
+                            <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                          }
+                        </label>
+                        <p-select
+                          [options]="disputeNatures()"
+                          formControlName="disputeNature"
+                          optionLabel="label"
+                          optionValue="value"
+                          appendTo="body"
+                          [styleClass]="'w-full !rounded-lg text-xs ' + (isPartyFieldInvalid(opp, 'disputeNature') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                        ></p-select>
+                      </div>
+
+                      <div class="flex flex-col gap-1">
+                        <label [for]="'companyOppLawyer_' + i" class="text-xs font-bold text-slate-600">{{ 'CASES.OPPONENT_LAWYER' | translate }}</label>
+                        <input [id]="'companyOppLawyer_' + i" pInputText formControlName="opponentLawyerName" title="Opponent Lawyer" placeholder="Opponent Lawyer" [placeholder]="'CASES.OPPONENT_LAWYER_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-xs" />
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </p-tabpanel>
+
+        <!-- TAB 3: File Info -->
+        <p-tabpanel [value]="3">
+          <div class="space-y-4 pt-3">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
+              <h4 class="font-bold text-slate-800 text-sm m-0 flex items-center gap-2">
+                <i class="pi pi-folder text-amber-600"></i>
+                {{ 'CASES.FILE_INFO' | translate }}
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="flex flex-col gap-1.5">
+                  <label for="companyFileNumberInput" class="text-xs font-bold text-slate-600">{{ 'CASES.FILE_NUMBER' | translate }}</label>
+                  <input id="companyFileNumberInput" pInputText formControlName="fileNumber" title="File Number" placeholder="File Number" [placeholder]="'CASES.FILE_NUMBER_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label for="companyFileYearInput" class="text-xs font-bold text-slate-600">{{ 'CASES.FILE_YEAR' | translate }}</label>
+                  <p-inputnumber
+                    inputId="companyFileYearInput"
+                    formControlName="fileYear"
+                    [useGrouping]="false"
+                    styleClass="w-full"
+                    inputStyleClass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white"
+                  ></p-inputnumber>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label for="companyFileColorInput" class="text-xs font-bold text-slate-600">{{ 'CASES.FILE_COLOR' | translate }}</label>
+                  <input id="companyFileColorInput" pInputText formControlName="fileColor" title="File Color" placeholder="File Color" [placeholder]="'CASES.FILE_COLOR_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </p-tabpanel>
+
+        <!-- TAB 4: Procedures & Result (العقد، السجل، مكان التسجيل، الإجراءات اللاحقة، الرقم الضريبي، القيمة المضافة، النتيجة، ملاحظات) -->
+        <p-tabpanel [value]="4">
+          <div class="space-y-4 pt-3">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label for="compContractProc" class="text-xs font-bold text-slate-700">{{ 'COMPANIES.CONTRACT_PROCEDURE' | translate }}</label>
+                <input id="compContractProc" pInputText formControlName="contractProcedure" title="Contract Procedure" placeholder="Contract Procedure" [placeholder]="'COMPANIES.CONTRACT_PROCEDURE_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm" />
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label for="compRegistryProc" class="text-xs font-bold text-slate-700">{{ 'COMPANIES.REGISTRY_PROCEDURE' | translate }}</label>
+                <input id="compRegistryProc" pInputText formControlName="registryProcedure" title="Registry Procedure" placeholder="Registry Procedure" [placeholder]="'COMPANIES.REGISTRY_PROCEDURE_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm" />
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label for="compRegPlace" class="text-xs font-bold text-slate-700">{{ 'COMPANIES.REGISTRATION_PLACE' | translate }}</label>
+                <input id="compRegPlace" pInputText formControlName="registrationPlace" title="Registration Place" placeholder="Registration Place" [placeholder]="'COMPANIES.REGISTRATION_PLACE_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm" />
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label for="compSubseqProc" class="text-xs font-bold text-slate-700">{{ 'COMPANIES.SUBSEQUENT_PROCEDURES' | translate }}</label>
+                <input id="compSubseqProc" pInputText formControlName="subsequentProcedures" title="Subsequent Procedures" placeholder="Subsequent Procedures" [placeholder]="'COMPANIES.SUBSEQUENT_PROCEDURES_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm" />
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label for="compTaxNum" class="text-xs font-bold text-slate-700">{{ 'COMPANIES.TAX_NUMBER' | translate }}</label>
+                <input id="compTaxNum" pInputText formControlName="taxNumber" title="Tax Number" placeholder="Tax Number" [placeholder]="'COMPANIES.TAX_NUMBER_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm" />
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label for="compVat" class="text-xs font-bold text-slate-700">{{ 'COMPANIES.VALUE_ADDED_TAX' | translate }}</label>
+                <input id="compVat" pInputText formControlName="valueAddedTax" title="Value Added Tax" placeholder="Value Added Tax" [placeholder]="'COMPANIES.VALUE_ADDED_TAX_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm" />
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label for="compResult" class="text-sm font-bold text-slate-700">{{ 'COMPANIES.RESULT' | translate }}</label>
+              <input id="compResult" pInputText formControlName="result" title="Result" placeholder="Result" [placeholder]="'COMPANIES.RESULT_PLACEHOLDER' | translate" class="w-full !py-2.5 !px-3.5 !rounded-lg !border-slate-300 text-sm" />
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label for="compNotes" class="text-sm font-bold text-slate-700">{{ 'CASES.NOTES_LABEL' | translate }}</label>
+              <textarea id="compNotes" pTextarea formControlName="notes" rows="3" title="Notes" placeholder="Notes" [placeholder]="'CASES.NOTES_PLACEHOLDER' | translate" class="w-full !p-3 !rounded-lg !border-slate-300 text-sm"></textarea>
+            </div>
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="flex items-center justify-between w-full pt-4 border-t border-slate-100 mt-2">
+      <div class="flex gap-2">
+        @if (activeTab() > 0) {
+          <p-button
+            [label]="'COMMON.PREVIOUS' | translate"
+            [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-right' : 'pi pi-arrow-left'"
+            [text]="true"
+            severity="secondary"
+            (onClick)="prevTab()"
+            styleClass="!py-2 !px-3 !rounded-lg font-medium text-xs"
+          ></p-button>
+        }
+        @if (activeTab() < 4) {
+          <p-button
+            [label]="'COMMON.NEXT' | translate"
+            [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-left' : 'pi pi-arrow-right'"
+            iconPos="right"
+            [outlined]="true"
+            severity="info"
+            (onClick)="nextTab()"
+            styleClass="!py-2 !px-3 !rounded-lg font-medium text-xs !text-sky-600 !border-sky-300 !bg-sky-50/70 hover:!bg-sky-100"
+          ></p-button>
+        }
+      </div>
+
+      <div class="flex gap-3">
+        <p-button
+          [label]="'COMMON.CANCEL' | translate"
+          icon="pi pi-times"
+          [text]="true"
+          severity="secondary"
+          (onClick)="close()"
+          styleClass="!py-2.5 !px-4 !rounded-lg font-medium"
+        ></p-button>
+        <p-button
+          [label]="'COMMON.SAVE' | translate"
+          icon="pi pi-check"
+          (onClick)="save()"
+          styleClass="!bg-primary-600 hover:!bg-primary-700 !py-2.5 !px-6 !rounded-lg font-bold shadow-md shadow-primary-200 border-none text-white transition-all"
+        ></p-button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+

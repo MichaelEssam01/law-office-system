@@ -1,0 +1,328 @@
+<p-dialog 
+  [header]="registration ? ('REGISTRATIONS.EDIT_REGISTRATION' | translate) : ('REGISTRATIONS.ADD_REGISTRATION_NEW' | translate)" 
+  [(visible)]="visible" 
+  (onHide)="close()"
+  [modal]="true" 
+  [style]="{ width: '920px', maxWidth: '96vw' }" 
+  [draggable]="false" 
+  [resizable]="false"
+  styleClass="p-fluid rounded-2xl overflow-hidden shadow-2xl"
+>
+  <form [formGroup]="registrationForm" class="pt-2">
+    <p-tabs [value]="activeTab()" (valueChange)="activeTab.set($any($event))">
+      <p-tablist>
+        <p-tab [value]="0">
+          <div class="flex items-center gap-2 font-bold">
+            <i class="pi pi-bookmark text-primary-600"></i>
+            <span>{{ 'REGISTRATIONS.DETAILS_TAB' | translate }}</span>
+            @if (hasTabErrors(0)) {
+              <i class="pi pi-exclamation-circle text-red-500 ms-1.5" [pTooltip]="'COMMON.REQUIRED_FIELDS_WARNING' | translate"></i>
+            }
+          </div>
+        </p-tab>
+        <p-tab [value]="1">
+          <div class="flex items-center gap-2 font-bold">
+            <i class="pi pi-list-check text-indigo-600"></i>
+            <span>{{ 'REGISTRATIONS.PROCEDURES_TAB' | translate }}</span>
+          </div>
+        </p-tab>
+        <p-tab [value]="2">
+          <div class="flex items-center gap-2 font-bold">
+            <i class="pi pi-folder-open text-amber-600"></i>
+            <span>{{ 'REGISTRATIONS.FILE_TAB' | translate }}</span>
+          </div>
+        </p-tab>
+        <p-tab [value]="3">
+          <div class="flex items-center gap-2 font-bold">
+            <i class="pi pi-check-circle text-emerald-600"></i>
+            <span>{{ 'REGISTRATIONS.RESULT_TAB' | translate }}</span>
+          </div>
+        </p-tab>
+      </p-tablist>
+
+      <p-tabpanels>
+        <!-- TAB 0: Registration Details -->
+        <p-tabpanel [value]="0">
+          <div class="space-y-4 pt-3">
+            <!-- Authority (الجهة - Required) -->
+            <div class="flex flex-col gap-1.5">
+              <label for="regAuthorityInput" class="text-sm font-bold text-slate-700 flex items-center gap-1">
+                <span>{{ 'REGISTRATIONS.AUTHORITY' | translate }}</span>
+                <span class="text-red-500">*</span>
+                @if (isFieldInvalid('authorityName')) {
+                  <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                }
+              </label>
+              <input
+                id="regAuthorityInput"
+                pInputText
+                formControlName="authorityName"
+                title="Authority"
+                placeholder="Authority"
+                [placeholder]="'REGISTRATIONS.AUTHORITY_PLACEHOLDER' | translate"
+                class="w-full !py-2.5 !px-3.5 !rounded-lg text-sm transition-colors"
+                [ngClass]="isFieldInvalid('authorityName') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300'"
+              />
+            </div>
+
+            <!-- Request Type + Other Request Type -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200/80">
+              <div class="md:col-span-6 flex flex-col gap-1.5">
+                <label class="text-sm font-bold text-slate-700 flex items-center gap-1">
+                  <span>{{ 'REGISTRATIONS.REQUEST_TYPE' | translate }}</span>
+                  <span class="text-red-500">*</span>
+                  @if (isFieldInvalid('requestType')) {
+                    <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                  }
+                </label>
+                <p-select
+                  [options]="requestTypes()"
+                  formControlName="requestType"
+                  optionLabel="label"
+                  optionValue="value"
+                  [filter]="true"
+                  appAutoSelectFilter
+                  appendTo="body"
+                  [placeholder]="'REGISTRATIONS.REQUEST_TYPE' | translate"
+                  [styleClass]="'w-full !rounded-lg ' + (isFieldInvalid('requestType') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                ></p-select>
+              </div>
+
+              @if (registrationForm.get('requestType')?.value === RegistrationRequestType.Other) {
+                <div class="md:col-span-6 flex flex-col gap-1.5">
+                  <label for="otherRequestTypeInput" class="text-sm font-bold text-slate-700">{{ 'REGISTRATIONS.OTHER_REQUEST_TYPE' | translate }}</label>
+                  <input id="otherRequestTypeInput" pInputText formControlName="otherRequestType" title="Other Request Type" placeholder="Other Request Type" [placeholder]="'REGISTRATIONS.OTHER_REQUEST_TYPE_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white" />
+                </div>
+              }
+            </div>
+
+            <!-- Client (Required) & Lawyer (Optional) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-bold text-slate-700 flex items-center gap-1">
+                  <span>{{ 'REGISTRATIONS.CLIENT' | translate }}</span>
+                  <span class="text-red-500">*</span>
+                  @if (isFieldInvalid('clientId')) {
+                    <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
+                  }
+                </label>
+                <p-select
+                  [options]="clients()"
+                  formControlName="clientId"
+                  optionLabel="fullName"
+                  optionValue="id"
+                  [filter]="true"
+                  appAutoSelectFilter
+                  filterBy="fullName,phone,clientNumber"
+                  appendTo="body"
+                  [placeholder]="'CASES.SELECT_CLIENT' | translate"
+                  [styleClass]="'w-full !rounded-lg ' + (isFieldInvalid('clientId') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                ></p-select>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-sm font-bold text-slate-700">{{ 'REGISTRATIONS.LAWYER' | translate }}</label>
+                <p-select
+                  [options]="lawyers()"
+                  formControlName="assignedLawyerId"
+                  optionLabel="fullName"
+                  optionValue="id"
+                  [filter]="true"
+                  appAutoSelectFilter
+                  filterBy="fullName,email"
+                  [showClear]="true"
+                  appendTo="body"
+                  [placeholder]="'CASES.SELECT_LAWYER' | translate"
+                  styleClass="w-full !rounded-lg !border-slate-300"
+                ></p-select>
+              </div>
+            </div>
+          </div>
+        </p-tabpanel>
+
+        <!-- TAB 1: 6 Structured Procedures -->
+        <p-tabpanel [value]="1">
+          <div formArrayName="procedures" class="space-y-4 pt-3 max-h-[55vh] overflow-y-auto px-1">
+            @for (proc of procedures.controls; track $index; let i = $index) {
+              <div [formGroupName]="i" class="bg-slate-50/80 p-4 rounded-xl border border-slate-200 space-y-3">
+                <div class="flex items-center gap-2 border-b border-slate-200 pb-2.5">
+                  <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">
+                    {{ i + 1 }}
+                  </span>
+                  <i [class]="procedureStages[i].icon + ' text-indigo-600'"></i>
+                  <h4 class="font-bold text-slate-800 text-sm m-0">{{ procedureStages[i].labelKey | translate }}</h4>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div class="flex flex-col gap-1">
+                    <label class="text-xs font-bold text-slate-600">{{ 'REGISTRATIONS.PROCEDURE_START_DATE' | translate }}</label>
+                    <p-datepicker
+                      formControlName="startDate"
+                      appendTo="body"
+                      dateFormat="yy-mm-dd"
+                      [showIcon]="true"
+                      styleClass="w-full"
+                      inputStyleClass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-xs bg-white"
+                    ></p-datepicker>
+                  </div>
+
+                  <div class="flex flex-col gap-1">
+                    <label class="text-xs font-bold text-slate-600">{{ 'REGISTRATIONS.RESPONSIBLE_LAWYER' | translate }}</label>
+                    <p-select
+                      [options]="lawyers()"
+                      formControlName="responsibleLawyerId"
+                      optionLabel="fullName"
+                      optionValue="id"
+                      [filter]="true"
+                      appAutoSelectFilter
+                      [showClear]="true"
+                      appendTo="body"
+                      [placeholder]="'CASES.SELECT_LAWYER' | translate"
+                      styleClass="w-full !rounded-lg !border-slate-300 text-xs bg-white"
+                    ></p-select>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div class="flex flex-col gap-1">
+                    <label [for]="'procCompleted_' + i" class="text-xs font-bold text-slate-600">{{ 'REGISTRATIONS.COMPLETED_WORK' | translate }}</label>
+                    <input [id]="'procCompleted_' + i" pInputText formControlName="completedWork" title="Completed Work" placeholder="Completed Work" [placeholder]="'REGISTRATIONS.COMPLETED_WORK_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-xs bg-white" />
+                  </div>
+
+                  <div class="flex flex-col gap-1">
+                    <label [for]="'procObstacles_' + i" class="text-xs font-bold text-slate-600">{{ 'REGISTRATIONS.OBSTACLES' | translate }}</label>
+                    <input [id]="'procObstacles_' + i" pInputText formControlName="obstacles" title="Obstacles" placeholder="Obstacles" [placeholder]="'REGISTRATIONS.OBSTACLES_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-xs bg-white" />
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div class="flex flex-col gap-1">
+                    <label [for]="'procRequired_' + i" class="text-xs font-bold text-slate-600">{{ 'REGISTRATIONS.REQUIRED_ACTION' | translate }}</label>
+                    <input [id]="'procRequired_' + i" pInputText formControlName="requiredAction" title="Required Action" placeholder="Required Action" [placeholder]="'REGISTRATIONS.REQUIRED_ACTION_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-xs bg-white" />
+                  </div>
+
+                  <div class="flex flex-col gap-1">
+                    <label [for]="'procNotes_' + i" class="text-xs font-bold text-slate-600">{{ 'REGISTRATIONS.NOTES' | translate }}</label>
+                    <input [id]="'procNotes_' + i" pInputText formControlName="notes" title="Notes" placeholder="Notes" [placeholder]="'CASES.NOTES_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-xs bg-white" />
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </p-tabpanel>
+
+        <!-- TAB 2: File Info -->
+        <p-tabpanel [value]="2">
+          <div class="space-y-4 pt-3">
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
+              <h4 class="font-bold text-slate-800 text-sm m-0 flex items-center gap-2">
+                <i class="pi pi-folder text-amber-600"></i>
+                {{ 'CASES.FILE_INFO' | translate }}
+              </h4>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="flex flex-col gap-1.5">
+                  <label for="regFileNumberInput" class="text-xs font-bold text-slate-600">{{ 'CASES.FILE_NUMBER' | translate }}</label>
+                  <input id="regFileNumberInput" pInputText formControlName="fileNumber" title="File Number" placeholder="File Number" [placeholder]="'CASES.FILE_NUMBER_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white" />
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label for="regFileYearInput" class="text-xs font-bold text-slate-600">{{ 'CASES.FILE_YEAR' | translate }}</label>
+                  <p-inputnumber
+                    inputId="regFileYearInput"
+                    formControlName="fileYear"
+                    [useGrouping]="false"
+                    styleClass="w-full"
+                    inputStyleClass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white"
+                  ></p-inputnumber>
+                </div>
+                <div class="flex flex-col gap-1.5">
+                  <label for="regFileColorInput" class="text-xs font-bold text-slate-600">{{ 'CASES.FILE_COLOR' | translate }}</label>
+                  <input id="regFileColorInput" pInputText formControlName="fileColor" title="File Color" placeholder="File Color" [placeholder]="'CASES.FILE_COLOR_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </p-tabpanel>
+
+        <!-- TAB 3: Result (رقم - تاريخ - جهة + ملاحظات) -->
+        <p-tabpanel [value]="3">
+          <div class="space-y-4 pt-3">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-emerald-50/40 p-4 rounded-xl border border-emerald-200/80">
+              <div class="flex flex-col gap-1.5">
+                <label for="regResultNumberInput" class="text-xs font-bold text-slate-700">{{ 'REGISTRATIONS.RESULT_NUMBER' | translate }}</label>
+                <input id="regResultNumberInput" pInputText formControlName="resultNumber" title="Result Number" placeholder="Result Number" [placeholder]="'REGISTRATIONS.RESULT_NUMBER_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white" />
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-bold text-slate-700">{{ 'REGISTRATIONS.RESULT_DATE' | translate }}</label>
+                <p-datepicker
+                  formControlName="resultDate"
+                  appendTo="body"
+                  dateFormat="yy-mm-dd"
+                  [showIcon]="true"
+                  styleClass="w-full"
+                  inputStyleClass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white"
+                ></p-datepicker>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label for="regResultAuthorityInput" class="text-xs font-bold text-slate-700">{{ 'REGISTRATIONS.RESULT_AUTHORITY' | translate }}</label>
+                <input id="regResultAuthorityInput" pInputText formControlName="resultAuthority" title="Result Authority" placeholder="Result Authority" [placeholder]="'REGISTRATIONS.RESULT_AUTHORITY_PLACEHOLDER' | translate" class="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white" />
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label for="regNotesInput" class="text-sm font-bold text-slate-700">{{ 'REGISTRATIONS.NOTES' | translate }}</label>
+              <textarea id="regNotesInput" pTextarea formControlName="notes" rows="4" title="Notes" placeholder="Notes" [placeholder]="'CASES.NOTES_PLACEHOLDER' | translate" class="w-full !p-3 !rounded-lg !border-slate-300 text-sm"></textarea>
+            </div>
+          </div>
+        </p-tabpanel>
+      </p-tabpanels>
+    </p-tabs>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="flex items-center justify-between w-full pt-4 border-t border-slate-100 mt-2">
+      <div class="flex gap-2">
+        @if (activeTab() > 0) {
+          <p-button
+            [label]="'COMMON.PREVIOUS' | translate"
+            [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-right' : 'pi pi-arrow-left'"
+            [text]="true"
+            severity="secondary"
+            (onClick)="prevTab()"
+            styleClass="!py-2 !px-3 !rounded-lg font-medium text-xs"
+          ></p-button>
+        }
+        @if (activeTab() < 3) {
+          <p-button
+            [label]="'COMMON.NEXT' | translate"
+            [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-left' : 'pi pi-arrow-right'"
+            iconPos="right"
+            [outlined]="true"
+            severity="info"
+            (onClick)="nextTab()"
+            styleClass="!py-2 !px-3 !rounded-lg font-medium text-xs !text-sky-600 !border-sky-300 !bg-sky-50/70 hover:!bg-sky-100"
+          ></p-button>
+        }
+      </div>
+
+      <div class="flex gap-3">
+        <p-button
+          [label]="'COMMON.CANCEL' | translate"
+          icon="pi pi-times"
+          [text]="true"
+          severity="secondary"
+          (onClick)="close()"
+          styleClass="!py-2.5 !px-4 !rounded-lg font-medium"
+        ></p-button>
+        <p-button
+          [label]="'COMMON.SAVE' | translate"
+          icon="pi pi-check"
+          (onClick)="save()"
+          styleClass="!bg-primary-600 hover:!bg-primary-700 !py-2.5 !px-6 !rounded-lg font-bold shadow-md shadow-primary-200 border-none text-white transition-all"
+        ></p-button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+

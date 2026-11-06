@@ -92,9 +92,43 @@ export interface ClientDocumentSummary {
   createdAt: string;
 }
 
+export interface ClientContractSummary {
+  id: string;
+  contractNumber: string;
+  title: string;
+  status: string;
+  contractType: string;
+  lawyerName: string;
+  startDate: string;
+}
+
+export interface ClientRegistrationSummary {
+  id: string;
+  registrationNumber: string;
+  authorityName: string;
+  requestType: string;
+  lawyerName: string;
+  resultNumber?: string;
+  createdAt: string;
+}
+
+export interface ClientCompanySummary {
+  id: string;
+  companyCode: string;
+  title: string;
+  status: string;
+  companyType: string;
+  companyNumber?: string;
+  lawyerName: string;
+  startDate: string;
+}
+
 export interface ClientWorks {
   client: Client;
   cases: ClientCaseSummary[];
+  contracts: ClientContractSummary[];
+  registrations: ClientRegistrationSummary[];
+  companies: ClientCompanySummary[];
   sessions: ClientSessionSummary[];
   invoices: ClientInvoiceSummary[];
   documents: ClientDocumentSummary[];

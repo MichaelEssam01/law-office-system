@@ -104,3 +104,66 @@ public enum PaymentType
     Expense
 }
 
+public enum ContractStatus
+{
+    InDrafting = 1, // جاري الصياغة
+    Finished = 2    // منتهي
+}
+
+public enum ContractType
+{
+    Rent = 0,          // إيجار
+    Sale = 1,          // بيع
+    Gift = 2,          // هبة
+    Partnership = 3,   // شركة
+    Mortgage = 4,      // رهن
+    Contracting = 5,   // مقاولة
+    Consultancy = 6,   // استشاري
+    Employment = 7,    // عمل
+    Marriage = 8,      // زواج
+    Exploitation = 9,  // استغلال
+    Usufruct = 10,     // حق انتفاع
+    Other = 11         // أخرى
+}
+
+public enum RegistrationRequestType
+{
+    InheritanceDeclaration = 0, // إشهار إرث
+    BareOwnershipSale = 1,      // بيع رقبة
+    UsufructSale = 2,           // بيع منفعة
+    FullOwnershipSale = 3,      // بيع رقبة ومنفعة
+    Rent = 4,                   // إيجار
+    Mortgage = 5,               // رهن
+    AmicablePartition = 6,      // قسمة رضائية
+    PetitionRegistration = 7,   // إشهار صحيفة
+    JudgmentRegistration = 8,   // إشهار حكم
+    Other = 9                   // أخرى
+}
+
+public enum RegistrationProcedureType
+{
+    Survey = 0,          // رفع مساحي
+    Application = 1,     // طلب
+    DraftProject = 2,    // مشروع
+    TechnicalReview = 3, // مراجعة فنية
+    FinancialReview = 4, // مراجعة مالية
+    Publication = 5      // إشهار
+}
+
+public enum CompanyStatus
+{
+    Active = 1,   // قائمة
+    Finished = 2  // منتهية
+}
+
+public enum CompanyType
+{
+    GeneralPartnership = 0,         // تضامن
+    LimitedPartnership = 1,         // توصية
+    PartnershipLimitedByShares = 2, // توصية بالأسهم
+    LLC = 3,                        // ذات مسئولية محدودة
+    JointStock = 4,                 // مساهمة
+    DeFacto = 5,                    // واقع
+    Other = 6                       // أخرى
+}
+

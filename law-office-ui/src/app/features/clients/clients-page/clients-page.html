@@ -179,7 +179,7 @@
                 </div>
             </div>
 
-            <!-- Tabs for Client Profile, Cases, Sessions, Invoices, Documents -->
+            <!-- Tabs for Client Profile, Cases, Contracts, Registrations, Companies, Sessions, Invoices, Documents -->
             <p-tabs [(value)]="activeWorksTab">
                 <p-tablist>
                     <p-tab value="0">
@@ -190,6 +190,21 @@
                         <i class="pi pi-briefcase me-2"></i>
                         <span>{{ 'CLIENTS.TABS.CASES' | translate }}</span>
                         <span class="ms-2 px-2 py-0.5 text-xs bg-indigo-100 text-indigo-700 rounded-full font-semibold">{{ clientWorks.cases.length }}</span>
+                    </p-tab>
+                    <p-tab value="5">
+                        <i class="pi pi-file-edit me-2 text-sky-600"></i>
+                        <span>{{ 'CLIENTS.TABS.CONTRACTS' | translate }}</span>
+                        <span class="ms-2 px-2 py-0.5 text-xs bg-sky-100 text-sky-700 rounded-full font-semibold">{{ clientWorks.contracts.length }}</span>
+                    </p-tab>
+                    <p-tab value="6">
+                        <i class="pi pi-bookmark me-2 text-purple-600"></i>
+                        <span>{{ 'CLIENTS.TABS.REGISTRATIONS' | translate }}</span>
+                        <span class="ms-2 px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full font-semibold">{{ clientWorks.registrations.length }}</span>
+                    </p-tab>
+                    <p-tab value="7">
+                        <i class="pi pi-building me-2 text-teal-600"></i>
+                        <span>{{ 'CLIENTS.TABS.COMPANIES' | translate }}</span>
+                        <span class="ms-2 px-2 py-0.5 text-xs bg-teal-100 text-teal-700 rounded-full font-semibold">{{ clientWorks.companies.length }}</span>
                     </p-tab>
                     <p-tab value="2">
                         <i class="pi pi-calendar me-2"></i>
@@ -437,6 +452,123 @@
                             <ng-template pTemplate="emptymessage">
                                 <tr>
                                     <td colspan="5" class="text-center py-6 text-slate-400">{{ 'CLIENTS.NO_CASES' | translate }}</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-tabpanel>
+
+                    <!-- Tab 5: Contracts -->
+                    <p-tabpanel value="5">
+                        <p-table [value]="clientWorks.contracts || []" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                                 [paginatorDropdownAppendTo]="'body'"
+                                 [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>{{ 'CONTRACTS.CONTRACT_NUMBER' | translate }}</th>
+                                    <th>{{ 'CONTRACTS.SUBJECT' | translate }}</th>
+                                    <th>{{ 'CONTRACTS.CONTRACT_TYPE' | translate }}</th>
+                                    <th>{{ 'CONTRACTS.LAWYER' | translate }}</th>
+                                    <th>{{ 'CONTRACTS.STATUS' | translate }}</th>
+                                    <th>{{ 'CONTRACTS.START_DATE' | translate }}</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-item>
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td>
+                                        <a [routerLink]="['/contracts']" (click)="displayWorksDialog = false" class="font-mono text-sky-600 font-bold hover:underline cursor-pointer">{{ item.contractNumber }}</a>
+                                    </td>
+                                    <td class="font-semibold text-slate-800">{{ item.title }}</td>
+                                    <td>
+                                        <span class="px-2 py-0.5 rounded bg-sky-50 text-sky-700 text-xs font-bold">{{ getContractTypeLabel(item.contractType) }}</span>
+                                    </td>
+                                    <td>{{ item.lawyerName || '-' }}</td>
+                                    <td>
+                                        <p-tag [value]="getContractStatusLabel(item.status)" [severity]="item.status === 'Finished' ? 'success' : 'info'"></p-tag>
+                                    </td>
+                                    <td>{{ item.startDate | date:'mediumDate' }}</td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="emptymessage">
+                                <tr>
+                                    <td colspan="6" class="text-center py-6 text-slate-400">{{ 'CLIENTS.NO_CONTRACTS' | translate }}</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-tabpanel>
+
+                    <!-- Tab 6: Registrations -->
+                    <p-tabpanel value="6">
+                        <p-table [value]="clientWorks.registrations || []" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                                 [paginatorDropdownAppendTo]="'body'"
+                                 [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>{{ 'REGISTRATIONS.REGISTRATION_NUMBER' | translate }}</th>
+                                    <th>{{ 'REGISTRATIONS.AUTHORITY' | translate }}</th>
+                                    <th>{{ 'REGISTRATIONS.REQUEST_TYPE' | translate }}</th>
+                                    <th>{{ 'REGISTRATIONS.LAWYER' | translate }}</th>
+                                    <th>{{ 'REGISTRATIONS.RESULT_NUMBER' | translate }}</th>
+                                    <th>{{ 'COMMON.DATE' | translate }}</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-item>
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td>
+                                        <a [routerLink]="['/registrations']" (click)="displayWorksDialog = false" class="font-mono text-purple-600 font-bold hover:underline cursor-pointer">{{ item.registrationNumber }}</a>
+                                    </td>
+                                    <td class="font-semibold text-slate-800">{{ item.authorityName }}</td>
+                                    <td>
+                                        <span class="px-2 py-0.5 rounded bg-purple-50 text-purple-700 text-xs font-bold">{{ getRegistrationTypeLabel(item.requestType) }}</span>
+                                    </td>
+                                    <td>{{ item.lawyerName || '-' }}</td>
+                                    <td>{{ item.resultNumber || '-' }}</td>
+                                    <td>{{ item.createdAt | date:'mediumDate' }}</td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="emptymessage">
+                                <tr>
+                                    <td colspan="6" class="text-center py-6 text-slate-400">{{ 'CLIENTS.NO_REGISTRATIONS' | translate }}</td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </p-tabpanel>
+
+                    <!-- Tab 7: Companies -->
+                    <p-tabpanel value="7">
+                        <p-table [value]="clientWorks.companies || []" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                                 [paginatorDropdownAppendTo]="'body'"
+                                 [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>{{ 'COMPANIES.COMPANY_CODE' | translate }}</th>
+                                    <th>{{ 'COMPANIES.SUBJECT' | translate }}</th>
+                                    <th>{{ 'COMPANIES.COMPANY_TYPE' | translate }}</th>
+                                    <th>{{ 'COMPANIES.COMPANY_NUMBER' | translate }}</th>
+                                    <th>{{ 'COMPANIES.LAWYER' | translate }}</th>
+                                    <th>{{ 'COMPANIES.STATUS' | translate }}</th>
+                                    <th>{{ 'COMPANIES.START_DATE' | translate }}</th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-item>
+                                <tr class="hover:bg-slate-50 transition-colors">
+                                    <td>
+                                        <a [routerLink]="['/companies']" (click)="displayWorksDialog = false" class="font-mono text-teal-600 font-bold hover:underline cursor-pointer">{{ item.companyCode }}</a>
+                                    </td>
+                                    <td class="font-semibold text-slate-800">{{ item.title }}</td>
+                                    <td>
+                                        <span class="px-2 py-0.5 rounded bg-teal-50 text-teal-700 text-xs font-bold">{{ getCompanyTypeLabel(item.companyType) }}</span>
+                                    </td>
+                                    <td class="font-mono text-xs">{{ item.companyNumber || '-' }}</td>
+                                    <td>{{ item.lawyerName || '-' }}</td>
+                                    <td>
+                                        <p-tag [value]="getCompanyStatusLabel(item.status)" [severity]="item.status === 'Finished' ? 'success' : 'info'"></p-tag>
+                                    </td>
+                                    <td>{{ item.startDate | date:'mediumDate' }}</td>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="emptymessage">
+                                <tr>
+                                    <td colspan="7" class="text-center py-6 text-slate-400">{{ 'CLIENTS.NO_COMPANIES' | translate }}</td>
                                 </tr>
                             </ng-template>
                         </p-table>

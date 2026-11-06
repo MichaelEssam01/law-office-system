@@ -14,6 +14,12 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<Client> Clients { get; set; }
     public DbSet<Case> Cases { get; set; }
     public DbSet<CaseParty> CaseParties { get; set; }
+    public DbSet<Contract> Contracts { get; set; }
+    public DbSet<ContractParty> ContractParties { get; set; }
+    public DbSet<Registration> Registrations { get; set; }
+    public DbSet<RegistrationProcedure> RegistrationProcedures { get; set; }
+    public DbSet<Company> Companies { get; set; }
+    public DbSet<CompanyParty> CompanyParties { get; set; }
     public DbSet<Session> Sessions { get; set; }
     public DbSet<Invoice> Invoices { get; set; }
     public DbSet<Payment> Payments { get; set; }
@@ -62,6 +68,97 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
 
         // CaseParty Configuration
         modelBuilder.Entity<CaseParty>(entity =>
+        {
+            entity.HasOne(p => p.Client)
+                .WithMany()
+                .HasForeignKey(p => p.ClientId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Contract Configuration
+        modelBuilder.Entity<Contract>(entity =>
+        {
+            entity.HasIndex(c => c.ContractNumber).IsUnique();
+
+            entity.HasOne(c => c.Client)
+                .WithMany(cl => cl.Contracts)
+                .HasForeignKey(c => c.ClientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(c => c.AssignedLawyer)
+                .WithMany()
+                .HasForeignKey(c => c.AssignedLawyerId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(c => c.Parties)
+                .WithOne(p => p.Contract)
+                .HasForeignKey(p => p.ContractId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ContractParty>(entity =>
+        {
+            entity.HasOne(p => p.Client)
+                .WithMany()
+                .HasForeignKey(p => p.ClientId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Registration Configuration
+        modelBuilder.Entity<Registration>(entity =>
+        {
+            entity.HasIndex(r => r.RegistrationNumber).IsUnique();
+
+            entity.HasOne(r => r.Client)
+                .WithMany(cl => cl.Registrations)
+                .HasForeignKey(r => r.ClientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(r => r.AssignedLawyer)
+                .WithMany()
+                .HasForeignKey(r => r.AssignedLawyerId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(r => r.Procedures)
+                .WithOne(p => p.Registration)
+                .HasForeignKey(p => p.RegistrationId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<RegistrationProcedure>(entity =>
+        {
+            entity.HasOne(p => p.ResponsibleLawyer)
+                .WithMany()
+                .HasForeignKey(p => p.ResponsibleLawyerId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Company Configuration
+        modelBuilder.Entity<Company>(entity =>
+        {
+            entity.HasIndex(c => c.CompanyCode).IsUnique();
+
+            entity.HasOne(c => c.Client)
+                .WithMany(cl => cl.Companies)
+                .HasForeignKey(c => c.ClientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(c => c.AssignedLawyer)
+                .WithMany()
+                .HasForeignKey(c => c.AssignedLawyerId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasMany(c => c.Parties)
+                .WithOne(p => p.Company)
+                .HasForeignKey(p => p.CompanyId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CompanyParty>(entity =>
         {
             entity.HasOne(p => p.Client)
                 .WithMany()

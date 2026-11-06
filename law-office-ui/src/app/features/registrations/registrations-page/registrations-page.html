@@ -1,0 +1,224 @@
+<div class="p-6">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <!-- Header Area -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-800">{{ 'REGISTRATIONS.TITLE' | translate }}</h1>
+    </div>
+    <button
+      type="button"
+      pButton
+      [label]="'REGISTRATIONS.ADD_REGISTRATION' | translate"
+      icon="pi pi-plus"
+      title="Add Registration"
+      aria-label="Add Registration"
+      [attr.aria-label]="'REGISTRATIONS.ADD_REGISTRATION' | translate"
+      class="p-button-primary shadow-md"
+      (click)="showAddDialog()"
+    ></button>
+  </div>
+
+  <!-- Filters Area -->
+  <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+      <div class="flex flex-col gap-2">
+        <label for="registrationsSearchInput" class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
+        <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
+          <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+          <input
+            id="registrationsSearchInput"
+            type="text"
+            pInputText
+            [ngModel]="searchTerm()"
+            (ngModelChange)="searchTerm.set($event)"
+            title="Search registrations"
+            aria-label="Search registrations"
+            placeholder="Search..."
+            [placeholder]="'REGISTRATIONS.SEARCH_PLACEHOLDER' | translate"
+            [attr.aria-label]="'REGISTRATIONS.SEARCH_PLACEHOLDER' | translate"
+            class="w-full rounded-lg border-slate-200"
+          />
+        </p-iconField>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-bold text-slate-500">{{ 'REGISTRATIONS.REQUEST_TYPE' | translate }}</label>
+        <p-select
+          [options]="requestTypes()"
+          [ngModel]="selectedRequestType()"
+          (ngModelChange)="selectedRequestType.set($event)"
+          optionLabel="label"
+          optionValue="value"
+          [filter]="true"
+          appAutoSelectFilter
+          [placeholder]="'REGISTRATIONS.ALL_TYPES' | translate"
+          [showClear]="true"
+          appendTo="body"
+          styleClass="w-full rounded-lg"
+        ></p-select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label class="text-xs font-bold text-slate-500">{{ 'REGISTRATIONS.CLIENT' | translate }}</label>
+        <p-select
+          [options]="clients()"
+          [ngModel]="selectedClient()"
+          (ngModelChange)="selectedClient.set($event); onFilterChange()"
+          optionLabel="fullName"
+          optionValue="id"
+          [filter]="true"
+          appAutoSelectFilter
+          filterBy="fullName,phone,clientNumber"
+          [placeholder]="'CASES.ALL_CLIENTS' | translate"
+          [showClear]="true"
+          appendTo="body"
+          styleClass="w-full rounded-lg"
+        ></p-select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <div class="flex gap-2">
+          <div class="flex-1 flex flex-col gap-2">
+            <label class="text-xs font-bold text-slate-500">{{ 'REGISTRATIONS.LAWYER' | translate }}</label>
+            <p-select
+              [options]="lawyers()"
+              [ngModel]="selectedLawyer()"
+              (ngModelChange)="selectedLawyer.set($event); onFilterChange()"
+              optionLabel="fullName"
+              optionValue="id"
+              [filter]="true"
+              appAutoSelectFilter
+              filterBy="fullName"
+              [placeholder]="'CASES.ALL_LAWYERS' | translate"
+              [showClear]="true"
+              appendTo="body"
+              styleClass="w-full rounded-lg"
+            ></p-select>
+          </div>
+          <button
+            type="button"
+            pButton
+            icon="pi pi-filter-slash"
+            aria-label="Reset Filters"
+            [attr.aria-label]="'CASES.RESET_FILTERS' | translate"
+            class="p-button-outlined p-button-secondary p-button-sm self-end h-[42px]"
+            (click)="resetFilters()"
+            [pTooltip]="'CASES.RESET_FILTERS' | translate"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="bg-white rounded-xl border border-slate-200 shadow-sm no-page-links">
+    <p-table
+      #dt
+      [value]="registrations()"
+      [loading]="loading()"
+      [rows]="10"
+      [paginator]="true"
+      [rowsPerPageOptions]="[5, 10, 30, 50]"
+      [showCurrentPageReport]="true"
+      [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
+      styleClass="p-datatable-sm shadow-sm rounded-lg overflow-hidden"
+      [rowHover]="true"
+    >
+      <ng-template pTemplate="header">
+        <tr class="bg-slate-50 text-slate-700 text-xs uppercase tracking-wider">
+          <th pSortableColumn="registrationNumber" class="p-3.5">{{ 'REGISTRATIONS.REGISTRATION_NUMBER' | translate }} <p-sortIcon field="registrationNumber"></p-sortIcon></th>
+          <th pSortableColumn="authorityName" class="p-3.5">{{ 'REGISTRATIONS.AUTHORITY' | translate }} <p-sortIcon field="authorityName"></p-sortIcon></th>
+          <th class="p-3.5">{{ 'REGISTRATIONS.REQUEST_TYPE' | translate }}</th>
+          <th pSortableColumn="clientName" class="p-3.5">{{ 'REGISTRATIONS.CLIENT' | translate }} <p-sortIcon field="clientName"></p-sortIcon></th>
+          <th pSortableColumn="lawyerName" class="p-3.5">{{ 'REGISTRATIONS.LAWYER' | translate }} <p-sortIcon field="lawyerName"></p-sortIcon></th>
+          <th class="p-3.5">{{ 'REGISTRATIONS.RESULT_TAB' | translate }}</th>
+          <th class="p-3.5 text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-item>
+        <tr class="border-b border-slate-100 hover:bg-slate-50/80 transition-colors cursor-pointer" (click)="showEditDialog(item)">
+          <td class="p-3.5">
+            <div class="flex flex-col gap-1">
+              <span class="font-mono font-bold text-blue-600 text-sm">{{ item.registrationNumber }}</span>
+              @if (item.fileNumber) {
+                <span class="inline-flex items-center gap-1 text-[10px] text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded w-fit font-mono">
+                  <i class="pi pi-folder text-[10px] text-amber-600"></i>
+                  {{ item.fileNumber }}@if (item.fileYear) {/{{ item.fileYear }}}
+                </span>
+              }
+            </div>
+          </td>
+          <td class="p-3.5 font-bold text-slate-900">{{ item.authorityName }}</td>
+          <td class="p-3.5">
+            <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 font-bold text-xs">
+              {{ getRequestTypeLabel(item.requestType, item.otherRequestType) | translate }}
+            </span>
+          </td>
+          <td class="p-3.5 text-slate-700 font-semibold text-sm">
+            <div class="flex items-center gap-2">
+              @if (item.clientNumber) {
+                <span class="font-mono text-[11px] bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-bold">#{{ item.clientNumber }}</span>
+              }
+              <span>{{ item.clientName }}</span>
+            </div>
+          </td>
+          <td class="p-3.5 text-slate-600 text-sm">{{ item.lawyerName || '---' }}</td>
+          <td class="p-3.5">
+            @if (item.resultNumber || item.resultAuthority) {
+              <div class="flex flex-col text-xs">
+                <span class="font-bold text-emerald-700">{{ item.resultNumber || '---' }}</span>
+                @if (item.resultAuthority) {
+                  <span class="text-slate-500">{{ item.resultAuthority }}</span>
+                }
+              </div>
+            } @else {
+              <span class="text-xs text-slate-400">---</span>
+            }
+          </td>
+          <td class="p-3.5 text-center" (click)="$event.stopPropagation()">
+            <div class="flex items-center justify-center gap-1">
+              <p-button
+                icon="pi pi-pencil"
+                [text]="true"
+                [rounded]="true"
+                severity="info"
+                (onClick)="showEditDialog(item)"
+                styleClass="!w-9 !h-9"
+                [pTooltip]="'COMMON.EDIT' | translate"
+              ></p-button>
+              <p-button
+                icon="pi pi-trash"
+                [text]="true"
+                [rounded]="true"
+                severity="danger"
+                (onClick)="confirmDelete(item)"
+                styleClass="!w-9 !h-9"
+                [pTooltip]="'COMMON.DELETE' | translate"
+              ></p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="!py-16 text-center">
+            <div class="flex flex-col items-center justify-center space-y-3 opacity-40">
+              <i class="pi pi-bookmark text-5xl"></i>
+              <p class="text-lg font-medium">{{ 'COMMON.NO_DATA' | translate }}</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <app-registration-dialog
+    [(visible)]="displayDialog"
+    [registration]="selectedRegistration()"
+    (onSave)="saveRegistration($event)"
+  ></app-registration-dialog>
+</div>

@@ -59,5 +59,8 @@ public class Client : BaseEntity
     public string? Instructions { get; set; }
 
     public ICollection<Case> Cases { get; set; } = new List<Case>();
+    public ICollection<Contract> Contracts { get; set; } = new List<Contract>();
+    public ICollection<Registration> Registrations { get; set; } = new List<Registration>();
+    public ICollection<Company> Companies { get; set; } = new List<Company>();
     public ICollection<Payment> Payments { get; set; } = new List<Payment>();
 }

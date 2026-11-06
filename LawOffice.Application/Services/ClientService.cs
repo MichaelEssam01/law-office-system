@@ -48,6 +48,24 @@ public class ClientService : IClientService
             .AsNoTracking()
             .ToListAsync();
 
+        var contracts = await _unitOfWork.Repository<Contract>().Query()
+            .Include(c => c.AssignedLawyer)
+            .Where(c => c.ClientId == id)
+            .AsNoTracking()
+            .ToListAsync();
+
+        var registrations = await _unitOfWork.Repository<Registration>().Query()
+            .Include(r => r.AssignedLawyer)
+            .Where(r => r.ClientId == id)
+            .AsNoTracking()
+            .ToListAsync();
+
+        var companies = await _unitOfWork.Repository<Company>().Query()
+            .Include(c => c.AssignedLawyer)
+            .Where(c => c.ClientId == id)
+            .AsNoTracking()
+            .ToListAsync();
+
         var worksDto = new ClientWorksDto
         {
             Client = MapToDto(client),
@@ -57,6 +75,35 @@ public class ClientService : IClientService
                 CaseNumber = c.CaseNumber,
                 Title = c.Title,
                 Status = c.Status.ToString(),
+                LawyerName = c.AssignedLawyer?.FullName ?? string.Empty,
+                StartDate = c.StartDate
+            }).ToList(),
+            Contracts = contracts.Select(c => new ClientContractSummaryDto
+            {
+                Id = c.Id,
+                ContractNumber = c.ContractNumber,
+                Title = c.Title,
+                Status = (int)c.Status,
+                ContractType = (int)c.ContractType,
+                LawyerName = c.AssignedLawyer?.FullName ?? string.Empty,
+                StartDate = c.StartDate
+            }).ToList(),
+            Registrations = registrations.Select(r => new ClientRegistrationSummaryDto
+            {
+                Id = r.Id,
+                RegistrationNumber = r.RegistrationNumber,
+                AuthorityName = r.AuthorityName,
+                RequestType = (int)r.RequestType,
+                LawyerName = r.AssignedLawyer?.FullName ?? string.Empty,
+                CreatedAt = r.CreatedAt
+            }).ToList(),
+            Companies = companies.Select(c => new ClientCompanySummaryDto
+            {
+                Id = c.Id,
+                CompanyCode = c.CompanyCode,
+                Title = c.Title,
+                Status = (int)c.Status,
+                CompanyType = (int)c.CompanyType,
                 LawyerName = c.AssignedLawyer?.FullName ?? string.Empty,
                 StartDate = c.StartDate
             }).ToList(),

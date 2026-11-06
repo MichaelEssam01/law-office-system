@@ -5,6 +5,9 @@ import { DashboardPage } from './features/dashboard/dashboard-page/dashboard-pag
 import { ClientsPage } from './features/clients/clients-page/clients-page';
 import { CasesPage } from './features/cases/cases-page/cases-page';
 import { CaseDetailsPage } from './features/cases/case-details-page/case-details-page';
+import { ContractsPage } from './features/contracts/contracts-page/contracts-page';
+import { RegistrationsPage } from './features/registrations/registrations-page/registrations-page';
+import { CompaniesPage } from './features/companies/companies-page/companies-page';
 import { SessionsPage } from './features/sessions/sessions-page/sessions-page';
 import { FinancePage } from './features/finance/finance-page/finance-page';
 import { DocumentsPage } from './features/documents/documents-page/documents-page';
@@ -35,6 +38,9 @@ export const routes: Routes = [
       { path: 'clients', component: ClientsPage },
       { path: 'cases', component: CasesPage },
       { path: 'cases/:id', component: CaseDetailsPage },
+      { path: 'contracts', component: ContractsPage },
+      { path: 'registrations', component: RegistrationsPage },
+      { path: 'companies', component: CompaniesPage },
       { path: 'sessions', component: SessionsPage },
       { path: 'finance', component: FinancePage },
       { path: 'documents', component: DocumentsPage },

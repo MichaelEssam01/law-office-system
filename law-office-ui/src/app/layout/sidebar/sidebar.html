@@ -14,10 +14,10 @@
         <div class="px-4 mb-4">
             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">{{ 'SIDEBAR.MAIN_MENU' | translate }}</p>
         </div>
-        <ul class="space-y-1.5 px-3">
+        <div class="space-y-1.5 px-3">
             @for (item of menuItems; track item.key) {
                 @if (item.key !== 'SETTINGS' && (!item.permission || authService.hasPermission(item.permission))) {
-                    <li>
+                    <div>
                         <a [routerLink]="item.routerLink" 
                            (click)="appState.closeSidebar()"
                            routerLinkActive="bg-slate-800 text-blue-400 font-bold"
@@ -26,19 +26,56 @@
                             <i [class]="item.icon + ' text-lg'"></i>
                             <span>{{ 'SIDEBAR.' + item.key | translate }}</span>
                         </a>
-                    </li>
+                    </div>
+
+                    @if (item.key === 'CLIENTS') {
+                        <!-- Grouped Legal Works Section right after Clients -->
+                        <div>
+                            <button type="button"
+                                    (click)="toggleLegalWorks()"
+                                    title="Legal Works"
+                                    aria-label="Legal Works"
+                                    [title]="'SIDEBAR.LEGAL_WORKS' | translate"
+                                    [attr.aria-label]="'SIDEBAR.LEGAL_WORKS' | translate"
+                                    [ngClass]="isLegalWorksActive() ? 'text-blue-400 font-bold' : 'text-slate-400 font-medium'"
+                                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl cursor-pointer transition-all duration-200 hover:bg-slate-800 hover:text-white">
+                                <div class="flex items-center gap-3">
+                                    <i class="pi pi-folder-open text-lg"></i>
+                                    <span>{{ 'SIDEBAR.LEGAL_WORKS' | translate }}</span>
+                                </div>
+                                <i class="pi text-xs transition-transform duration-200"
+                                   [ngClass]="legalWorksExpanded ? 'pi-chevron-down' : (appState.currentLang() === 'ar' ? 'pi-chevron-left' : 'pi-chevron-right')"></i>
+                            </button>
+
+                            @if (legalWorksExpanded) {
+                                <div class="mt-1 space-y-1 ms-4 ps-3 border-s border-slate-800">
+                                    @for (work of legalWorkItems; track work.key) {
+                                        <div>
+                                            <a [routerLink]="work.routerLink"
+                                               (click)="appState.closeSidebar()"
+                                               routerLinkActive="bg-slate-800 text-blue-400 font-bold"
+                                               class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium cursor-pointer transition-all duration-200 text-slate-400 hover:bg-slate-800 hover:text-white">
+                                                <i [class]="work.icon + ' text-base'"></i>
+                                                <span>{{ 'SIDEBAR.' + work.key | translate }}</span>
+                                            </a>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
                 }
             }
-        </ul>
+        </div>
         
         @if (authService.hasPermission('Settings.Manage')) {
             <div class="px-4 mt-8 mb-2">
                 <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">{{ 'SIDEBAR.SYSTEM' | translate }}</p>
             </div>
-            <ul class="space-y-1.5 px-3">
+            <div class="space-y-1.5 px-3">
                 @for (item of menuItems; track item.key) {
                     @if (item.key === 'SETTINGS' && authService.hasPermission(item.permission!)) {
-                        <li>
+                        <div>
                             <a [routerLink]="item.routerLink" 
                                (click)="appState.closeSidebar()"
                                routerLinkActive="bg-slate-800 text-blue-400 font-bold"
@@ -46,10 +83,10 @@
                                 <i [class]="item.icon + ' text-lg'"></i>
                                 <span>{{ 'SIDEBAR.' + item.key | translate }}</span>
                             </a>
-                        </li>
+                        </div>
                     }
                 }
-            </ul>
+            </div>
         }
     </nav>
 
