@@ -56,7 +56,7 @@ export class FinancePage implements OnInit {
   invoices = signal<any[]>([]);
   loading = signal(true);
   selectedStatuses = signal<number[]>([]);
-  activeTab = signal<'fees' | 'expenses' | 'all'>('fees');
+  activeTab = signal<'all' | 'fees' | 'expenses'>('all');
   defaultInvoiceCategory = signal<FinanceCategory>(FinanceCategory.Fees);
 
   feesCount = computed(() => this.invoices().filter(i => (i.category ?? FinanceCategory.Fees) === FinanceCategory.Fees).length);
@@ -143,13 +143,34 @@ export class FinancePage implements OnInit {
     await this.loadData();
   }
 
-  async loadData() {
+  async loadData(refreshInvoiceId?: string) {
     this.loading.set(true);
     try {
+      const previouslyExpandedIds = new Set<string>(
+        this.invoices()
+          .filter(item => this.dt?.isRowExpanded(item) || item.id === refreshInvoiceId)
+          .map(item => item.id)
+      );
+
       const [summaryData, invoicesData] = await Promise.all([
         this.financeService.getGlobalSummary(),
         this.financeService.getInvoices()
       ]);
+
+      if (previouslyExpandedIds.size > 0) {
+        await Promise.all(
+          invoicesData
+            .filter(item => previouslyExpandedIds.has(item.id))
+            .map(async (item: any) => {
+              try {
+                item.payments = await this.financeService.getPaymentsByInvoice(item.id);
+              } catch {
+                item.payments = [];
+              }
+            })
+        );
+      }
+
       this.summary.set(summaryData);
       this.invoices.set(invoicesData);
     } catch (error) {
@@ -223,7 +244,7 @@ export class FinancePage implements OnInit {
         detail: this.translate.instant('FINANCE.PAYMENT_SUCCESS') || 'Payment recorded'
       });
       this.displayPaymentDialog.set(false);
-      await this.loadData();
+      await this.loadData(data?.invoiceId);
     } catch (error: any) {
       this.messageService.add({ 
         severity: 'error', 
@@ -233,20 +254,16 @@ export class FinancePage implements OnInit {
     }
   }
 
-  // onRowExpand logic is already handled, just cleaning up unused signal
   async onRowExpand(event: any) {
     const invoice = event.data;
 
-    if (invoice.payments?.length) {
-      return;
+    if (!invoice.payments?.length) {
+      this.invoices.update(items =>
+        items.map(item =>
+          item.id === invoice.id ? { ...item, loadingPayments: true } : item
+        )
+      );
     }
-
-    // Set loading state immutably
-    this.invoices.update(items =>
-      items.map(item =>
-        item.id === invoice.id ? { ...item, loadingPayments: true } : item
-      )
-    );
 
     try {
       const payments = await this.financeService.getPaymentsByInvoice(invoice.id);

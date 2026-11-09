@@ -354,6 +354,18 @@ export class CaseDetailsPage implements OnInit {
     if (this.caseId()) await this.loadDocuments(this.caseId()!);
   }
 
+  async openDocument(doc: DocumentDto) {
+    try {
+      await this.documentService.openDocument(doc.id);
+    } catch (error) {
+      this.messageService.add({ 
+        severity: 'error', 
+        summary: this.translate.instant('COMMON.ERROR'), 
+        detail: this.translate.instant('CASES.DOWNLOAD_ERROR') || 'Failed to open file'
+      });
+    }
+  }
+
   async downloadDocument(doc: DocumentDto) {
     try {
       await this.documentService.downloadDocument(doc.id, doc.originalFileName);

@@ -111,6 +111,22 @@
                             </form>
                         </div>
                     </div>
+
+                    @if (canManageSettings) {
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-4">
+                            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">{{ 'SETTINGS.FIRM_NAME' | translate }}</h3>
+                            <div class="flex flex-col md:flex-row gap-3 md:items-center">
+                                <input pInputText type="text" id="firmNameInput" [(ngModel)]="firmName"
+                                       [title]="'SETTINGS.FIRM_NAME' | translate" [attr.aria-label]="'SETTINGS.FIRM_NAME' | translate"
+                                       [placeholder]="'SETTINGS.FIRM_NAME' | translate"
+                                       class="flex-1 px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm" />
+                                <button type="button" pButton icon="pi pi-save" [label]="'COMMON.SAVE' | translate"
+                                        title="Save" aria-label="Save" [attr.aria-label]="'COMMON.SAVE' | translate"
+                                        [disabled]="savingFirm() || !firmName.trim()"
+                                        class="p-button-primary shadow-md px-6" (click)="saveFirmName()"></button>
+                            </div>
+                        </div>
+                    }
                 </div>
             }
 

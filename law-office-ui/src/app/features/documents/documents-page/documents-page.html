@@ -106,6 +106,7 @@
                     <td class="text-slate-500 text-sm">{{doc.uploadedAt | date:'yyyy/MM/dd HH:mm'}}</td>
                     <td>
                         <div class="flex gap-1">
+                            <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="secondary" [pTooltip]="'COMMON.VIEW' | translate" aria-label="View" (onClick)="open(doc)"></p-button>
                             <p-button icon="pi pi-download" [rounded]="true" [text]="true" severity="info" (onClick)="download(doc)"></p-button>
                             <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="delete(doc)"></p-button>
                         </div>

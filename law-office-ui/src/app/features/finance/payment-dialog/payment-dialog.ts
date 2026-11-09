@@ -12,6 +12,7 @@ import { ClientService, Client } from '../../../core/services/client';
 import { FinanceService, PaymentMethod, InvoiceListDto, FinancialSummaryDto, InvoiceStatus, FinanceCategory } from '../../../core/services/finance.service';
 import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { AppStateService } from '../../../core/services/app-state.service';
+import { TooltipModule } from 'primeng/tooltip';
 import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-filter.directive';
 
 @Component({
@@ -28,6 +29,7 @@ import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-
     AutoSelectFilterDirective,
     DatePickerModule,
     TextareaModule,
+    TooltipModule,
     TranslateModule
   ],
   templateUrl: './payment-dialog.html'
@@ -46,17 +48,53 @@ export class PaymentDialog {
 
   paymentForm: FormGroup;
   saving = signal(false);
+  submitted = signal(false);
   clients = signal<Client[]>([]);
   cases = signal<CaseListDto[]>([]);
+  allInvoices = signal<InvoiceListDto[]>([]);
   
   // Local state for client filtering
   selectedClientId = signal<string | null>(null);
+
+  // Set of caseIds that have unpaid balance > 0
+  caseIdsWithPendingBalance = computed(() => {
+    const unpaidCaseIds = new Set<string>();
+    for (const inv of this.allInvoices()) {
+      const remaining = inv.remainingAmount ?? (inv.amount - inv.paidAmount);
+      if (remaining > 0 && inv.status !== InvoiceStatus.Cancelled && inv.caseId) {
+        unpaidCaseIds.add(inv.caseId);
+      }
+    }
+    return unpaidCaseIds;
+  });
+
+  // Clients that have at least one case with pending unpaid balance
+  filteredClients = computed(() => {
+    const unpaidCases = this.caseIdsWithPendingBalance();
+    const clientIdsWithPending = new Set<string>();
+    for (const c of this.cases()) {
+      if (unpaidCases.has(c.id) && c.clientId) {
+        clientIdsWithPending.add(c.clientId);
+      }
+    }
+    for (const inv of this.allInvoices()) {
+      const remaining = inv.remainingAmount ?? (inv.amount - inv.paidAmount);
+      if (remaining > 0 && inv.status !== InvoiceStatus.Cancelled && inv.clientId) {
+        clientIdsWithPending.add(inv.clientId);
+      }
+    }
+    return this.clients().filter(cl => cl.id && clientIdsWithPending.has(cl.id));
+  });
   
-  // Computed for filtered cases
+  // Computed for filtered cases (only cases with pending money)
   filteredCases = computed(() => {
     const clientId = this.selectedClientId();
-    if (!clientId) return this.cases();
-    return this.cases().filter(c => c.clientId === clientId);
+    const unpaidCases = this.caseIdsWithPendingBalance();
+    return this.cases().filter(c => {
+      const matchesClient = !clientId || c.clientId === clientId;
+      const hasPending = unpaidCases.has(c.id) || c.id === this.caseId();
+      return matchesClient && hasPending;
+    });
   });
 
   localInvoices = signal<InvoiceListDto[]>([]); 
@@ -111,32 +149,38 @@ export class PaymentDialog {
     effect(async () => {
       const isVisible = this.visible();
       if (isVisible) {
-        // 1. Load cases and clients first
-        await Promise.all([
-          this.loadCases(),
-          this.loadClients()
-        ]);
+        const currentCaseId = untracked(() => this.caseId());
 
-        // 2. Untracked reset of the form to avoid loops
+        // Reset form and state synchronously BEFORE awaiting API calls so no stale validation shows on open
         untracked(() => {
-          const currentCaseId = this.caseId();
-          
-          // Reset form and state
+          this.submitted.set(false);
           this.selectedClientId.set(null);
           this.localInvoices.set([]);
           this.selectedInvoice.set(null);
           this.caseSummary.set(null);
 
-          this.paymentForm.patchValue({
+          this.paymentForm.reset({
             caseId: currentCaseId,
             paymentDate: new Date(),
             method: PaymentMethod.Cash,
-            amount: 0,
+            amount: null,
             invoiceId: null,
+            category: FinanceCategory.Fees,
             notes: ''
-          });
+          }, { emitEvent: false });
+          this.paymentForm.markAsPristine();
+          this.paymentForm.markAsUntouched();
+        });
 
-          // 3. If case is pre-provided, load its data and set client
+        // Load cases, clients, and all invoices
+        await Promise.all([
+          this.loadCases(),
+          this.loadClients(),
+          this.loadAllInvoices()
+        ]);
+
+        // If case is pre-provided, load its data and set client
+        untracked(() => {
           if (currentCaseId) {
             const c = this.cases().find(x => x.id === currentCaseId);
             if (c) {
@@ -144,14 +188,29 @@ export class PaymentDialog {
             }
             this.loadInvoicesForCase(currentCaseId);
           }
+          this.paymentForm.markAsPristine();
+          this.paymentForm.markAsUntouched();
         });
       }
     });
   }
 
+  isFieldInvalid(controlName: string): boolean {
+    const ctrl = this.paymentForm.get(controlName);
+    return !!(ctrl && ctrl.invalid && (this.submitted() || ctrl.touched));
+  }
+
   getSelectedCase() {
     const id = this.paymentForm.get('caseId')?.value;
     return this.cases().find(c => c.id === id);
+  }
+
+  async loadAllInvoices() {
+    try {
+      this.allInvoices.set(await this.financeService.getInvoices());
+    } catch (error) {
+      console.error('Error loading invoices', error);
+    }
   }
 
   async loadCases() {
@@ -229,6 +288,7 @@ export class PaymentDialog {
   }
 
   async save() {
+    this.submitted.set(true);
     if (this.paymentForm.invalid) {
       this.paymentForm.markAllAsTouched();
       return;

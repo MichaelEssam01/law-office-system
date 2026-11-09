@@ -182,6 +182,12 @@
                                                                 aria-label="Download"
                                                                 [attr.aria-label]="'COMMON.DOWNLOAD' | translate"
                                                                 [pTooltip]="'COMMON.DOWNLOAD' | translate" (click)="downloadDocument(doc)"></button>
+                                                         <button pButton icon="pi pi-eye" class="p-button-text p-button-secondary p-button-xs" 
+                                                                 title="View"
+                                                                 [title]="'COMMON.VIEW' | translate"
+                                                                 aria-label="View"
+                                                                 [attr.aria-label]="'COMMON.VIEW' | translate"
+                                                                 [pTooltip]="'COMMON.VIEW' | translate" (click)="openDocument(doc)"></button>
                                                         <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-xs" 
                                                                 title="Delete"
                                                                 [title]="'COMMON.DELETE' | translate"

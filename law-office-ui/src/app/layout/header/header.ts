@@ -65,12 +65,6 @@ export class Header {
         routerLink: '/profile'
       },
       {
-        label: this.translate.instant('PROFILE.ACCOUNT_SETTINGS'),
-        icon: 'pi pi-cog',
-        routerLink: '/settings',
-        visible: this.authService.hasPermission('Settings.Manage')
-      },
-      {
         label: this.translate.instant('USERS.TITLE'),
         icon: 'pi pi-user-plus',
         routerLink: '/users',

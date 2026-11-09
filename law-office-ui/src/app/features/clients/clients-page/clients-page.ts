@@ -16,6 +16,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { RippleModule } from 'primeng/ripple';
 import { AppStateService } from '../../../core/services/app-state.service';
 import { ClientService, Client, ClientWorks } from '../../../core/services/client';
+import { DocumentService } from '../../../core/services/document.service';
 import { ClientDialog } from '../client-dialog/client-dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
@@ -62,8 +63,25 @@ export class ClientsPage implements OnInit {
     private confirmationService: ConfirmationService,
     public cdr: ChangeDetectorRef,
     private translate: TranslateService,
-    public appState: AppStateService
+    public appState: AppStateService,
+    private documentService: DocumentService
   ) {}
+
+  async openDocument(item: { id: string }) {
+    try {
+      await this.documentService.openDocument(item.id);
+    } catch {
+      this.messageService.add({ severity: 'error', summary: this.translate.instant('COMMON.ERROR'), detail: this.translate.instant('CASES.DOWNLOAD_ERROR') });
+    }
+  }
+
+  async downloadDocument(item: { id: string; originalFileName: string }) {
+    try {
+      await this.documentService.downloadDocument(item.id, item.originalFileName);
+    } catch {
+      this.messageService.add({ severity: 'error', summary: this.translate.instant('COMMON.ERROR'), detail: this.translate.instant('CASES.DOWNLOAD_ERROR') });
+    }
+  }
 
   async ngOnInit(): Promise<void> {
     await this.loadClients();

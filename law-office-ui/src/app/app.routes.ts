@@ -11,7 +11,6 @@ import { CompaniesPage } from './features/companies/companies-page/companies-pag
 import { SessionsPage } from './features/sessions/sessions-page/sessions-page';
 import { FinancePage } from './features/finance/finance-page/finance-page';
 import { DocumentsPage } from './features/documents/documents-page/documents-page';
-import { SettingsPage } from './features/settings/settings-page/settings-page';
 import { UsersPage } from './features/users/users-page/users-page';
 import { authGuard } from './core/guards/auth.guard';
 import { permissionGuard } from './core/guards/permission.guard';
@@ -44,7 +43,7 @@ export const routes: Routes = [
       { path: 'sessions', component: SessionsPage },
       { path: 'finance', component: FinancePage },
       { path: 'documents', component: DocumentsPage },
-      { path: 'settings', component: SettingsPage, canActivate: [permissionGuard('Settings.Manage')] },
+      { path: 'settings', redirectTo: 'profile', pathMatch: 'full' },
       { path: 'profile', loadComponent: () => import('./features/profile/profile-page/profile-page').then(m => m.ProfilePage) },
       { path: 'users', component: UsersPage, canActivate: [permissionGuard('Users.View')] },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }

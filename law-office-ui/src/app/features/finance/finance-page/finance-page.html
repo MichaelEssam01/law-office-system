@@ -20,6 +20,11 @@
 
     <!-- Category Tabs Navigation -->
     <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl w-fit mb-6">
+        <button type="button" (click)="setActiveTab('all')" title="All" aria-label="All" [attr.aria-label]="'FINANCE.TABS.ALL' | translate" [class]="activeTab() === 'all' ? 'bg-white text-slate-800 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'" class="px-4 py-2 rounded-xl text-sm transition-all flex items-center gap-2 cursor-pointer">
+            <i class="pi pi-th-large text-sm"></i>
+            <span>{{ 'FINANCE.TABS.ALL' | translate }}</span>
+            <span class="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full font-bold">{{ invoices().length }}</span>
+        </button>
         <button type="button" (click)="setActiveTab('fees')" title="Fees" aria-label="Fees" [attr.aria-label]="'FINANCE.CATEGORIES.FEES' | translate" [class]="activeTab() === 'fees' ? 'bg-white text-blue-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'" class="px-4 py-2 rounded-xl text-sm transition-all flex items-center gap-2 cursor-pointer">
             <i class="pi pi-briefcase text-sm"></i>
             <span>{{ 'FINANCE.CATEGORIES.FEES' | translate }}</span>
@@ -29,11 +34,6 @@
             <i class="pi pi-receipt text-sm"></i>
             <span>{{ 'FINANCE.CATEGORIES.EXPENSES' | translate }}</span>
             <span class="bg-amber-100 text-amber-700 text-xs px-2 py-0.5 rounded-full font-bold">{{ expensesCount() }}</span>
-        </button>
-        <button type="button" (click)="setActiveTab('all')" title="All" aria-label="All" [attr.aria-label]="'FINANCE.TABS.ALL' | translate" [class]="activeTab() === 'all' ? 'bg-white text-slate-800 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'" class="px-4 py-2 rounded-xl text-sm transition-all flex items-center gap-2 cursor-pointer">
-            <i class="pi pi-th-large text-sm"></i>
-            <span>{{ 'FINANCE.TABS.ALL' | translate }}</span>
-            <span class="bg-slate-200 text-slate-700 text-xs px-2 py-0.5 rounded-full font-bold">{{ invoices().length }}</span>
         </button>
     </div>
 

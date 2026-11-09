@@ -13,6 +13,8 @@ import { ProfileService, SecurityLogDto, NotificationSettingsDto } from '../../.
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { NotificationService } from '../../../core/services/notification.service';
+import { SettingsService } from '../../../core/services/settings.service';
+import { AppStateService } from '../../../core/services/app-state.service';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { TooltipModule } from 'primeng/tooltip';
@@ -47,11 +49,43 @@ export class ProfilePage implements OnInit {
   private translate = inject(TranslateService);
   private route = inject(ActivatedRoute);
   public notificationService = inject(NotificationService);
+  private settingsService = inject(SettingsService);
+  private appState = inject(AppStateService);
 
   currentUser = this.authService.currentUser;
   passwordForm: FormGroup;
   loading = signal(false);
   activeTab = signal<string>('profile');
+
+  // Firm name (admins with Settings.Manage only)
+  firmName = this.appState.settings().firmName;
+  savingFirm = signal(false);
+
+  get canManageSettings(): boolean {
+    return this.authService.hasPermission('Settings.Manage');
+  }
+
+  async saveFirmName() {
+    this.savingFirm.set(true);
+    try {
+      const current = await this.settingsService.getSettings();
+      await this.settingsService.updateSettings({ ...current, firmName: this.firmName.trim() });
+      await this.appState.refreshSettings();
+      this.messageService.add({
+        severity: 'success',
+        summary: this.translate.instant('COMMON.SUCCESS'),
+        detail: this.translate.instant('SETTINGS.SAVE_SUCCESS')
+      });
+    } catch {
+      this.messageService.add({
+        severity: 'error',
+        summary: this.translate.instant('COMMON.ERROR'),
+        detail: this.translate.instant('COMMON.ERROR')
+      });
+    } finally {
+      this.savingFirm.set(false);
+    }
+  }
 
   // Real data from database
   securityLogs = signal<SecurityLogDto[]>([]);

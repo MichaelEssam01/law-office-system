@@ -107,6 +107,11 @@ export class InvoiceDialog {
     effect(async () => {
       const isVisible = this.visible();
       if (isVisible) {
+        untracked(() => {
+          this.invoiceForm.markAsPristine();
+          this.invoiceForm.markAsUntouched();
+        });
+
         // 1. Load data
         await Promise.all([
           this.loadCases(),
@@ -120,8 +125,9 @@ export class InvoiceDialog {
           this.selectedClientId.set(null);
           
           if (inv) {
-            this.selectedClientId.set(inv.clientId || null); // Note: Might need clientId in InvoiceListDto
-            this.invoiceForm.patchValue({
+            const linkedCase = this.cases().find(x => x.id === inv.caseId);
+            this.selectedClientId.set(inv.clientId || linkedCase?.clientId || null);
+            this.invoiceForm.reset({
               ...inv,
               category: inv.category ?? FinanceCategory.Fees,
               dueDate: new Date(inv.dueDate)
@@ -143,6 +149,8 @@ export class InvoiceDialog {
               notes: ''
             });
           }
+          this.invoiceForm.markAsPristine();
+          this.invoiceForm.markAsUntouched();
           this.cdr.detectChanges();
         });
       }
@@ -152,6 +160,16 @@ export class InvoiceDialog {
   getSelectedCase() {
     const id = this.invoiceForm.get('caseId')?.value;
     return this.cases().find(c => c.id === id);
+  }
+
+  getSelectedClientName(): string {
+    const c = this.getSelectedCase();
+    const clientId = this.selectedClientId() || c?.clientId;
+    const cl = this.clients().find(x => x.id === clientId);
+    if (cl) {
+      return cl.clientNumber ? `#${cl.clientNumber} - ${cl.fullName}` : cl.fullName;
+    }
+    return this.invoice()?.clientName || c?.clientName || '';
   }
 
   getStatusLabel(status: InvoiceStatus): string {

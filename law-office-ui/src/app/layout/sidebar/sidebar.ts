@@ -39,7 +39,6 @@ export class Sidebar {
     { label: 'الجلسات', key: 'SESSIONS', icon: 'pi pi-calendar', routerLink: '/sessions', active: false },
     { label: 'المالية', key: 'FINANCE', icon: 'pi pi-wallet', routerLink: '/finance', active: false },
     { label: 'المستندات', key: 'DOCUMENTS', icon: 'pi pi-file', routerLink: '/documents', active: false },
-    { label: 'إعدادات النظام', key: 'SETTINGS', icon: 'pi pi-cog', routerLink: '/settings', active: false, permission: 'Settings.Manage' },
   ];
 
   toggleLegalWorks() {

@@ -59,6 +59,28 @@ export class DocumentService {
     window.URL.revokeObjectURL(url);
   }
 
+  /**
+   * Opens the document in a new browser tab (PDF, images, text are rendered inline;
+   * other types such as Word/Excel fall back to the browser's download behavior).
+   */
+  async openDocument(id: string): Promise<void> {
+    // Open the tab synchronously (inside the click handler) so popup blockers allow it.
+    const newTab = window.open('', '_blank');
+    try {
+      const blob = await firstValueFrom(this.http.get(`${this.baseUrl}/download/${id}`, { responseType: 'blob' }));
+      const url = window.URL.createObjectURL(blob);
+      if (newTab) {
+        newTab.location.href = url;
+      } else {
+        window.open(url, '_blank');
+      }
+      setTimeout(() => window.URL.revokeObjectURL(url), 60000);
+    } catch (error) {
+      newTab?.close();
+      throw error;
+    }
+  }
+
   async deleteDocument(id: string): Promise<void> {
     await firstValueFrom(this.http.delete<void>(`${this.baseUrl}/${id}`));
   }

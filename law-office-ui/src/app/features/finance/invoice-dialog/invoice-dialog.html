@@ -12,11 +12,11 @@
         <div class="flex flex-col gap-2">
             <label class="font-bold text-slate-700">{{ 'FINANCE.CATEGORY' | translate }}</label>
             <div class="grid grid-cols-2 gap-2">
-                <button type="button" title="Fees" aria-label="Fees" [title]="'FINANCE.CATEGORIES.FEES' | translate" [attr.aria-label]="'FINANCE.CATEGORIES.FEES' | translate" (click)="invoiceForm.get('category')?.setValue(0)" [class]="invoiceForm.get('category')?.value === 0 ? 'bg-blue-600 text-white shadow-sm font-bold border-blue-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-transparent'" class="py-2.5 px-4 rounded-xl border flex items-center justify-center gap-2 transition-all cursor-pointer">
+                <button type="button" [disabled]="!!invoice()" title="Fees" aria-label="Fees" [title]="'FINANCE.CATEGORIES.FEES' | translate" [attr.aria-label]="'FINANCE.CATEGORIES.FEES' | translate" (click)="!invoice() && invoiceForm.get('category')?.setValue(0)" [class]="invoiceForm.get('category')?.value === 0 ? 'bg-blue-600 text-white shadow-sm font-bold border-blue-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-transparent'" class="py-2.5 px-4 rounded-xl border flex items-center justify-center gap-2 transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-75">
                     <i class="pi pi-briefcase"></i>
                     <span>{{ 'FINANCE.CATEGORIES.FEES' | translate }}</span>
                 </button>
-                <button type="button" title="Expenses" aria-label="Expenses" [title]="'FINANCE.CATEGORIES.EXPENSES' | translate" [attr.aria-label]="'FINANCE.CATEGORIES.EXPENSES' | translate" (click)="invoiceForm.get('category')?.setValue(1)" [class]="invoiceForm.get('category')?.value === 1 ? 'bg-amber-600 text-white shadow-sm font-bold border-amber-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-transparent'" class="py-2.5 px-4 rounded-xl border flex items-center justify-center gap-2 transition-all cursor-pointer">
+                <button type="button" [disabled]="!!invoice()" title="Expenses" aria-label="Expenses" [title]="'FINANCE.CATEGORIES.EXPENSES' | translate" [attr.aria-label]="'FINANCE.CATEGORIES.EXPENSES' | translate" (click)="!invoice() && invoiceForm.get('category')?.setValue(1)" [class]="invoiceForm.get('category')?.value === 1 ? 'bg-amber-600 text-white shadow-sm font-bold border-amber-600' : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border-transparent'" class="py-2.5 px-4 rounded-xl border flex items-center justify-center gap-2 transition-all cursor-pointer disabled:cursor-not-allowed disabled:opacity-75">
                     <i class="pi pi-receipt"></i>
                     <span>{{ 'FINANCE.CATEGORIES.EXPENSES' | translate }}</span>
                 </button>
@@ -24,11 +24,13 @@
         </div>
 
         <!-- Client & Case Selection -->
-        <div class="flex flex-col gap-4" [class.opacity-60]="caseId()">
-            <!-- Client Selection (Only if no caseId provided) -->
-            @if (!caseId()) {
-                <div class="flex flex-col gap-2">
-                    <label for="clientId" class="font-bold text-slate-700">{{ 'CASES.CLIENT' | translate }}</label>
+        <div class="flex flex-col gap-4">
+            <!-- Client Selection -->
+            <div class="flex flex-col gap-2">
+                <label for="clientId" class="font-bold text-slate-700">{{ 'CASES.CLIENT' | translate }}</label>
+                @if (caseId() || invoice()) {
+                    <input id="clientId" pInputText title="Client" placeholder="Client" aria-label="Client" [attr.aria-label]="'CASES.CLIENT' | translate" [value]="getSelectedClientName()" class="w-full bg-slate-100 border-slate-200 text-slate-500 font-medium cursor-not-allowed opacity-80" readonly />
+                } @else {
                     <p-select id="clientId" [options]="clients()" [ngModel]="selectedClientId()" (onChange)="onClientChange($event)"
                               [ngModelOptions]="{standalone: true}"
                               optionLabel="fullName" optionValue="id" [filter]="true" filterBy="fullName,nationalId,clientNumber"
@@ -52,16 +54,16 @@
                             </div>
                         </ng-template>
                     </p-select>
-                </div>
-            }
+                }
+            </div>
 
             <!-- Case Selection -->
             <div class="flex flex-col gap-2">
                 <label for="caseId" class="font-bold text-slate-700">{{ 'FINANCE.LINKED_CASE' | translate }}</label>
                 
-                @if (caseId()) {
+                @if (caseId() || invoice()) {
                     <div class="w-full">
-                        <input id="caseId" pInputText title="Linked Case" placeholder="Linked Case" aria-label="Linked Case" [attr.aria-label]="'FINANCE.LINKED_CASE' | translate" [value]="getSelectedCase()?.caseNumber + ' - ' + getSelectedCase()?.title" class="w-full bg-slate-200 border-slate-200 text-slate-500 font-medium cursor-not-allowed opacity-70 p-disabled" readonly />
+                        <input id="caseId" pInputText title="Linked Case" placeholder="Linked Case" aria-label="Linked Case" [attr.aria-label]="'FINANCE.LINKED_CASE' | translate" [value]="(getSelectedCase()?.caseNumber || invoice()?.caseNumber || '') + ' - ' + (getSelectedCase()?.title || invoice()?.caseTitle || '')" class="w-full bg-slate-100 border-slate-200 text-slate-500 font-medium cursor-not-allowed opacity-80" readonly />
                     </div>
                 } @else {
                     <p-select id="caseId" [options]="filteredCases()" formControlName="caseId" 

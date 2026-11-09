@@ -131,6 +131,14 @@ export class DocumentsPage implements OnInit {
     }
   }
 
+  async open(doc: DocumentDto) {
+    try {
+      await this.documentService.openDocument(doc.id);
+    } catch (error) {
+      this.messageService.add({ severity: 'error', summary: this.translate.instant('COMMON.ERROR'), detail: this.translate.instant('CASES.DOWNLOAD_ERROR') });
+    }
+  }
+
   async download(doc: DocumentDto) {
     try {
       await this.documentService.downloadDocument(doc.id, doc.originalFileName);
