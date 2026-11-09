@@ -10,9 +10,13 @@
     <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
             <div class="flex flex-col gap-2">
-                <label class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
+                <label for="documentSearchInput" class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
                 <div class="relative">
-                    <input pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event); dt.filterGlobal($event, 'contains')"
+                    <input id="documentSearchInput" pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event); dt.filterGlobal($event, 'contains')"
+                           title="Search"
+                           placeholder="Search"
+                           aria-label="Search"
+                           [attr.aria-label]="'COMMON.SEARCH' | translate"
                            [placeholder]="'COMMON.SEARCH' | translate" 
                            class="w-full rounded-lg border-slate-200"
                            [ngClass]="appState.currentLang() === 'ar' ? 'pl-9 pr-3' : 'pr-9 pl-3'" />
@@ -51,8 +55,12 @@
             </div>
 
             <div class="flex justify-end">
-                <button pButton icon="pi pi-filter-slash" class="p-button-outlined p-button-secondary h-[42px] px-4" 
-                        (click)="resetFilters()" [pTooltip]="'DOCUMENTS.RESET_FILTERS' | translate" [title]="'DOCUMENTS.RESET_FILTERS' | translate"></button>
+                <button type="button" pButton icon="pi pi-filter-slash" class="p-button-outlined p-button-secondary h-[42px] px-4" 
+                        title="Reset Filters"
+                        aria-label="Reset Filters"
+                        [title]="'DOCUMENTS.RESET_FILTERS' | translate"
+                        [attr.aria-label]="'DOCUMENTS.RESET_FILTERS' | translate"
+                        (click)="resetFilters()" [pTooltip]="'DOCUMENTS.RESET_FILTERS' | translate"></button>
             </div>
         </div>
     </div>
@@ -106,9 +114,9 @@
                     <td class="text-slate-500 text-sm">{{doc.uploadedAt | date:'yyyy/MM/dd HH:mm'}}</td>
                     <td>
                         <div class="flex gap-1">
-                            <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="secondary" [pTooltip]="'COMMON.VIEW' | translate" aria-label="View" (onClick)="open(doc)"></p-button>
-                            <p-button icon="pi pi-download" [rounded]="true" [text]="true" severity="info" (onClick)="download(doc)"></p-button>
-                            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" (onClick)="delete(doc)"></p-button>
+                            <p-button icon="pi pi-eye" [rounded]="true" [text]="true" severity="secondary" [pTooltip]="'COMMON.VIEW' | translate" title="View" aria-label="View" [title]="'COMMON.VIEW' | translate" [attr.aria-label]="'COMMON.VIEW' | translate" (onClick)="open(doc)"></p-button>
+                            <p-button icon="pi pi-download" [rounded]="true" [text]="true" severity="info" [pTooltip]="'COMMON.DOWNLOAD' | translate" title="Download" aria-label="Download" [title]="'COMMON.DOWNLOAD' | translate" [attr.aria-label]="'COMMON.DOWNLOAD' | translate" (onClick)="download(doc)"></p-button>
+                            <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger" [pTooltip]="'COMMON.DELETE' | translate" title="Delete" aria-label="Delete" [title]="'COMMON.DELETE' | translate" [attr.aria-label]="'COMMON.DELETE' | translate" (onClick)="delete(doc)"></p-button>
                         </div>
                     </td>
                 </tr>

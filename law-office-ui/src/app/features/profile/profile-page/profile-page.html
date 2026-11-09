@@ -114,9 +114,10 @@
 
                     @if (canManageSettings) {
                         <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 space-y-4">
-                            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">{{ 'SETTINGS.FIRM_NAME' | translate }}</h3>
+                            <label for="firmNameInput" class="text-sm font-bold text-slate-400 uppercase tracking-widest block">{{ 'SETTINGS.FIRM_NAME' | translate }}</label>
                             <div class="flex flex-col md:flex-row gap-3 md:items-center">
                                 <input pInputText type="text" id="firmNameInput" [(ngModel)]="firmName"
+                                       title="Firm Name" placeholder="Firm Name" aria-label="Firm Name"
                                        [title]="'SETTINGS.FIRM_NAME' | translate" [attr.aria-label]="'SETTINGS.FIRM_NAME' | translate"
                                        [placeholder]="'SETTINGS.FIRM_NAME' | translate"
                                        class="flex-1 px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm" />
@@ -140,6 +141,7 @@
                         </div>
                         @if (notificationService.unreadCount() > 0) {
                             <button pButton (click)="notificationService.markAllAsRead()" [label]="'NOTIFICATIONS.MARK_ALL_READ' | translate" 
+                                    title="Mark all as read" aria-label="Mark all as read" [attr.aria-label]="'NOTIFICATIONS.MARK_ALL_READ' | translate" [title]="'NOTIFICATIONS.MARK_ALL_READ' | translate"
                                     icon="pi pi-check-circle" class="p-button-outlined p-button-sm p-button-secondary rounded-xl font-bold"></button>
                         }
                     </div>
@@ -192,6 +194,8 @@
                                     @if (!n.isRead) {
                                         <button pButton icon="pi pi-check" [text]="true" [rounded]="true" severity="secondary" 
                                                 (click)="notificationService.markAsRead(n.id)" 
+                                                title="Mark as read" aria-label="Mark as read"
+                                                [attr.aria-label]="'NOTIFICATIONS.MARK_READ' | translate"
                                                 [title]="'NOTIFICATIONS.MARK_READ' | translate"></button>
                                     }
                                 </td>
