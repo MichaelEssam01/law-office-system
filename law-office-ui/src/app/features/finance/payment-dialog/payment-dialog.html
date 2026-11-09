@@ -123,7 +123,7 @@
                 <p-inputNumber id="amount" formControlName="amount" [min]="0"
                                [showButtons]="true" [minFractionDigits]="0" locale="en-US"
                                [class]="'w-full ' + (isFieldInvalid('amount') ? '!border-red-500 ng-invalid ng-dirty' : '')"
-                               [inputclass]="'w-full ' + (isFieldInvalid('amount') ? '!border-red-500 ng-invalid ng-dirty' : '')"></p-inputNumber>
+                               [inputStyleClass]="'w-full ' + (isFieldInvalid('amount') ? '!border-red-500 ng-invalid ng-dirty' : '')"></p-inputNumber>
                 @if (paymentForm.get('amount')?.hasError('overpayment')) {
                     <small class="text-red-500">{{ 'FINANCE.OVERPAYMENT_ERROR' | translate }}</small>
                 }

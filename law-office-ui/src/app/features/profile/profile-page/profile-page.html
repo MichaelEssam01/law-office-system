@@ -99,11 +99,11 @@
                             <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">{{ 'AUTH.RESET_PASSWORD_TITLE' | translate }}</h3>
                             <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()" class="space-y-4">
                                 <p-password formControlName="currentPassword" [toggleMask]="true" [feedback]="false" [placeholder]="'AUTH.PASSWORD' | translate"
-                                            class="w-full" inputclass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
+                                            class="w-full" inputStyleClass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
                                 <p-password formControlName="newPassword" [toggleMask]="true" [placeholder]="'AUTH.NEW_PASSWORD' | translate"
-                                            class="w-full" inputclass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
+                                            class="w-full" inputStyleClass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
                                 <p-password formControlName="confirmPassword" [toggleMask]="true" [feedback]="false" [placeholder]="'AUTH.CONFIRM_PASSWORD' | translate"
-                                            class="w-full" inputclass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
+                                            class="w-full" inputStyleClass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
                                 <button pButton type="submit" [disabled]="passwordForm.invalid || loading()" 
                                         class="w-full bg-slate-900 hover:bg-slate-800 text-white py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50 mt-2">
                                     {{ 'AUTH.RESET_PASSWORD_BUTTON' | translate }}

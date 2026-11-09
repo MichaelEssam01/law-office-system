@@ -220,8 +220,8 @@ export class ContractsPage implements OnInit {
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: this.translate.instant('CASES.DELETE_ACCEPT'),
       rejectLabel: this.translate.instant('CASES.DELETE_REJECT'),
-      acceptButtonclass: 'p-button-danger p-button-sm',
-      rejectButtonclass: 'p-button-text p-button-secondary p-button-sm',
+      acceptButtonStyleClass: 'p-button-danger p-button-sm',
+      rejectButtonStyleClass: 'p-button-text p-button-secondary p-button-sm',
       accept: async () => {
         try {
           await this.contractService.deleteContract(item.id);
