@@ -1,19 +1,25 @@
 <form [formGroup]="userForm" (ngSubmit)="save()" class="space-y-6 py-4">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="flex flex-col gap-2">
-            <label class="font-semibold text-slate-700">{{ 'USERS.NAME' | translate }}</label>
-            <input pInputText formControlName="fullName" [placeholder]="'USERS.NAME_PLACEHOLDER' | translate" class="rounded-xl border-slate-200" />
+            <label for="userFullName" class="font-semibold text-slate-700">{{ 'USERS.NAME' | translate }}</label>
+            <input id="userFullName" pInputText formControlName="fullName"
+                   title="Full Name" placeholder="Full Name" aria-label="Full Name"
+                   [title]="'USERS.NAME' | translate" [attr.aria-label]="'USERS.NAME' | translate"
+                   [placeholder]="'USERS.NAME_PLACEHOLDER' | translate" class="rounded-xl border-slate-200" />
         </div>
         <div class="flex flex-col gap-2">
-            <label class="font-semibold text-slate-700">{{ 'USERS.EMAIL' | translate }}</label>
-            <input pInputText formControlName="email" type="email" [placeholder]="'USERS.EMAIL_PLACEHOLDER' | translate" class="rounded-xl border-slate-200" />
+            <label for="userEmail" class="font-semibold text-slate-700">{{ 'USERS.EMAIL' | translate }}</label>
+            <input id="userEmail" pInputText formControlName="email" type="email"
+                   title="Email" placeholder="Email" aria-label="Email"
+                   [title]="'USERS.EMAIL' | translate" [attr.aria-label]="'USERS.EMAIL' | translate"
+                   [placeholder]="'USERS.EMAIL_PLACEHOLDER' | translate" class="rounded-xl border-slate-200" />
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="flex flex-col gap-2">
             <label class="font-semibold text-slate-700">{{ 'USERS.ROLE' | translate }}</label>
-            <p-select [options]="roles()" formControlName="role" [placeholder]="'USERS.SELECT_ROLE' | translate" styleClass="rounded-xl border-slate-200" optionLabel="label" optionValue="value">
+            <p-select [options]="roles()" formControlName="role" [placeholder]="'USERS.SELECT_ROLE' | translate" class="rounded-xl border-slate-200" optionLabel="label" optionValue="value">
                 <ng-template pTemplate="selectedItem" let-selectedOption>
                     {{ 'USERS.ROLES.' + selectedOption?.value?.toUpperCase() | translate }}
                 </ng-template>
@@ -27,12 +33,13 @@
                 <label class="font-semibold text-slate-700">{{ (userId ? 'USERS.NEW_PASSWORD' : 'USERS.PASSWORD') | translate }}</label>
                 @if (userId) {
                     <i class="pi pi-info-circle text-slate-400 hover:text-indigo-600 cursor-pointer text-sm transition-colors" 
+                       title="Leave blank to keep current password"
                        [title]="'USERS.LEAVE_BLANK_HINT' | translate"></i>
                 }
             </div>
             <p-password formControlName="password" [toggleMask]="true" [feedback]="!userId" 
                         [placeholder]="(userId ? 'USERS.NEW_PASSWORD' : 'USERS.PASSWORD') | translate"
-                        styleClass="w-full" inputStyleClass="w-full rounded-xl border-slate-200"></p-password>
+                        class="w-full" inputStyleClass="w-full rounded-xl border-slate-200"></p-password>
         </div>
     </div>
 
@@ -65,6 +72,6 @@
     <div class="flex justify-end gap-3 pt-4 border-t">
         <p-button [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" severity="secondary" [text]="true" (onClick)="cancel()"></p-button>
         <p-button [label]="'COMMON.SAVE' | translate" icon="pi pi-check" [loading]="loading()" type="submit" 
-                  styleClass="bg-blue-600 border-none rounded-xl px-8 shadow-lg shadow-blue-600/20"></p-button>
+                  class="bg-blue-600 border-none rounded-xl px-8 shadow-lg shadow-blue-600/20"></p-button>
     </div>
 </form>

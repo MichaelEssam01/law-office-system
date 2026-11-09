@@ -5,7 +5,7 @@
           [style]="{ width: '920px', maxWidth: '96vw' }" 
           [draggable]="false" 
           [resizable]="false"
-          styleClass="rtl-dialog">
+          class="rtl-dialog">
     
     <form [formGroup]="sessionForm" class="flex flex-col gap-4 mt-2" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
         
@@ -35,7 +35,7 @@
                 } @else {
                     <p-select id="caseId" [options]="cases()" formControlName="caseId" 
                               optionLabel="title" optionValue="id" [filter]="true" filterBy="caseNumber,courtCaseNumber,title"
-                              [placeholder]="'SESSIONS.SELECT_CASE' | translate" styleClass="w-full" appendTo="body"
+                              [placeholder]="'SESSIONS.SELECT_CASE' | translate" class="w-full" appendTo="body"
                               [class.p-invalid]="sessionForm.get('caseId')?.touched && sessionForm.get('caseId')?.invalid">
                         <ng-template pTemplate="selectedItem">
                             @if (getSelectedCase(); as selected) {
@@ -101,7 +101,7 @@
                     {{ 'SESSIONS.DATE' | translate }} <span class="text-red-500">*</span>
                 </label>
                 <p-datepicker id="scheduledDate" formControlName="scheduledDate" [showIcon]="true"
-                             dateFormat="dd/mm/yy" appendTo="body" styleClass="w-full"
+                             dateFormat="dd/mm/yy" appendTo="body" class="w-full"
                              [class.p-invalid]="sessionForm.get('scheduledDate')?.touched && sessionForm.get('scheduledDate')?.invalid"></p-datepicker>
                 @if (sessionForm.get('scheduledDate')?.touched && sessionForm.get('scheduledDate')?.invalid) {
                     <small class="text-red-500 text-xs">{{ 'SESSIONS.DATE_TIME_REQUIRED' | translate }}</small>
@@ -125,7 +125,7 @@
                     {{ 'SESSIONS.STATUS' | translate }} <span class="text-red-500">*</span>
                 </label>
                 <p-select id="status" [options]="statuses()" formControlName="status" 
-                          optionValue="value" styleClass="w-full" appendTo="body">
+                          optionValue="value" class="w-full" appendTo="body">
                     <ng-template pTemplate="selectedItem" let-selectedOption>
                         {{ selectedOption?.labelKey | translate }}
                     </ng-template>
@@ -159,7 +159,7 @@
                     </label>
                     <p-select id="assignedLawyerId" [options]="lawyers()" formControlName="assignedLawyerId" 
                               optionLabel="fullName" optionValue="id" [showClear]="true" [filter]="true"
-                              [placeholder]="'SESSIONS.SELECT_LAWYER' | translate" styleClass="w-full" appendTo="body"></p-select>
+                              [placeholder]="'SESSIONS.SELECT_LAWYER' | translate" class="w-full" appendTo="body"></p-select>
                 </div>
             </div>
         </div>
@@ -195,7 +195,7 @@
                     </label>
                     <p-select id="previousSessionLawyerId" [options]="lawyers()" formControlName="previousSessionLawyerId" 
                               optionLabel="fullName" optionValue="id" [showClear]="true" [filter]="true"
-                              [placeholder]="'SESSIONS.SELECT_LAWYER' | translate" styleClass="w-full" appendTo="body"></p-select>
+                              [placeholder]="'SESSIONS.SELECT_LAWYER' | translate" class="w-full" appendTo="body"></p-select>
                 </div>
             </div>
         </div>
@@ -238,7 +238,7 @@
                         </label>
                         <p-select id="decisionKey" [options]="decisionKeys()" formControlName="decisionKey" 
                                   optionLabel="label" optionValue="value" [showClear]="true" [filter]="true"
-                                  [placeholder]="'SESSIONS.SELECT_DECISION' | translate" styleClass="w-full" appendTo="body"></p-select>
+                                  [placeholder]="'SESSIONS.SELECT_DECISION' | translate" class="w-full" appendTo="body"></p-select>
                     </div>
 
                     <!-- Decision Text (7 cols) -->

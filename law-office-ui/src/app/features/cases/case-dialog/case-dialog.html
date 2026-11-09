@@ -63,7 +63,7 @@
                                         <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
                                     }
                                 </label>
-                                <p-select id="status" [options]="statuses()" optionValue="value" formControlName="status" [placeholder]="'CASES.SELECT_STATUS' | translate" [styleClass]="'w-full ' + (isFieldInvalid('status') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                <p-select id="status" [options]="statuses()" optionValue="value" formControlName="status" [placeholder]="'CASES.SELECT_STATUS' | translate" [class]="'w-full ' + (isFieldInvalid('status') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
                                     <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                     <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                 </p-select>
@@ -73,7 +73,7 @@
                                 <div class="flex flex-col gap-2 animate-fadeIn">
                                     <label for="archivingType" class="font-semibold text-slate-700">{{ 'CASES.ARCHIVING_TYPE' | translate }}</label>
                                     <p-select id="archivingType" [options]="archivingTypes()" optionValue="value" formControlName="archivingType" 
-                                              [placeholder]="'CASES.ARCHIVING_TYPE' | translate" styleClass="w-full" appendTo="body">
+                                              [placeholder]="'CASES.ARCHIVING_TYPE' | translate" class="w-full" appendTo="body">
                                         <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                         <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                     </p-select>
@@ -90,7 +90,7 @@
                                         <i class="pi" [class]="isInProgressStatus() ? 'pi-list-check text-sky-600' : (isPendingStatus() ? 'pi-clock text-amber-600' : 'pi-pause-circle text-rose-600')"></i>
                                         <span>{{ 'CASES.REQUIRED_ACTIONS' | translate }}</span>
                                     </label>
-                                    <p-multiselect id="selectedRequiredActions" [options]="requiredActionOptions()" optionValue="value" formControlName="selectedRequiredActions" (onChange)="onRequiredActionsChange()" [placeholder]="'CASES.SELECT_REQUIRED_ACTIONS' | translate" [showToggleAll]="false" [filter]="false" display="chip" styleClass="w-full" appendTo="body">
+                                    <p-multiselect id="selectedRequiredActions" [options]="requiredActionOptions()" optionValue="value" formControlName="selectedRequiredActions" (onChange)="onRequiredActionsChange()" [placeholder]="'CASES.SELECT_REQUIRED_ACTIONS' | translate" [showToggleAll]="false" [filter]="false" display="chip" class="w-full" appendTo="body">
                                         <ng-template pTemplate="selectedItems" let-items>
                                             @if (items && items.length > 0) {
                                                 <div class="flex flex-wrap gap-1.5">
@@ -148,7 +148,7 @@
                                     <div class="pt-3 border-t border-amber-200 flex flex-col gap-3">
                                         <div class="flex flex-col gap-1">
                                             <label for="selectedSuspensionReasons" class="font-bold text-amber-900 text-xs">{{ 'CASES.SUSPENSION_REASON' | translate }}</label>
-                                            <p-multiselect id="selectedSuspensionReasons" [options]="suspensionReasons()" optionValue="value" formControlName="selectedSuspensionReasons" [placeholder]="'CASES.SELECT_SUSPENSION_REASONS' | translate" [showToggleAll]="false" [filter]="false" display="chip" styleClass="w-full" appendTo="body">
+                                            <p-multiselect id="selectedSuspensionReasons" [options]="suspensionReasons()" optionValue="value" formControlName="selectedSuspensionReasons" [placeholder]="'CASES.SELECT_SUSPENSION_REASONS' | translate" [showToggleAll]="false" [filter]="false" display="chip" class="w-full" appendTo="body">
                                                 <ng-template pTemplate="selectedItems" let-items>
                                                     @if (items && items.length > 0) {
                                                         <div class="flex flex-wrap gap-1.5">
@@ -196,7 +196,7 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                             <div class="flex flex-col gap-2">
                                 <label for="agreementDate" class="font-semibold text-slate-700">{{ 'CASES.AGREEMENT_DATE' | translate }}</label>
-                                <p-datepicker id="agreementDate" formControlName="agreementDate" [showIcon]="true" dateFormat="dd/mm/yy" [maxDate]="today" styleClass="w-full" appendTo="body"></p-datepicker>
+                                <p-datepicker id="agreementDate" formControlName="agreementDate" [showIcon]="true" dateFormat="dd/mm/yy" [maxDate]="today" class="w-full" appendTo="body"></p-datepicker>
                             </div>
 
                             <div class="flex flex-col gap-2">
@@ -207,17 +207,17 @@
                                         <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
                                     }
                                 </label>
-                                <p-datepicker id="startDate" formControlName="startDate" [showIcon]="true" dateFormat="dd/mm/yy" [styleClass]="'w-full ' + (isFieldInvalid('startDate') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body"></p-datepicker>
+                                <p-datepicker id="startDate" formControlName="startDate" [showIcon]="true" dateFormat="dd/mm/yy" [class]="'w-full ' + (isFieldInvalid('startDate') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body"></p-datepicker>
                             </div>
 
                             <div class="flex flex-col gap-2">
                                 <label for="courtFilingDate" class="font-semibold text-slate-700">{{ 'CASES.COURT_FILING_DATE' | translate }}</label>
-                                <p-datepicker id="courtFilingDate" formControlName="courtFilingDate" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full" appendTo="body"></p-datepicker>
+                                <p-datepicker id="courtFilingDate" formControlName="courtFilingDate" [showIcon]="true" dateFormat="dd/mm/yy" class="w-full" appendTo="body"></p-datepicker>
                             </div>
 
                             <div class="flex flex-col gap-2">
                                 <label for="closedDate" class="font-semibold text-slate-700">{{ 'CASES.CLOSED_DATE' | translate }}</label>
-                                <p-datepicker id="closedDate" formControlName="closedDate" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full" appendTo="body"></p-datepicker>
+                                <p-datepicker id="closedDate" formControlName="closedDate" [showIcon]="true" dateFormat="dd/mm/yy" class="w-full" appendTo="body"></p-datepicker>
                             </div>
                         </div>
 
@@ -231,7 +231,7 @@
                                         <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
                                     }
                                 </label>
-                                <p-select id="caseType" [options]="caseTypes()" optionValue="value" formControlName="caseType" [placeholder]="'CASES.CASE_TYPE' | translate" [showClear]="true" [styleClass]="'w-full ' + (isFieldInvalid('caseType') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                <p-select id="caseType" [options]="caseTypes()" optionValue="value" formControlName="caseType" [placeholder]="'CASES.CASE_TYPE' | translate" [showClear]="true" [class]="'w-full ' + (isFieldInvalid('caseType') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
                                     <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                     <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                 </p-select>
@@ -241,7 +241,7 @@
                                 <div class="flex flex-col gap-2 animate-fadeIn">
                                     <label for="familyCaseSubtype" class="font-semibold text-slate-700">{{ 'CASES.FAMILY_SUBTYPE' | translate }}</label>
                                     <p-select id="familyCaseSubtype" [options]="familySubtypes()" optionValue="value" formControlName="familyCaseSubtype" 
-                                              [placeholder]="'CASES.FAMILY_SUBTYPE' | translate" [showClear]="true" styleClass="w-full" appendTo="body">
+                                              [placeholder]="'CASES.FAMILY_SUBTYPE' | translate" [showClear]="true" class="w-full" appendTo="body">
                                         <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                         <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                     </p-select>
@@ -259,7 +259,7 @@
                                         <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
                                     }
                                 </label>
-                                <p-select id="clientId" [options]="clients()" optionLabel="fullName" optionValue="id" formControlName="clientId" [placeholder]="'CASES.SELECT_CLIENT' | translate" [filter]="true" filterBy="fullName,nationalId,clientNumber" [styleClass]="'w-full ' + (isFieldInvalid('clientId') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                <p-select id="clientId" [options]="clients()" optionLabel="fullName" optionValue="id" formControlName="clientId" [placeholder]="'CASES.SELECT_CLIENT' | translate" [filter]="true" filterBy="fullName,nationalId,clientNumber" [class]="'w-full ' + (isFieldInvalid('clientId') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
                                     <ng-template pTemplate="selectedItem" let-selected>
                                         @if (selected) {
                                             <div class="flex items-center gap-2">
@@ -287,7 +287,7 @@
                                 </label>
                                 <p-select id="assignedLawyerId" [options]="lawyers()" optionLabel="fullName" optionValue="id" 
                                           formControlName="assignedLawyerId" [placeholder]="'CASES.SELECT_LAWYER' | translate" 
-                                          [showClear]="true" styleClass="w-full" appendTo="body"></p-select>
+                                          [showClear]="true" class="w-full" appendTo="body"></p-select>
                             </div>
                         </div>
                     </div>
@@ -307,7 +307,7 @@
                             <div class="flex flex-col gap-2">
                                 <label for="litigationDegree" class="font-semibold text-slate-700">{{ 'CASES.LITIGATION_DEGREE' | translate }}</label>
                                 <p-select id="litigationDegree" [options]="litigationDegrees()" optionValue="value" formControlName="litigationDegree" 
-                                          [placeholder]="'CASES.LITIGATION_DEGREE' | translate" [showClear]="true" styleClass="w-full" appendTo="body">
+                                          [placeholder]="'CASES.LITIGATION_DEGREE' | translate" [showClear]="true" class="w-full" appendTo="body">
                                     <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                     <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                 </p-select>
@@ -319,7 +319,7 @@
                             <div class="flex flex-col gap-2">
                                 <label for="yearType" class="font-semibold text-slate-700">{{ 'CASES.YEAR_TYPE' | translate }}</label>
                                 <p-select id="yearType" [options]="yearTypes()" optionValue="value" formControlName="yearType" 
-                                          styleClass="w-full" appendTo="body">
+                                          class="w-full" appendTo="body">
                                     <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                     <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                 </p-select>
@@ -333,9 +333,9 @@
                                     }
                                 </label>
                                 @if (isJudicialYear()) {
-                                    <p-inputNumber id="year" formControlName="year" [max]="999" [min]="1" [useGrouping]="false" styleClass="w-full"></p-inputNumber>
+                                    <p-inputNumber id="year" formControlName="year" [max]="999" [min]="1" [useGrouping]="false" class="w-full"></p-inputNumber>
                                 } @else {
-                                    <p-select id="year" [options]="gregorianYears" formControlName="year" [filter]="true" styleClass="w-full" appendTo="body"></p-select>
+                                    <p-select id="year" [options]="gregorianYears" formControlName="year" [filter]="true" class="w-full" appendTo="body"></p-select>
                                 }
                             </div>
                         </div>
@@ -378,7 +378,7 @@
                                                         <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
                                                     }
                                                 </label>
-                                                <p-select [id]="'clientPartySelect_' + $index" [options]="clients()" optionLabel="fullName" optionValue="id" formControlName="clientId" (onChange)="onClientSelectForParty($event, $index)" [filter]="true" [placeholder]="'CASES.SELECT_CLIENT' | translate" [styleClass]="'w-full ' + (isPartyFieldInvalid(clientParty, 'clientId') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body"></p-select>
+                                                <p-select [id]="'clientPartySelect_' + $index" [options]="clients()" optionLabel="fullName" optionValue="id" formControlName="clientId" (onChange)="onClientSelectForParty($event, $index)" [filter]="true" [placeholder]="'CASES.SELECT_CLIENT' | translate" [class]="'w-full ' + (isPartyFieldInvalid(clientParty, 'clientId') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body"></p-select>
                                             </div>
 
                                             <div class="flex flex-col gap-1">
@@ -389,7 +389,7 @@
                                                         <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
                                                     }
                                                 </label>
-                                                <p-select [id]="'clientPartyCapacity_' + $index" [options]="capacities()" optionValue="value" formControlName="capacity" [styleClass]="'w-full ' + (isPartyFieldInvalid(clientParty, 'capacity') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                                <p-select [id]="'clientPartyCapacity_' + $index" [options]="capacities()" optionValue="value" formControlName="capacity" [class]="'w-full ' + (isPartyFieldInvalid(clientParty, 'capacity') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
                                                     <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                                     <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                                 </p-select>
@@ -403,7 +403,7 @@
                                                         <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
                                                     }
                                                 </label>
-                                                <p-select [id]="'clientPartyDispute_' + $index" [options]="disputeNatures()" optionValue="value" formControlName="disputeNature" [styleClass]="'w-full ' + (isPartyFieldInvalid(clientParty, 'disputeNature') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                                <p-select [id]="'clientPartyDispute_' + $index" [options]="disputeNatures()" optionValue="value" formControlName="disputeNature" [class]="'w-full ' + (isPartyFieldInvalid(clientParty, 'disputeNature') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
                                                     <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                                     <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                                 </p-select>
@@ -505,7 +505,7 @@
                                                         <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
                                                     }
                                                 </label>
-                                                <p-select [id]="'oppCapacity_' + $index" [options]="capacities()" optionValue="value" formControlName="capacity" [styleClass]="'w-full ' + (isPartyFieldInvalid(oppParty, 'capacity') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                                <p-select [id]="'oppCapacity_' + $index" [options]="capacities()" optionValue="value" formControlName="capacity" [class]="'w-full ' + (isPartyFieldInvalid(oppParty, 'capacity') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
                                                     <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                                     <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                                 </p-select>
@@ -519,7 +519,7 @@
                                                         <i class="pi pi-exclamation-circle text-red-500 text-xs ms-1 cursor-help" [pTooltip]="'COMMON.FIELD_REQUIRED' | translate"></i>
                                                     }
                                                 </label>
-                                                <p-select [id]="'oppDispute_' + $index" [options]="disputeNatures()" optionValue="value" formControlName="disputeNature" [styleClass]="'w-full ' + (isPartyFieldInvalid(oppParty, 'disputeNature') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
+                                                <p-select [id]="'oppDispute_' + $index" [options]="disputeNatures()" optionValue="value" formControlName="disputeNature" [class]="'w-full ' + (isPartyFieldInvalid(oppParty, 'disputeNature') ? '!border-red-500 ng-invalid ng-dirty' : '')" appendTo="body">
                                                     <ng-template pTemplate="selectedItem" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                                     <ng-template pTemplate="item" let-opt>{{ opt?.labelKey | translate }}</ng-template>
                                                 </p-select>
@@ -559,7 +559,7 @@
                                 </div>
                                 <div class="flex flex-col gap-1">
                                     <label for="fileYear" class="text-xs font-semibold text-slate-600">{{ 'CASES.FILE_YEAR' | translate }}</label>
-                                    <p-inputNumber id="fileYear" formControlName="fileYear" [useGrouping]="false" styleClass="w-full"></p-inputNumber>
+                                    <p-inputNumber id="fileYear" formControlName="fileYear" [useGrouping]="false" class="w-full"></p-inputNumber>
                                 </div>
                                 <div class="flex flex-col gap-1">
                                     <label for="fileColor" class="text-xs font-semibold text-slate-600">{{ 'CASES.FILE_COLOR' | translate }}</label>
@@ -589,7 +589,7 @@
 
                                 <div class="flex flex-col gap-2">
                                     <label for="judgmentDate" class="font-semibold text-slate-700">{{ 'CASES.JUDGMENT_DATE' | translate }}</label>
-                                    <p-datepicker id="judgmentDate" formControlName="judgmentDate" [showIcon]="true" dateFormat="dd/mm/yy" styleClass="w-full" appendTo="body"></p-datepicker>
+                                    <p-datepicker id="judgmentDate" formControlName="judgmentDate" [showIcon]="true" dateFormat="dd/mm/yy" class="w-full" appendTo="body"></p-datepicker>
                                 </div>
                             </div>
                         </div>
@@ -617,7 +617,7 @@
                         [text]="true"
                         severity="secondary"
                         (onClick)="prevTab()"
-                        styleClass="!py-2 !px-3 !rounded-lg font-medium text-xs"
+                        class="!py-2 !px-3 !rounded-lg font-medium text-xs"
                     ></p-button>
                 }
                 @if (activeTab() < 4) {
@@ -628,7 +628,7 @@
                         [outlined]="true"
                         severity="info"
                         (onClick)="nextTab()"
-                        styleClass="!py-2 !px-3 !rounded-lg font-medium text-xs !text-sky-600 !border-sky-300 !bg-sky-50/70 hover:!bg-sky-100"
+                        class="!py-2 !px-3 !rounded-lg font-medium text-xs !text-sky-600 !border-sky-300 !bg-sky-50/70 hover:!bg-sky-100"
                     ></p-button>
                 }
             </div>

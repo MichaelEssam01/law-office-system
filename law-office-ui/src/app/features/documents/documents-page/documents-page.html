@@ -29,7 +29,7 @@
                 <label class="text-xs font-bold text-slate-500">{{ 'COMMON.CATEGORY' | translate }}</label>
                 <p-select [options]="categoryOptions" [ngModel]="selectedCategory()" (ngModelChange)="selectedCategory.set($event); applyFilters()"
                           optionValue="value" [placeholder]="'DOCUMENTS.ALL_CATEGORIES' | translate" 
-                          [showClear]="true" styleClass="w-full rounded-lg">
+                          [showClear]="true" class="w-full rounded-lg">
                     <ng-template pTemplate="selectedItem" let-selectedOption>
                         {{ getCategoryLabel(selectedOption.value) }}
                     </ng-template>
@@ -44,7 +44,7 @@
                 <p-select [options]="cases()" [ngModel]="selectedCase()" (ngModelChange)="selectedCase.set($event); applyFilters()"
                           optionLabel="title" optionValue="id" [placeholder]="'DOCUMENTS.ALL_CASES' | translate" 
                           [showClear]="true" [filter]="true" filterBy="caseNumber,title"
-                          styleClass="w-full rounded-lg">
+                          class="w-full rounded-lg">
                     <ng-template pTemplate="item" let-case>
                         <div class="flex flex-col">
                             <span class="font-mono text-blue-600 text-xs font-bold">{{ case.caseNumber }}</span>
@@ -71,7 +71,7 @@
                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                  [globalFilterFields]="['originalFileName', 'caseTitle', 'description']"
                  (onFilter)="cdr.detectChanges()"
-                 styleClass="p-datatable-sm" [tableStyle]="{'min-width': '60rem'}">
+                 class="p-datatable-sm" [tableStyle]="{'min-width': '60rem'}">
 
             <ng-template pTemplate="header">
                 <tr>

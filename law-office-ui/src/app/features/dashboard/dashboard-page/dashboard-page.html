@@ -83,7 +83,7 @@
                     <p-select [options]="viewModeOptions" [ngModel]="selectedViewMode()" 
                               (ngModelChange)="onViewModeChange($event)" 
                               optionLabel="label" optionValue="value"
-                              styleClass="rounded-xl border-slate-200 text-xs w-48"></p-select>
+                              class="rounded-xl border-slate-200 text-xs w-48"></p-select>
                 </div>
                 <div class="h-80">
                     <p-chart type="bar" [data]="financeChartData" [options]="chartOptions"></p-chart>

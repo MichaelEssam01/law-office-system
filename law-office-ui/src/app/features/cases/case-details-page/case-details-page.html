@@ -102,7 +102,7 @@
                                                 [attr.aria-label]="'COMMON.ADD' | translate"
                                                 icon="pi pi-plus" class="p-button-text p-button-sm" (click)="openNewSession()"></button>
                                     </div>
-                                    <p-table [value]="sessions()" [loading]="sessionsLoading()" styleClass="p-datatable-sm">
+                                    <p-table [value]="sessions()" [loading]="sessionsLoading()" class="p-datatable-sm">
                                         <ng-template pTemplate="header">
                                             <tr class="bg-slate-50 text-slate-700">
                                                 <th class="p-3">{{ 'SESSIONS.SESSION_TITLE' | translate }}</th>
@@ -117,7 +117,7 @@
                                                 <td class="p-3 font-medium text-slate-800">{{ s.title }}</td>
                                                 <td class="p-3 text-center">{{ s.scheduledAt | date:'dd/MM/yyyy' }}</td>
                                                 <td class="p-3 text-sm">{{ s.courtName }}</td>
-                                                <td class="p-3"><p-tag [value]="getSessionStatusLabel(s.status)" [severity]="getSessionStatusSeverity(s.status)" styleClass="text-xs"></p-tag></td>
+                                                <td class="p-3"><p-tag [value]="getSessionStatusLabel(s.status)" [severity]="getSessionStatusSeverity(s.status)" class="text-xs"></p-tag></td>
                                                 <td class="p-3 text-center">
                                                     <button pButton icon="pi pi-pencil" 
                                                             title="Edit"
@@ -151,7 +151,7 @@
                                                 icon="pi pi-upload" class="p-button-text p-button-sm" (click)="openUploadDialog()"></button>
                                     </div>
                                     
-                                    <p-table [value]="documents()" [loading]="docsLoading()" styleClass="p-datatable-sm" [rowHover]="true">
+                                    <p-table [value]="documents()" [loading]="docsLoading()" class="p-datatable-sm" [rowHover]="true">
                                         <ng-template pTemplate="header">
                                             <tr class="bg-slate-50 text-slate-700">
                                                 <th class="p-3">{{ 'COMMON.FILE_NAME' | translate }}</th>
@@ -240,7 +240,7 @@
                                                     [attr.aria-label]="'COMMON.ADD' | translate"
                                                     icon="pi pi-plus" class="p-button-text p-button-sm" (click)="openNewInvoice()"></button>
                                         </div>
-                                        <p-table [value]="caseInvoices()" [loading]="financeLoading()" styleClass="p-datatable-sm">
+                                        <p-table [value]="caseInvoices()" [loading]="financeLoading()" class="p-datatable-sm">
                                             <ng-template pTemplate="header">
                                                 <tr class="bg-slate-50 text-slate-700">
                                                     <th class="p-3">{{ 'FINANCE.INVOICE_NUMBER' | translate }}</th>
@@ -260,7 +260,7 @@
                                                         {{ (inv.remainingAmount ?? (inv.amount - inv.paidAmount)) | number }}
                                                     </td>
                                                     <td class="p-3 text-center">
-                                                        <p-tag [value]="getInvoiceStatusLabel(inv.status)" [severity]="getInvoiceStatusSeverity(inv.status)" styleClass="text-[10px]"></p-tag>
+                                                        <p-tag [value]="getInvoiceStatusLabel(inv.status)" [severity]="getInvoiceStatusSeverity(inv.status)" class="text-[10px]"></p-tag>
                                                     </td>
                                                     <td class="p-3 text-center">
                                                         <button pButton icon="pi pi-pencil" 
@@ -286,7 +286,7 @@
                                                     [attr.aria-label]="'COMMON.ADD' | translate"
                                                     icon="pi pi-money-bill" class="p-button-text p-button-success p-button-sm" (click)="openNewPayment()"></button>
                                         </div>
-                                        <p-table [value]="casePayments()" [loading]="financeLoading()" styleClass="p-datatable-sm">
+                                        <p-table [value]="casePayments()" [loading]="financeLoading()" class="p-datatable-sm">
                                             <ng-template pTemplate="header">
                                                 <tr class="bg-slate-50 text-slate-700">
                                                     <th class="p-3">{{ 'FINANCE.PAYMENT_DATE' | translate }}</th>
@@ -317,7 +317,7 @@
             <!-- Sidebar Column -->
             <div class="flex flex-col gap-6">
                 <!-- Case Subject & Litigation Details -->
-                <p-card [header]="'CASES.CASE_DETAILS_TITLE' | translate" styleClass="shadow-sm border border-slate-200 rounded-xl">
+                <p-card [header]="'CASES.CASE_DETAILS_TITLE' | translate" class="shadow-sm border border-slate-200 rounded-xl">
                     <div class="text-slate-800 font-semibold mb-2">{{ c.title }}</div>
                     @if (c.subject && c.subject !== c.title) {
                         <div class="text-slate-600 text-sm mb-3">{{ c.subject }}</div>
@@ -543,7 +543,7 @@
 
                 <!-- Case Parties Card -->
                 @if (c.parties && c.parties.length > 0) {
-                    <p-card [header]="'CASES.PARTIES_TAB' | translate" styleClass="shadow-sm border border-slate-200 rounded-xl">
+                    <p-card [header]="'CASES.PARTIES_TAB' | translate" class="shadow-sm border border-slate-200 rounded-xl">
                         <div class="flex flex-col gap-3">
                             @for (p of c.parties; track p.id) {
                                 <div class="p-3 rounded-lg border text-sm flex flex-col gap-1.5" 

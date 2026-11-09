@@ -17,7 +17,7 @@
             <div class="flex flex-col gap-2">
                 <label for="sessionsSearchInput" class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
                 <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
-                    <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+                    <p-inputIcon class="pi pi-search"></p-inputIcon>
                     <input id="sessionsSearchInput" pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event); dt.filterGlobal($event, 'contains')" title="Search" placeholder="Search" aria-label="Search" [placeholder]="'SESSIONS.SEARCH_PLACEHOLDER' | translate" [attr.aria-label]="'SESSIONS.SEARCH_PLACEHOLDER' | translate" class="w-full rounded-lg border-slate-200" />
                 </p-iconField>
             </div>
@@ -26,7 +26,7 @@
                 <label class="text-xs font-bold text-slate-500">{{ 'SESSIONS.STATUS' | translate }}</label>
                 <p-select [options]="statuses()" [ngModel]="selectedStatus()" (ngModelChange)="selectedStatus.set($event); onFilterChange()"
                           optionValue="value" [placeholder]="'SESSIONS.ALL_STATUSES' | translate" 
-                          [showClear]="true" styleClass="w-full rounded-lg">
+                          [showClear]="true" class="w-full rounded-lg">
                     <ng-template pTemplate="selectedItem" let-selectedOption>
                         {{ selectedOption?.labelKey | translate }}
                     </ng-template>
@@ -41,7 +41,7 @@
                 <p-select [options]="cases()" [ngModel]="selectedCase()" (ngModelChange)="selectedCase.set($event); onFilterChange()"
                           optionLabel="title" optionValue="id" [placeholder]="'SESSIONS.ALL_CASES' | translate" 
                           [showClear]="true" [filter]="true" filterBy="caseNumber,title"
-                          styleClass="w-full rounded-lg">
+                          class="w-full rounded-lg">
                     <ng-template pTemplate="item" let-case>
                         <div class="flex flex-col">
                             <span class="font-mono text-blue-600 text-xs font-bold">{{ case.caseNumber }}</span>
@@ -62,7 +62,7 @@
         <p-table #dt [value]="sessions()" [loading]="loading()" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5, 10, 30, 50]"
                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                  [globalFilterFields]="['title', 'caseNumber', 'courtName']"
-                 styleClass="p-datatable-sm" [rowHover]="true">
+                 class="p-datatable-sm" [rowHover]="true">
             
             <ng-template pTemplate="header">
                 <tr class="bg-slate-50 text-slate-700">
@@ -112,7 +112,7 @@
                         </div>
                     </td>
                     <td class="p-4">
-                        <p-tag [value]="getStatusLabel(session.status)" [severity]="getStatusSeverity(session.status)" styleClass="text-xs"></p-tag>
+                        <p-tag [value]="getStatusLabel(session.status)" [severity]="getStatusSeverity(session.status)" class="text-xs"></p-tag>
                     </td>
                     <td class="p-4 text-center">
                         <div class="flex justify-center gap-1.5">

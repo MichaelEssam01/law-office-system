@@ -5,7 +5,7 @@
           [style]="{ width: '500px' }" 
           [draggable]="false" 
           [resizable]="false"
-          styleClass="rtl-dialog">
+          class="rtl-dialog">
     
     <div class="flex flex-col gap-6 mt-2" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
         <!-- File Picker -->
@@ -19,14 +19,17 @@
                          [invalidFileSizeMessageSummary]="'DOCUMENTS.FILE_TOO_LARGE' | translate"
                          (onSelect)="onFileSelect($event)"
                          (onRemove)="onFileRemove()"
-                         styleClass="w-full"></p-fileUpload>
+                         class="w-full"></p-fileUpload>
             @if (selectedFile) {
                 <div class="mt-2 p-3 bg-blue-50 rounded-lg flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <i class="pi pi-file text-blue-500"></i>
                         <span class="text-sm font-medium truncate max-w-[200px]">{{ selectedFile.name }}</span>
                     </div>
-                    <button pButton icon="pi pi-times" class="p-button-text p-button-danger p-button-sm" (click)="onFileRemove()"></button>
+                    <button type="button" pButton icon="pi pi-times" class="p-button-text p-button-danger p-button-sm"
+                            title="Remove file" aria-label="Remove file"
+                            [title]="'COMMON.DELETE' | translate" [attr.aria-label]="'COMMON.DELETE' | translate"
+                            (click)="onFileRemove()"></button>
                 </div>
             }
             <small class="text-slate-400">{{ 'DOCUMENTS.ALLOWED_TYPES' | translate }}</small>
@@ -37,21 +40,29 @@
             <div class="flex flex-col gap-2">
                 <label for="category" class="font-bold text-slate-700">{{ 'COMMON.CATEGORY' | translate }}</label>
                 <p-select id="category" [options]="categories" formControlName="category" 
-                          optionLabel="label" optionValue="value" styleClass="w-full"></p-select>
+                          optionLabel="label" optionValue="value" class="w-full"></p-select>
             </div>
 
             <!-- Description -->
             <div class="flex flex-col gap-2">
                 <label for="description" class="font-bold text-slate-700">{{ 'COMMON.DESCRIPTION' | translate }}</label>
-                <textarea pTextarea id="description" formControlName="description" [rows]="3" [placeholder]="'DOCUMENTS.DESCRIPTION_PLACEHOLDER' | translate"></textarea>
+                <textarea pTextarea id="description" formControlName="description" [rows]="3"
+                          title="Description" placeholder="Description" aria-label="Description"
+                          [title]="'COMMON.DESCRIPTION' | translate" [attr.aria-label]="'COMMON.DESCRIPTION' | translate"
+                          [placeholder]="'DOCUMENTS.DESCRIPTION_PLACEHOLDER' | translate"></textarea>
             </div>
         </form>
     </div>
 
     <ng-template pTemplate="footer">
         <div class="flex justify-end gap-2" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
-            <button pButton [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="close()"></button>
-            <button pButton [label]="'CASES.UPLOAD_FILE' | translate" icon="pi pi-upload" 
+            <button type="button" pButton [label]="'COMMON.CANCEL' | translate" icon="pi pi-times"
+                    title="Cancel" aria-label="Cancel"
+                    [title]="'COMMON.CANCEL' | translate" [attr.aria-label]="'COMMON.CANCEL' | translate"
+                    class="p-button-text p-button-secondary" (click)="close()"></button>
+            <button type="button" pButton [label]="'CASES.UPLOAD_FILE' | translate" icon="pi pi-upload"
+                    title="Upload File" aria-label="Upload File"
+                    [title]="'CASES.UPLOAD_FILE' | translate" [attr.aria-label]="'CASES.UPLOAD_FILE' | translate"
                     class="p-button-primary shadow-md" [loading]="uploading()" 
                     [disabled]="!selectedFile" (click)="save()"></button>
         </div>

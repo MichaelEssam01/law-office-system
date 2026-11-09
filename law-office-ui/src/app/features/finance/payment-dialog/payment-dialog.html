@@ -5,7 +5,7 @@
           [style]="{ width: '500px' }" 
           [draggable]="false" 
           [resizable]="false"
-          styleClass="rtl-dialog">
+          class="rtl-dialog">
     
     <form [formGroup]="paymentForm" class="flex flex-col gap-4 mt-2" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
         <!-- Client & Case Selection -->
@@ -18,7 +18,7 @@
                               [ngModelOptions]="{standalone: true}"
                               optionLabel="fullName" optionValue="id" [filter]="true" filterBy="fullName,nationalId,clientNumber"
                               [showClear]="true"
-                              [placeholder]="'CASES.ALL_CLIENTS' | translate" styleClass="w-full" appendTo="body">
+                              [placeholder]="'CASES.ALL_CLIENTS' | translate" class="w-full" appendTo="body">
                         <ng-template pTemplate="selectedItem" let-selected>
                             @if (selected) {
                                 <div class="flex items-center gap-2">
@@ -60,7 +60,7 @@
                               optionLabel="title" optionValue="id" dataKey="id" [filter]="true" filterBy="caseNumber,title"
                               [placeholder]="'FINANCE.SELECT_CASE' | translate" appendTo="body"
                               (onChange)="onCaseChange($event)"
-                              [styleClass]="'w-full ' + (isFieldInvalid('caseId') ? '!border-red-500 ng-invalid ng-dirty' : '')">
+                              [class]="'w-full ' + (isFieldInvalid('caseId') ? '!border-red-500 ng-invalid ng-dirty' : '')">
                         <ng-template pTemplate="selectedItem">
                             @if (getSelectedCase(); as selected) {
                                 <div class="flex items-center gap-2">
@@ -87,7 +87,7 @@
                 <label for="invoiceId" class="font-bold text-slate-700">{{ 'FINANCE.INVOICE_OPTIONAL' | translate }}</label>
                 <p-select id="invoiceId" [options]="filteredInvoices()" formControlName="invoiceId" 
                           optionLabel="title" optionValue="id" dataKey="id" [filter]="true" filterBy="invoiceNumber,title"
-                          [placeholder]="'FINANCE.SELECT_INVOICE' | translate" styleClass="w-full" appendTo="body"
+                          [placeholder]="'FINANCE.SELECT_INVOICE' | translate" class="w-full" appendTo="body"
                           (onChange)="onInvoiceChange($event)" [showClear]="true">
                     <ng-template pTemplate="item" let-inv>
                         <div class="flex justify-between items-center w-full">
@@ -122,8 +122,8 @@
                 </label>
                 <p-inputNumber id="amount" formControlName="amount" [min]="0"
                                [showButtons]="true" [minFractionDigits]="0" locale="en-US"
-                               [styleClass]="'w-full ' + (isFieldInvalid('amount') ? '!border-red-500 ng-invalid ng-dirty' : '')"
-                               [inputStyleClass]="'w-full ' + (isFieldInvalid('amount') ? '!border-red-500 ng-invalid ng-dirty' : '')"></p-inputNumber>
+                               [class]="'w-full ' + (isFieldInvalid('amount') ? '!border-red-500 ng-invalid ng-dirty' : '')"
+                               [inputclass]="'w-full ' + (isFieldInvalid('amount') ? '!border-red-500 ng-invalid ng-dirty' : '')"></p-inputNumber>
                 @if (paymentForm.get('amount')?.hasError('overpayment')) {
                     <small class="text-red-500">{{ 'FINANCE.OVERPAYMENT_ERROR' | translate }}</small>
                 }
@@ -133,7 +133,7 @@
             <div class="flex flex-col gap-2">
                 <label for="paymentDate" class="font-bold text-slate-700">{{ 'FINANCE.PAYMENT_DATE' | translate }}</label>
                 <p-datepicker id="paymentDate" formControlName="paymentDate" [placeholder]="'FINANCE.SELECT_DATE' | translate" appendTo="body" 
-                             styleClass="w-full"></p-datepicker>
+                             class="w-full"></p-datepicker>
             </div>
         </div>
 
@@ -141,7 +141,7 @@
         <div class="flex flex-col gap-2">
             <label for="method" class="font-bold text-slate-700">{{ 'FINANCE.PAYMENT_METHOD' | translate }}</label>
             <p-select id="method" [options]="methods()" formControlName="method" 
-                      optionLabel="label" optionValue="value" styleClass="w-full" appendTo="body">
+                      optionLabel="label" optionValue="value" class="w-full" appendTo="body">
                 <ng-template pTemplate="selectedItem" let-m>
                     <div class="flex items-center gap-2">
                         <i [class]="m?.icon || 'pi pi-wallet'" class="text-blue-600"></i>

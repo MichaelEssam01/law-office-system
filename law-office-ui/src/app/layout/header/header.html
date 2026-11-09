@@ -1,13 +1,18 @@
 <div class="flex justify-between items-center w-full px-2">
     <!-- Left Section (Search & Mobile Toggle) -->
     <div class="flex items-center gap-6 flex-1">
-        <button (click)="appState.toggleSidebar()" class="md:hidden p-2.5 text-slate-500 hover:bg-slate-100 rounded-xl transition-all active:scale-95">
+        <button type="button" (click)="appState.toggleSidebar()"
+                title="Toggle Menu" aria-label="Toggle Menu"
+                class="md:hidden p-2.5 text-slate-500 hover:bg-slate-100 rounded-xl transition-all active:scale-95">
             <i class="pi pi-bars text-xl"></i>
         </button>
         
         <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'" class="hidden md:flex w-full max-w-md">
-            <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
-            <input pInputText type="text" [placeholder]="'COMMON.SEARCH' | translate" 
+            <p-inputIcon class="pi pi-search"></p-inputIcon>
+            <input id="headerSearchInput" pInputText type="text"
+                   title="Search" placeholder="Search" aria-label="Search"
+                   [title]="'COMMON.SEARCH' | translate" [attr.aria-label]="'COMMON.SEARCH' | translate"
+                   [placeholder]="'COMMON.SEARCH' | translate" 
                    class="w-full py-2.5 rounded-xl border-slate-200 bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all duration-200 text-sm outline-none shadow-sm" />
         </p-iconField>
     </div>
@@ -15,7 +20,9 @@
     <!-- Right Section (Actions & Profile) -->
     <div class="flex items-center gap-3 md:gap-6">
         <!-- Notifications -->
-        <button (click)="notificationOp.toggle($event)" 
+        <button type="button" (click)="notificationOp.toggle($event)" 
+                title="Notifications" aria-label="Notifications"
+                [title]="'NOTIFICATIONS.TITLE' | translate" [attr.aria-label]="'NOTIFICATIONS.TITLE' | translate"
                 class="relative p-2.5 text-slate-500 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all duration-200 active:scale-90">
             <i class="pi pi-bell text-xl"></i>
             @if (notificationService.unreadCount() > 0) {
@@ -25,12 +32,15 @@
             }
         </button>
 
-        <p-popover #notificationOp styleClass="shadow-2xl border-slate-100 rounded-2xl w-80 md:w-96 p-0 overflow-hidden">
+        <p-popover #notificationOp class="shadow-2xl border-slate-100 rounded-2xl w-80 md:w-96 p-0 overflow-hidden">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
                     <h3 class="font-bold text-slate-800">{{ 'NOTIFICATIONS.TITLE' | translate }}</h3>
                     @if (notificationService.unreadCount() > 0) {
-                        <button (click)="markAllAsRead()" class="text-xs text-blue-600 hover:text-blue-700 font-semibold transition-colors">
+                        <button type="button" (click)="markAllAsRead()"
+                                title="Mark all as read" aria-label="Mark all as read"
+                                [title]="'NOTIFICATIONS.MARK_ALL_READ' | translate" [attr.aria-label]="'NOTIFICATIONS.MARK_ALL_READ' | translate"
+                                class="text-xs text-blue-600 hover:text-blue-700 font-semibold transition-colors">
                             {{ 'NOTIFICATIONS.MARK_ALL_READ' | translate }}
                         </button>
                     }
@@ -79,7 +89,8 @@
         </p-popover>
 
         <!-- Language Switcher -->
-        <button (click)="appState.toggleLanguage()" 
+        <button type="button" (click)="appState.toggleLanguage()" 
+                title="Toggle Language" aria-label="Toggle Language"
                 class="hidden sm:flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 font-semibold text-sm transition-all duration-200 border border-slate-100 hover:border-blue-100 shadow-sm active:scale-95">
             <i class="pi pi-globe text-lg"></i>
             <span>{{ appState.currentLang() === 'ar' ? 'English' : 'العربية' }}</span>
@@ -94,12 +105,12 @@
                 <p class="text-[10px] uppercase tracking-wider font-bold text-slate-400">{{ getRoleLabel(authService.currentUser()?.role) }}</p>
             </div>
             <p-avatar [label]="getInitials()" 
-                      styleClass="bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold shadow-lg shadow-blue-200" 
+                      class="bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold shadow-lg shadow-blue-200" 
                       shape="circle"></p-avatar>
             <i class="pi pi-angle-down text-xs text-slate-400 group-hover:text-slate-600 transition-colors hidden sm:block"></i>
         </div>
 
-        <p-menu #profileMenu [model]="profileMenuItems" [popup]="true" appendTo="body" styleClass="mt-2 shadow-xl border-slate-100 rounded-xl overflow-hidden"></p-menu>
+        <p-menu #profileMenu [model]="profileMenuItems" [popup]="true" appendTo="body" class="mt-2 shadow-xl border-slate-100 rounded-xl overflow-hidden"></p-menu>
     </div>
 </div>
 

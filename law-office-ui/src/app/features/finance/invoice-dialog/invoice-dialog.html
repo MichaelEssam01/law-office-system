@@ -5,7 +5,7 @@
           [style]="{ width: '500px' }" 
           [draggable]="false" 
           [resizable]="false"
-          styleClass="rtl-dialog">
+          class="rtl-dialog">
     
     <form [formGroup]="invoiceForm" class="flex flex-col gap-4 mt-2" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
         <!-- Category Selection (Fees vs Expenses) -->
@@ -34,7 +34,7 @@
                     <p-select id="clientId" [options]="clients()" [ngModel]="selectedClientId()" (onChange)="onClientChange($event)"
                               [ngModelOptions]="{standalone: true}"
                               optionLabel="fullName" optionValue="id" [filter]="true" filterBy="fullName,nationalId,clientNumber"
-                              [placeholder]="'CASES.ALL_CLIENTS' | translate" styleClass="w-full" appendTo="body">
+                              [placeholder]="'CASES.ALL_CLIENTS' | translate" class="w-full" appendTo="body">
                         <ng-template pTemplate="selectedItem" let-selected>
                             @if (selected) {
                                 <div class="flex items-center gap-2">
@@ -68,7 +68,7 @@
                 } @else {
                     <p-select id="caseId" [options]="filteredCases()" formControlName="caseId" 
                               optionLabel="title" optionValue="id" [filter]="true" filterBy="caseNumber,title"
-                              [placeholder]="'FINANCE.SELECT_CASE' | translate" styleClass="w-full" appendTo="body"
+                              [placeholder]="'FINANCE.SELECT_CASE' | translate" class="w-full" appendTo="body"
                               [class.p-invalid]="invoiceForm.get('caseId')?.touched && invoiceForm.get('caseId')?.invalid">
                         <ng-template pTemplate="selectedItem">
                             @if (getSelectedCase(); as selected) {
@@ -113,7 +113,7 @@
             <!-- Amount -->
             <div class="flex flex-col gap-2">
                 <label for="amount" class="font-bold text-slate-700">{{ 'FINANCE.AMOUNT' | translate }}</label>
-                <p-inputNumber id="amount" formControlName="amount" [min]="0" styleClass="w-full"
+                <p-inputNumber id="amount" formControlName="amount" [min]="0" class="w-full"
                                [showButtons]="true" [minFractionDigits]="0" locale="en-US"
                                [class.p-invalid]="invoiceForm.get('amount')?.touched && invoiceForm.get('amount')?.invalid"></p-inputNumber>
                 @if (invoiceForm.get('amount')?.touched && invoiceForm.get('amount')?.invalid) {
@@ -125,7 +125,7 @@
             <div class="flex flex-col gap-2">
                 <label for="dueDate" class="font-bold text-slate-700">{{ 'FINANCE.DUE_DATE' | translate }}</label>
                 <p-datepicker id="dueDate" formControlName="dueDate" [placeholder]="'FINANCE.SELECT_DATE' | translate" appendTo="body" 
-                             styleClass="w-full" [class.p-invalid]="invoiceForm.get('dueDate')?.touched && invoiceForm.get('dueDate')?.invalid"></p-datepicker>
+                             class="w-full" [class.p-invalid]="invoiceForm.get('dueDate')?.touched && invoiceForm.get('dueDate')?.invalid"></p-datepicker>
             </div>
         </div>
 

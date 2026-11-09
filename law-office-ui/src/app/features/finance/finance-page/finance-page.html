@@ -149,7 +149,7 @@
         
         <p-table #dt [value]="filteredInvoices()" [loading]="loading()" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5, 10, 30, 50]"
                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
-                 styleClass="p-datatable-sm" dataKey="id" 
+                 class="p-datatable-sm" dataKey="id" 
                  [globalFilterFields]="['invoiceNumber', 'clientName', 'caseNumber', 'caseTitle', 'title']"
                  (onFilter)="cdr.detectChanges()"
                  rowExpandMode="single"
@@ -179,7 +179,7 @@
                         <p-tag [value]="getCategoryLabel(inv.category)" 
                                [severity]="getCategorySeverity(inv.category)" 
                                [icon]="getCategoryIcon(inv.category)" 
-                               styleClass="text-[11px] gap-1 font-bold"></p-tag>
+                               class="text-[11px] gap-1 font-bold"></p-tag>
                     </td>
                     <td class="p-4 text-sm">
                         <div class="font-bold text-slate-800">{{ inv.clientName || 'N/A' }}</div>
@@ -193,7 +193,7 @@
                         <span [class.text-red-500]="inv.status === 3">{{ inv.dueDate | date:'dd/MM/yyyy' }}</span>
                     </td>
                     <td class="p-4">
-                        <p-tag [value]="getStatusLabel(inv.status)" [severity]="getStatusSeverity(inv.status)" styleClass="text-xs"></p-tag>
+                        <p-tag [value]="getStatusLabel(inv.status)" [severity]="getStatusSeverity(inv.status)" class="text-xs"></p-tag>
                     </td>
                     <td class="p-4 text-center">
                         <div class="flex justify-center gap-1">
@@ -232,7 +232,7 @@
                                                     </td>
                                                     <td class="p-3 text-slate-600 font-medium">{{ pay.paymentDate | date:'dd/MM/yyyy' }}</td>
                                                     <td class="p-3">
-                                                        <p-tag [icon]="getPaymentMethodIcon(pay.method)" [value]="getPaymentMethodLabel(pay.method)" severity="secondary" styleClass="text-[10px] uppercase gap-1"></p-tag>
+                                                        <p-tag [icon]="getPaymentMethodIcon(pay.method)" [value]="getPaymentMethodLabel(pay.method)" severity="secondary" class="text-[10px] uppercase gap-1"></p-tag>
                                                     </td>
                                                     <td class="p-3 text-slate-400 italic text-xs">{{ pay.notes || '-' }}</td>
                                                     <td class="p-3 text-end font-bold text-green-600">{{ pay.amount | number:'1.0-0' }}</td>

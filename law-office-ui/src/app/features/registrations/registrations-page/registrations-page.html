@@ -26,7 +26,7 @@
       <div class="flex flex-col gap-2">
         <label for="registrationsSearchInput" class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
         <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
-          <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+          <p-inputIcon class="pi pi-search"></p-inputIcon>
           <input
             id="registrationsSearchInput"
             type="text"
@@ -56,7 +56,7 @@
           [placeholder]="'REGISTRATIONS.ALL_TYPES' | translate"
           [showClear]="true"
           appendTo="body"
-          styleClass="w-full rounded-lg"
+          class="w-full rounded-lg"
         ></p-select>
       </div>
 
@@ -74,7 +74,7 @@
           [placeholder]="'CASES.ALL_CLIENTS' | translate"
           [showClear]="true"
           appendTo="body"
-          styleClass="w-full rounded-lg"
+          class="w-full rounded-lg"
         ></p-select>
       </div>
 
@@ -94,7 +94,7 @@
               [placeholder]="'CASES.ALL_LAWYERS' | translate"
               [showClear]="true"
               appendTo="body"
-              styleClass="w-full rounded-lg"
+              class="w-full rounded-lg"
             ></p-select>
           </div>
           <button
@@ -123,7 +123,7 @@
       [rowsPerPageOptions]="[5, 10, 30, 50]"
       [showCurrentPageReport]="true"
       [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
-      styleClass="p-datatable-sm shadow-sm rounded-lg overflow-hidden"
+      class="p-datatable-sm shadow-sm rounded-lg overflow-hidden"
       [rowHover]="true"
     >
       <ng-template pTemplate="header">
@@ -186,7 +186,7 @@
                 [rounded]="true"
                 severity="info"
                 (onClick)="showEditDialog(item)"
-                styleClass="!w-9 !h-9"
+                class="!w-9 !h-9"
                 [pTooltip]="'COMMON.EDIT' | translate"
               ></p-button>
               <p-button
@@ -195,7 +195,7 @@
                 [rounded]="true"
                 severity="danger"
                 (onClick)="confirmDelete(item)"
-                styleClass="!w-9 !h-9"
+                class="!w-9 !h-9"
                 [pTooltip]="'COMMON.DELETE' | translate"
               ></p-button>
             </div>

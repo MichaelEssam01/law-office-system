@@ -12,7 +12,7 @@
                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                  [globalFilterFields]="['clientNumber', 'fullName', 'nationalId', 'phone', 'email', 'job', 'poaNumber']"
                  (onFilter)="cdr.detectChanges()"
-                 styleClass="p-datatable-sm" [tableStyle]="{'min-width': '55rem'}">
+                 class="p-datatable-sm" [tableStyle]="{'min-width': '55rem'}">
             
             <ng-template pTemplate="caption">
                 <div class="flex items-center justify-between">
@@ -112,7 +112,7 @@
     </div>
 </div>
 
-<p-dialog [(visible)]="displayDialog" [style]="{width: '950px', maxWidth: '96vw'}" [header]="selectedClient ? ('CLIENTS.EDIT_CLIENT' | translate) : ('CLIENTS.ADD_CLIENT' | translate)" [modal]="true" styleClass="p-fluid">
+<p-dialog [(visible)]="displayDialog" [style]="{width: '950px', maxWidth: '96vw'}" [header]="selectedClient ? ('CLIENTS.EDIT_CLIENT' | translate) : ('CLIENTS.ADD_CLIENT' | translate)" [modal]="true" class="p-fluid">
     @if (displayDialog) {
         <app-client-dialog 
                            [client]="selectedClient" 
@@ -422,7 +422,7 @@
 
                     <!-- Tab 1: Cases -->
                     <p-tabpanel value="1">
-                        <p-table [value]="clientWorks.cases" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                        <p-table [value]="clientWorks.cases" class="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
                                  [paginatorDropdownAppendTo]="'body'"
                                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
                             <ng-template pTemplate="header">
@@ -459,7 +459,7 @@
 
                     <!-- Tab 5: Contracts -->
                     <p-tabpanel value="5">
-                        <p-table [value]="clientWorks.contracts || []" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                        <p-table [value]="clientWorks.contracts || []" class="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
                                  [paginatorDropdownAppendTo]="'body'"
                                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
                             <ng-template pTemplate="header">
@@ -498,7 +498,7 @@
 
                     <!-- Tab 6: Registrations -->
                     <p-tabpanel value="6">
-                        <p-table [value]="clientWorks.registrations || []" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                        <p-table [value]="clientWorks.registrations || []" class="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
                                  [paginatorDropdownAppendTo]="'body'"
                                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
                             <ng-template pTemplate="header">
@@ -535,7 +535,7 @@
 
                     <!-- Tab 7: Companies -->
                     <p-tabpanel value="7">
-                        <p-table [value]="clientWorks.companies || []" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                        <p-table [value]="clientWorks.companies || []" class="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
                                  [paginatorDropdownAppendTo]="'body'"
                                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
                             <ng-template pTemplate="header">
@@ -576,7 +576,7 @@
 
                     <!-- Sessions Tab -->
                     <p-tabpanel value="2">
-                        <p-table [value]="clientWorks.sessions" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                        <p-table [value]="clientWorks.sessions" class="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
                                  [paginatorDropdownAppendTo]="'body'"
                                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
                             <ng-template pTemplate="header">
@@ -614,7 +614,7 @@
                         <p-table #invDt [value]="clientWorks.invoices" 
                                  [expandedRowKeys]="expandedInvoices" 
                                  (expandedRowKeysChange)="onExpandedInvoicesChange($event)"
-                                 styleClass="p-datatable-sm" dataKey="id" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                                 class="p-datatable-sm" dataKey="id" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
                                  [paginatorDropdownAppendTo]="'body'"
                                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
                             <ng-template pTemplate="header">
@@ -699,7 +699,7 @@
 
                     <!-- Documents Tab -->
                     <p-tabpanel value="4">
-                        <p-table [value]="clientWorks.documents" styleClass="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                        <p-table [value]="clientWorks.documents" class="p-datatable-sm" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
                                  [paginatorDropdownAppendTo]="'body'"
                                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate" [pageLinks]="3">
                             <ng-template pTemplate="header">

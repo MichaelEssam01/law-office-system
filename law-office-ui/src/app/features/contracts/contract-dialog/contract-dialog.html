@@ -6,7 +6,7 @@
   [style]="{ width: '860px', maxWidth: '96vw' }" 
   [draggable]="false" 
   [resizable]="false"
-  styleClass="p-fluid rounded-2xl overflow-hidden shadow-2xl"
+  class="p-fluid rounded-2xl overflow-hidden shadow-2xl"
 >
   <form [formGroup]="contractForm" class="pt-2">
     <p-tabs [value]="activeTab()" (valueChange)="activeTab.set($any($event))">
@@ -78,7 +78,7 @@
                   optionLabel="label"
                   optionValue="value"
                   appendTo="body"
-                  [styleClass]="'w-full !rounded-lg ' + (isFieldInvalid('status') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                  [class]="'w-full !rounded-lg ' + (isFieldInvalid('status') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
                 ></p-select>
               </div>
 
@@ -99,7 +99,7 @@
                   appAutoSelectFilter
                   appendTo="body"
                   [placeholder]="'CONTRACTS.CONTRACT_TYPE' | translate"
-                  [styleClass]="'w-full !rounded-lg ' + (isFieldInvalid('contractType') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                  [class]="'w-full !rounded-lg ' + (isFieldInvalid('contractType') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
                 ></p-select>
               </div>
 
@@ -131,7 +131,7 @@
                   filterBy="fullName,phone,clientNumber"
                   appendTo="body"
                   [placeholder]="'CASES.SELECT_CLIENT' | translate"
-                  [styleClass]="'w-full !rounded-lg ' + (isFieldInvalid('clientId') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                  [class]="'w-full !rounded-lg ' + (isFieldInvalid('clientId') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
                 ></p-select>
               </div>
 
@@ -148,7 +148,7 @@
                   [showClear]="true"
                   appendTo="body"
                   [placeholder]="'CASES.SELECT_LAWYER' | translate"
-                  styleClass="w-full !rounded-lg !border-slate-300"
+                  class="w-full !rounded-lg !border-slate-300"
                 ></p-select>
               </div>
             </div>
@@ -162,8 +162,8 @@
                   appendTo="body"
                   dateFormat="yy-mm-dd"
                   [showIcon]="true"
-                  styleClass="w-full"
-                  inputStyleClass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm"
+                  class="w-full"
+                  inputclass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm"
                 ></p-datepicker>
               </div>
 
@@ -180,8 +180,8 @@
                   appendTo="body"
                   dateFormat="yy-mm-dd"
                   [showIcon]="true"
-                  [styleClass]="'w-full ' + (isFieldInvalid('startDate') ? '!border-red-500 ng-invalid ng-dirty' : '')"
-                  [inputStyleClass]="'w-full !py-2 !px-3 !rounded-lg text-sm ' + (isFieldInvalid('startDate') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                  [class]="'w-full ' + (isFieldInvalid('startDate') ? '!border-red-500 ng-invalid ng-dirty' : '')"
+                  [inputclass]="'w-full !py-2 !px-3 !rounded-lg text-sm ' + (isFieldInvalid('startDate') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
                 ></p-datepicker>
               </div>
 
@@ -192,8 +192,8 @@
                   appendTo="body"
                   dateFormat="yy-mm-dd"
                   [showIcon]="true"
-                  styleClass="w-full"
-                  inputStyleClass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm"
+                  class="w-full"
+                  inputclass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm"
                 ></p-datepicker>
               </div>
             </div>
@@ -216,7 +216,7 @@
                   size="small"
                   [outlined]="true"
                   (onClick)="addClientParty()"
-                  styleClass="!py-1.5 !px-3 !text-xs !rounded-lg"
+                  class="!py-1.5 !px-3 !text-xs !rounded-lg"
                 ></p-button>
               </div>
 
@@ -254,7 +254,7 @@
                           appAutoSelectFilter
                           appendTo="body"
                           [placeholder]="'CASES.SELECT_CLIENT' | translate"
-                          [styleClass]="'w-full !rounded-lg text-xs ' + (isPartyFieldInvalid(party, 'clientId') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                          [class]="'w-full !rounded-lg text-xs ' + (isPartyFieldInvalid(party, 'clientId') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
                         ></p-select>
                       </div>
 
@@ -272,7 +272,7 @@
                           optionLabel="label"
                           optionValue="value"
                           appendTo="body"
-                          [styleClass]="'w-full !rounded-lg text-xs ' + (isPartyFieldInvalid(party, 'capacity') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                          [class]="'w-full !rounded-lg text-xs ' + (isPartyFieldInvalid(party, 'capacity') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
                         ></p-select>
                       </div>
                     </div>
@@ -293,7 +293,7 @@
                             size="small"
                             [text]="true"
                             (onClick)="addOtherPersonToParty(party)"
-                            styleClass="!py-1 !px-2 !text-xs"
+                            class="!py-1 !px-2 !text-xs"
                           ></p-button>
                         }
                       </div>
@@ -339,7 +339,7 @@
                   size="small"
                   [outlined]="true"
                   (onClick)="addOtherParty()"
-                  styleClass="!py-1.5 !px-3 !text-xs !rounded-lg"
+                  class="!py-1.5 !px-3 !text-xs !rounded-lg"
                 ></p-button>
               </div>
 
@@ -385,7 +385,7 @@
                           optionLabel="label"
                           optionValue="value"
                           appendTo="body"
-                          [styleClass]="'w-full !rounded-lg text-xs ' + (isPartyFieldInvalid(party, 'capacity') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
+                          [class]="'w-full !rounded-lg text-xs ' + (isPartyFieldInvalid(party, 'capacity') ? '!border-red-500 ng-invalid ng-dirty' : '!border-slate-300')"
                         ></p-select>
                       </div>
 
@@ -420,8 +420,8 @@
                     inputId="contractFileYearInput"
                     formControlName="fileYear"
                     [useGrouping]="false"
-                    styleClass="w-full"
-                    inputStyleClass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white"
+                    class="w-full"
+                    inputclass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white"
                   ></p-inputnumber>
                 </div>
                 <div class="flex flex-col gap-1.5">
@@ -451,7 +451,7 @@
             [text]="true"
             severity="secondary"
             (onClick)="prevTab()"
-            styleClass="!py-2 !px-3 !rounded-lg font-medium text-xs"
+            class="!py-2 !px-3 !rounded-lg font-medium text-xs"
           ></p-button>
         }
         @if (activeTab() < 2) {
@@ -462,7 +462,7 @@
             [outlined]="true"
             severity="info"
             (onClick)="nextTab()"
-            styleClass="!py-2 !px-3 !rounded-lg font-medium text-xs !text-sky-600 !border-sky-300 !bg-sky-50/70 hover:!bg-sky-100"
+            class="!py-2 !px-3 !rounded-lg font-medium text-xs !text-sky-600 !border-sky-300 !bg-sky-50/70 hover:!bg-sky-100"
           ></p-button>
         }
       </div>
@@ -474,13 +474,13 @@
           [text]="true"
           severity="secondary"
           (onClick)="close()"
-          styleClass="!py-2.5 !px-4 !rounded-lg font-medium"
+          class="!py-2.5 !px-4 !rounded-lg font-medium"
         ></p-button>
         <p-button
           [label]="'COMMON.SAVE' | translate"
           icon="pi pi-check"
           (onClick)="save()"
-          styleClass="!bg-primary-600 hover:!bg-primary-700 !py-2.5 !px-6 !rounded-lg font-bold shadow-md shadow-primary-200 border-none text-white transition-all"
+          class="!bg-primary-600 hover:!bg-primary-700 !py-2.5 !px-6 !rounded-lg font-bold shadow-md shadow-primary-200 border-none text-white transition-all"
         ></p-button>
       </div>
     </div>

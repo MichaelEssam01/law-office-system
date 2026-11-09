@@ -99,11 +99,11 @@
                             <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">{{ 'AUTH.RESET_PASSWORD_TITLE' | translate }}</h3>
                             <form [formGroup]="passwordForm" (ngSubmit)="updatePassword()" class="space-y-4">
                                 <p-password formControlName="currentPassword" [toggleMask]="true" [feedback]="false" [placeholder]="'AUTH.PASSWORD' | translate"
-                                            styleClass="w-full" inputStyleClass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
+                                            class="w-full" inputclass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
                                 <p-password formControlName="newPassword" [toggleMask]="true" [placeholder]="'AUTH.NEW_PASSWORD' | translate"
-                                            styleClass="w-full" inputStyleClass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
+                                            class="w-full" inputclass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
                                 <p-password formControlName="confirmPassword" [toggleMask]="true" [feedback]="false" [placeholder]="'AUTH.CONFIRM_PASSWORD' | translate"
-                                            styleClass="w-full" inputStyleClass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
+                                            class="w-full" inputclass="w-full px-4 py-2.5 rounded-xl border-slate-200 focus:border-blue-500 text-sm"></p-password>
                                 <button pButton type="submit" [disabled]="passwordForm.invalid || loading()" 
                                         class="w-full bg-slate-900 hover:bg-slate-800 text-white py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 disabled:opacity-50 mt-2">
                                     {{ 'AUTH.RESET_PASSWORD_BUTTON' | translate }}
@@ -149,7 +149,7 @@
                     <div class="no-page-links">
                     <p-table [value]="notificationService.notifications()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
                              [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
-                             [pageLinks]="3" styleClass="p-datatable-sm">
+                             [pageLinks]="3" class="p-datatable-sm">
                         <ng-template pTemplate="header">
                             <tr class="bg-slate-50">
                                 <th class="px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wider">{{ 'COMMON.CATEGORY' | translate }}</th>
@@ -279,7 +279,7 @@
                     <div class="no-page-links">
                     <p-table [value]="securityLogs()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 25, 50]"
                              [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
-                             [pageLinks]="3" styleClass="p-datatable-sm">
+                             [pageLinks]="3" class="p-datatable-sm">
                         <ng-template pTemplate="header">
                             <tr class="bg-slate-50">
                                 <th class="px-6 py-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ 'PROFILE.EVENT' | translate }}</th>

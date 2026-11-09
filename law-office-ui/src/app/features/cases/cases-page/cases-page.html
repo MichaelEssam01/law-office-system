@@ -16,7 +16,7 @@
             <div class="flex flex-col gap-2">
                 <label for="casesSearchInput" class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
                 <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
-                    <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+                    <p-inputIcon class="pi pi-search"></p-inputIcon>
                     <input id="casesSearchInput" pInputText type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event); dt.filterGlobal($event, 'contains')" title="Search" placeholder="Search" aria-label="Search" [placeholder]="'CASES.SEARCH_PLACEHOLDER' | translate" [attr.aria-label]="'CASES.SEARCH_PLACEHOLDER' | translate" class="w-full rounded-lg border-slate-200" />
                 </p-iconField>
             </div>
@@ -25,7 +25,7 @@
                 <label class="text-xs font-bold text-slate-500">{{ 'CASES.STATUS' | translate }}</label>
                 <p-select [options]="statuses()" [ngModel]="selectedStatus()" (ngModelChange)="selectedStatus.set($event)"
                           optionValue="value" [placeholder]="'CASES.ALL_STATUSES' | translate" 
-                          [showClear]="true" styleClass="w-full rounded-lg">
+                          [showClear]="true" class="w-full rounded-lg">
                     <ng-template pTemplate="selectedItem" let-selectedOption>
                         @if (selectedOption) {
                             <div class="flex items-center gap-2">
@@ -51,14 +51,14 @@
                 <label class="text-xs font-bold text-slate-500">{{ 'CASES.CASE_TYPE' | translate }}</label>
                 <p-select [options]="caseTypes()" [ngModel]="selectedCaseType()" (ngModelChange)="selectedCaseType.set($event)"
                           optionLabel="label" optionValue="value" [placeholder]="'CASES.ALL_TYPES' | translate" 
-                          [showClear]="true" [filter]="true" styleClass="w-full rounded-lg"></p-select>
+                          [showClear]="true" [filter]="true" class="w-full rounded-lg"></p-select>
             </div>
 
             <div class="flex flex-col gap-2">
                 <label class="text-xs font-bold text-slate-500">{{ 'CASES.CLIENT' | translate }}</label>
                 <p-select [options]="clients()" [ngModel]="selectedClient()" (ngModelChange)="selectedClient.set($event); onFilterChange()"
                           optionLabel="fullName" optionValue="id" [placeholder]="'CASES.ALL_CLIENTS' | translate" 
-                          [showClear]="true" [filter]="true" styleClass="w-full rounded-lg"></p-select>
+                          [showClear]="true" [filter]="true" class="w-full rounded-lg"></p-select>
             </div>
 
             <div class="flex flex-col gap-2">
@@ -67,7 +67,7 @@
                         <label class="text-xs font-bold text-slate-500">{{ 'CASES.LAWYER' | translate }}</label>
                         <p-select [options]="lawyers()" [ngModel]="selectedLawyer()" (ngModelChange)="selectedLawyer.set($event); onFilterChange()"
                                   optionLabel="fullName" optionValue="id" [placeholder]="'CASES.ALL_LAWYERS' | translate" 
-                                  [showClear]="true" styleClass="w-full rounded-lg"></p-select>
+                                  [showClear]="true" class="w-full rounded-lg"></p-select>
                     </div>
                     <button type="button" pButton icon="pi pi-filter-slash" aria-label="Reset Filters" [attr.aria-label]="'CASES.RESET_FILTERS' | translate" class="p-button-outlined p-button-secondary p-button-sm self-end h-[42px]" (click)="resetFilters()" [pTooltip]="'CASES.RESET_FILTERS' | translate"></button>
                 </div>
@@ -81,7 +81,7 @@
                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                  [globalFilterFields]="['caseNumber', 'courtCaseNumber', 'fileNumber', 'title', 'clientName', 'opponentName', 'lawyerName']"
                  (onFilter)="cdr.detectChanges()"
-                 styleClass="p-datatable-sm shadow-sm rounded-lg overflow-hidden" [rowHover]="true">
+                 class="p-datatable-sm shadow-sm rounded-lg overflow-hidden" [rowHover]="true">
             
             <ng-template pTemplate="header">
                 <tr class="bg-slate-50 text-slate-700 text-xs uppercase tracking-wider">
@@ -213,7 +213,7 @@
                     <!-- Status, Archiving & Suspension Reason -->
                     <td class="p-3.5 text-center">
                         <div class="flex flex-col items-center gap-1">
-                            <p-tag [value]="getStatusLabel(case.status)" [severity]="getStatusSeverity(case.status)" styleClass="text-xs font-medium"></p-tag>
+                            <p-tag [value]="getStatusLabel(case.status)" [severity]="getStatusSeverity(case.status)" class="text-xs font-medium"></p-tag>
                             @if (case.status === 4 && case.archivingType !== null && case.archivingType !== undefined) {
                                 <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-medium">
                                     {{ getArchivingTypeKey(case.archivingType) | translate }}

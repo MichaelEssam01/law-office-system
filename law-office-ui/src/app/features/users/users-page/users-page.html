@@ -5,7 +5,7 @@
             <p class="text-slate-500">{{ 'USERS.SUBTITLE' | translate }}</p>
         </div>
         <p-button [label]="'USERS.ADD_USER' | translate" icon="pi pi-user-plus" 
-                  styleClass="bg-blue-600 border-none hover:bg-blue-700 rounded-xl px-6 py-3 font-semibold shadow-lg shadow-blue-600/20"
+                  class="bg-blue-600 border-none hover:bg-blue-700 rounded-xl px-6 py-3 font-semibold shadow-lg shadow-blue-600/20"
                   (onClick)="openNew()"></p-button>
     </div>
 
@@ -14,13 +14,15 @@
                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                  [globalFilterFields]="['fullName', 'email', 'role']"
                  (onFilter)="cdr.detectChanges()"
-                 styleClass="p-datatable-gridlines p-datatable-sm">
+                 class="p-datatable-gridlines p-datatable-sm">
             
             <ng-template pTemplate="caption">
                 <div class="flex items-center justify-between p-2">
                     <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
-                        <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
-                        <input pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
+                        <p-inputIcon class="pi pi-search"></p-inputIcon>
+                        <input id="usersSearchInput" pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" 
+                               title="Search" placeholder="Search" aria-label="Search"
+                               [title]="'COMMON.SEARCH' | translate" [attr.aria-label]="'COMMON.SEARCH' | translate"
                                [placeholder]="'COMMON.SEARCH' | translate" class="pl-10 py-2.5 border-slate-200 rounded-xl w-full sm:w-64 focus:ring-2 focus:ring-blue-500/20" />
                     </p-iconField>
                 </div>
@@ -63,8 +65,8 @@
                     </td>
                     <td class="px-4 py-4">
                         <div class="flex gap-1">
-                            <p-button icon="pi pi-pencil" severity="info" [rounded]="true" [text]="true" (onClick)="editUser(user)"></p-button>
-                            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [text]="true" (onClick)="deleteUser(user)"></p-button>
+                            <p-button icon="pi pi-pencil" severity="info" [rounded]="true" [text]="true" title="Edit" aria-label="Edit" [title]="'COMMON.EDIT' | translate" [attr.aria-label]="'COMMON.EDIT' | translate" (onClick)="editUser(user)"></p-button>
+                            <p-button icon="pi pi-trash" severity="danger" [rounded]="true" [text]="true" title="Delete" aria-label="Delete" [title]="'COMMON.DELETE' | translate" [attr.aria-label]="'COMMON.DELETE' | translate" (onClick)="deleteUser(user)"></p-button>
                         </div>
                     </td>
                 </tr>
@@ -86,7 +88,7 @@
           [modal]="true" 
           [breakpoints]="{ '960px': '75vw', '640px': '100vw' }"
           [style]="{ width: '600px' }"
-          styleClass="p-fluid">
+          class="p-fluid">
     @if (displayDialog()) {
         <app-user-management-dialog [userId]="selectedUserId()" (onSave)="onSave()" (onCancel)="onCancel()"></app-user-management-dialog>
     }

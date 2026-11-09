@@ -26,7 +26,7 @@
       <div class="flex flex-col gap-2">
         <label for="contractsSearchInput" class="text-xs font-bold text-slate-500">{{ 'COMMON.SEARCH' | translate }}</label>
         <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'">
-          <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+          <p-inputIcon class="pi pi-search"></p-inputIcon>
           <input
             id="contractsSearchInput"
             type="text"
@@ -54,7 +54,7 @@
           [placeholder]="'CASES.ALL_STATUSES' | translate"
           [showClear]="true"
           appendTo="body"
-          styleClass="w-full rounded-lg"
+          class="w-full rounded-lg"
         >
           <ng-template pTemplate="selectedItem" let-selectedOption>
             @if (selectedOption) {
@@ -94,7 +94,7 @@
           [placeholder]="'CONTRACTS.ALL_TYPES' | translate"
           [showClear]="true"
           appendTo="body"
-          styleClass="w-full rounded-lg"
+          class="w-full rounded-lg"
         ></p-select>
       </div>
 
@@ -112,7 +112,7 @@
           [placeholder]="'CASES.ALL_CLIENTS' | translate"
           [showClear]="true"
           appendTo="body"
-          styleClass="w-full rounded-lg"
+          class="w-full rounded-lg"
         ></p-select>
       </div>
 
@@ -132,7 +132,7 @@
               [placeholder]="'CASES.ALL_LAWYERS' | translate"
               [showClear]="true"
               appendTo="body"
-              styleClass="w-full rounded-lg"
+              class="w-full rounded-lg"
             ></p-select>
           </div>
           <button
@@ -161,7 +161,7 @@
       [rowsPerPageOptions]="[5, 10, 30, 50]"
       [showCurrentPageReport]="true"
       [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
-      styleClass="p-datatable-sm shadow-sm rounded-lg overflow-hidden"
+      class="p-datatable-sm shadow-sm rounded-lg overflow-hidden"
       [rowHover]="true"
     >
       <ng-template pTemplate="header">
@@ -213,7 +213,7 @@
           </td>
           <td class="p-3.5 text-slate-600 text-sm">{{ item.lawyerName || '---' }}</td>
           <td class="p-3.5 text-center">
-            <p-tag [value]="getStatusLabel(item.status) | translate" [severity]="getStatusSeverity(item.status)" styleClass="!text-xs !px-2.5 !py-1 !rounded-lg font-bold"></p-tag>
+            <p-tag [value]="getStatusLabel(item.status) | translate" [severity]="getStatusSeverity(item.status)" class="!text-xs !px-2.5 !py-1 !rounded-lg font-bold"></p-tag>
           </td>
           <td class="p-3.5 text-center text-slate-600 text-xs font-mono">{{ item.startDate | date:'yyyy-MM-dd' }}</td>
           <td class="p-3.5 text-center" (click)="$event.stopPropagation()">
@@ -224,7 +224,7 @@
                 [rounded]="true"
                 severity="info"
                 (onClick)="showEditDialog(item)"
-                styleClass="!w-9 !h-9"
+                class="!w-9 !h-9"
                 [pTooltip]="'COMMON.EDIT' | translate"
               ></p-button>
               <p-button
@@ -233,7 +233,7 @@
                 [rounded]="true"
                 severity="danger"
                 (onClick)="confirmDelete(item)"
-                styleClass="!w-9 !h-9"
+                class="!w-9 !h-9"
                 [pTooltip]="'COMMON.DELETE' | translate"
               ></p-button>
             </div>
