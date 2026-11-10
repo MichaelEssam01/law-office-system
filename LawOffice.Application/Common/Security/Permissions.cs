@@ -11,6 +11,38 @@ public static class Permissions
         public const string Delete = "Cases.Delete";
     }
 
+    public static class Contracts
+    {
+        public const string View = "Contracts.View";
+        public const string Create = "Contracts.Create";
+        public const string Update = "Contracts.Update";
+        public const string Delete = "Contracts.Delete";
+    }
+
+    public static class Registrations
+    {
+        public const string View = "Registrations.View";
+        public const string Create = "Registrations.Create";
+        public const string Update = "Registrations.Update";
+        public const string Delete = "Registrations.Delete";
+    }
+
+    public static class Companies
+    {
+        public const string View = "Companies.View";
+        public const string Create = "Companies.Create";
+        public const string Update = "Companies.Update";
+        public const string Delete = "Companies.Delete";
+    }
+
+    public static class Sessions
+    {
+        public const string View = "Sessions.View";
+        public const string Create = "Sessions.Create";
+        public const string Update = "Sessions.Update";
+        public const string Delete = "Sessions.Delete";
+    }
+
     public static class Clients
     {
         public const string View = "Clients.View";

@@ -1,3 +1,4 @@
+using LawOffice.Application.Common.Security;
 using LawOffice.Application.DTOs.Settings;
 using LawOffice.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -17,7 +18,7 @@ public class SettingsController : ControllerBase
         _settingsService = settingsService;
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.Settings.Manage)]
     [HttpGet]
     public async Task<ActionResult<SystemSettingDto>> GetSettings()
     {
@@ -31,7 +32,7 @@ public class SettingsController : ControllerBase
         return Ok(await _settingsService.GetPublicSettingsAsync());
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.Settings.Manage)]
     [HttpPut]
     public async Task<IActionResult> UpdateSettings(SystemSettingDto dto)
     {

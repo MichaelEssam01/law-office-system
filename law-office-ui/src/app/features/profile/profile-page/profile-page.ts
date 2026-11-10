@@ -18,8 +18,9 @@ import { AppStateService } from '../../../core/services/app-state.service';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 
 import { TooltipModule } from 'primeng/tooltip';
+import { UsersPage } from '../../users/users-page/users-page';
 
-export type ProfileTab = 'profile' | 'notifications' | 'preferences' | 'security';
+export type ProfileTab = 'profile' | 'notifications' | 'preferences' | 'security' | 'users';
 
 @Component({
   selector: 'app-profile-page',
@@ -36,7 +37,8 @@ export type ProfileTab = 'profile' | 'notifications' | 'preferences' | 'security
     ToggleSwitchModule,
     TableModule,
     TooltipModule,
-    TranslateModule
+    TranslateModule,
+    UsersPage
   ],
   templateUrl: './profile-page.html',
   providers: [MessageService]
@@ -63,6 +65,10 @@ export class ProfilePage implements OnInit {
 
   get canManageSettings(): boolean {
     return this.authService.hasPermission('Settings.Manage');
+  }
+
+  get canManageUsers(): boolean {
+    return this.authService.hasPermission('Users.View');
   }
 
   async saveFirmName() {
@@ -114,6 +120,8 @@ export class ProfilePage implements OnInit {
         this.activeTab.set('preferences');
       } else if (params['tab'] === 'security') {
         this.activeTab.set('security');
+      } else if (params['tab'] === 'users' && this.canManageUsers) {
+        this.activeTab.set('users');
       } else if (params['tab'] === 'profile') {
         this.activeTab.set('profile');
       }
@@ -220,14 +228,16 @@ export class ProfilePage implements OnInit {
   }
 
   getRoleLabel(role?: string): string {
-    if (!role) return '';
+    const user = this.currentUser();
+    const roles = user?.roles && user.roles.length > 0 ? user.roles : (role ? [role] : []);
+    if (roles.length === 0) return '';
     const keyMap: { [key: string]: string } = {
       'Admin': 'USERS.ROLES.ADMIN',
       'Lawyer': 'USERS.ROLES.LAWYER',
       'Receptionist': 'USERS.ROLES.RECEPTIONIST',
       'Accountant': 'USERS.ROLES.ACCOUNTANT'
     };
-    return keyMap[role] ? this.translate.instant(keyMap[role]) : role;
+    return roles.map(r => keyMap[r] ? this.translate.instant(keyMap[r]) : r).join(' • ');
   }
 
   async saveNotificationSettings() {
@@ -281,6 +291,10 @@ export class ProfilePage implements OnInit {
     switch (n.message) {
       case 'NOTIFICATIONS.CASE_ASSIGNED_MSG':
         return this.translate.instant('NOTIFICATIONS.CASE_ASSIGNED_MSG_PREFIX') + ' ';
+      case 'NOTIFICATIONS.ADMIN_CASE_ASSIGNED_MSG':
+        return this.translate.instant('NOTIFICATIONS.ADMIN_CASE_ASSIGNED_MSG_PREFIX', params) + ' ';
+      case 'NOTIFICATIONS.ADMIN_CASE_CREATED_MSG':
+        return this.translate.instant('NOTIFICATIONS.ADMIN_CASE_CREATED_MSG_PREFIX') + ' ';
       case 'NOTIFICATIONS.CASE_UPDATED_MSG':
         return this.translate.instant('NOTIFICATIONS.CASE_UPDATED_MSG_PREFIX') + ' ';
       case 'NOTIFICATIONS.PAYMENT_RECORDED_MSG':
@@ -295,6 +309,8 @@ export class ProfilePage implements OnInit {
     const params = n.parameters || {};
     switch (n.message) {
       case 'NOTIFICATIONS.CASE_ASSIGNED_MSG':
+      case 'NOTIFICATIONS.ADMIN_CASE_ASSIGNED_MSG':
+      case 'NOTIFICATIONS.ADMIN_CASE_CREATED_MSG':
         return this.translate.instant('NOTIFICATIONS.CASE_ASSIGNED_MSG_CASE', params);
       case 'NOTIFICATIONS.CASE_UPDATED_MSG':
         return this.translate.instant('NOTIFICATIONS.CASE_UPDATED_MSG_CASE', params);
@@ -319,6 +335,8 @@ export class ProfilePage implements OnInit {
   hasSplitMessage(n: any): boolean {
     return n.link && [
       'NOTIFICATIONS.CASE_ASSIGNED_MSG',
+      'NOTIFICATIONS.ADMIN_CASE_ASSIGNED_MSG',
+      'NOTIFICATIONS.ADMIN_CASE_CREATED_MSG',
       'NOTIFICATIONS.CASE_UPDATED_MSG',
       'NOTIFICATIONS.PAYMENT_RECORDED_MSG'
     ].includes(n.message);

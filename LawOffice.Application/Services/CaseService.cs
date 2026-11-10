@@ -238,15 +238,13 @@ public class CaseService : ICaseService
 
         await _auditService.LogAsync("CaseCreated", "Case", @case.Id.ToString(), userId, $"{{\"number\": \"{@case.CaseNumber}\", \"title\": \"{@case.Title}\"}}");
 
-        if (@case.AssignedLawyerId.HasValue && @case.AssignedLawyerId.Value != userId)
-        {
-            await _notificationService.CreateNotificationAsync(@case.AssignedLawyerId.Value, 
-                "NOTIFICATIONS.CASE_ASSIGNED_TITLE", 
-                "NOTIFICATIONS.CASE_ASSIGNED_MSG", 
-                "Cases", 
-                $"/cases/{@case.Id}",
-                new Dictionary<string, string> { { "number", @case.CaseNumber }, { "title", @case.Title } });
-        }
+        await _notificationService.NotifyUserAndAdminsAsync(
+            @case.AssignedLawyerId,
+            "NOTIFICATIONS.CASE_ASSIGNED_TITLE",
+            "NOTIFICATIONS.CASE_ASSIGNED_MSG",
+            "Cases",
+            $"/cases/{@case.Id}",
+            new Dictionary<string, string> { { "number", @case.CaseNumber }, { "title", @case.Title } });
 
         return (await GetByIdAsync(@case.Id))!;
     }
@@ -326,15 +324,13 @@ public class CaseService : ICaseService
 
         await _auditService.LogAsync("CaseUpdated", "Case", @case.Id.ToString(), userId, $"{{\"status\": \"{@case.Status}\"}}");
 
-        if (@case.AssignedLawyerId.HasValue && @case.AssignedLawyerId.Value != userId)
-        {
-            await _notificationService.CreateNotificationAsync(@case.AssignedLawyerId.Value, 
-                "NOTIFICATIONS.CASE_UPDATED_TITLE", 
-                "NOTIFICATIONS.CASE_UPDATED_MSG", 
-                "Cases", 
-                $"/cases/{@case.Id}",
-                new Dictionary<string, string> { { "number", @case.CaseNumber } });
-        }
+        await _notificationService.NotifyUserAndAdminsAsync(
+            @case.AssignedLawyerId,
+            "NOTIFICATIONS.CASE_UPDATED_TITLE",
+            "NOTIFICATIONS.CASE_UPDATED_MSG",
+            "Cases",
+            $"/cases/{@case.Id}",
+            new Dictionary<string, string> { { "number", @case.CaseNumber } });
         return true;
     }
 

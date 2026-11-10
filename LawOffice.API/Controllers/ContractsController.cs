@@ -19,7 +19,7 @@ public class ContractsController : ControllerBase
         _contractService = contractService;
     }
 
-    [Authorize(Policy = Permissions.Cases.View)]
+    [Authorize(Policy = Permissions.Contracts.View)]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ContractListDto>>> GetAll(
         [FromQuery] string? status = null,
@@ -30,7 +30,7 @@ public class ContractsController : ControllerBase
         return Ok(items);
     }
 
-    [Authorize(Policy = Permissions.Cases.View)]
+    [Authorize(Policy = Permissions.Contracts.View)]
     [HttpGet("{id}")]
     public async Task<ActionResult<ContractDetailDto>> GetById(Guid id)
     {
@@ -39,7 +39,7 @@ public class ContractsController : ControllerBase
         return Ok(item);
     }
 
-    [Authorize(Policy = Permissions.Cases.Create)]
+    [Authorize(Policy = Permissions.Contracts.Create)]
     [HttpPost]
     public async Task<ActionResult<ContractDetailDto>> Create([FromBody] CreateContractDto dto)
     {
@@ -48,7 +48,7 @@ public class ContractsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
-    [Authorize(Policy = Permissions.Cases.Update)]
+    [Authorize(Policy = Permissions.Contracts.Update)]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateContractDto dto)
     {
@@ -59,7 +59,7 @@ public class ContractsController : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Policy = Permissions.Cases.Delete)]
+    [Authorize(Policy = Permissions.Contracts.Delete)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {

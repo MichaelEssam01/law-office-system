@@ -65,9 +65,9 @@ export class Header {
         routerLink: '/profile'
       },
       {
-        label: this.translate.instant('USERS.TITLE'),
-        icon: 'pi pi-user-plus',
-        routerLink: '/users',
+        label: this.translate.instant('USERS.ADMIN_TAB_TITLE'),
+        icon: 'pi pi-users',
+        command: () => this.router.navigate(['/profile'], { queryParams: { tab: 'users' } }),
         visible: this.authService.hasPermission('Users.View')
       },
       {
@@ -104,14 +104,15 @@ export class Header {
   }
 
   getRoleLabel(role?: string): string {
-    const defaultRole = role || 'Lawyer';
+    const user = this.authService.currentUser();
+    const roles = user?.roles && user.roles.length > 0 ? user.roles : [role || 'Lawyer'];
     const keyMap: { [key: string]: string } = {
       'Admin': 'USERS.ROLES.ADMIN',
       'Lawyer': 'USERS.ROLES.LAWYER',
       'Receptionist': 'USERS.ROLES.RECEPTIONIST',
       'Accountant': 'USERS.ROLES.ACCOUNTANT'
     };
-    return keyMap[defaultRole] ? this.translate.instant(keyMap[defaultRole]) : defaultRole;
+    return roles.map(r => keyMap[r] ? this.translate.instant(keyMap[r]) : r).join(' • ');
   }
 
   onNotificationClick(notification: NotificationDto, op: any) {

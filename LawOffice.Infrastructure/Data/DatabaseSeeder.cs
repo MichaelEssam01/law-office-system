@@ -126,20 +126,56 @@ public static class DatabaseSeeder
         // Admin: All Permissions
         await AssignAllPermissions(roleManager, "Admin");
 
-        // Lawyer
+        // Lawyer: Legal Works (Cases, Contracts, Registrations, Companies), Sessions, Clients (View), Documents (View/Upload)
         await AssignPermissions(roleManager, "Lawyer", new[] {
+            Permissions.Clients.View,
             Permissions.Cases.View,
+            Permissions.Cases.Create,
             Permissions.Cases.Update,
-            Permissions.Clients.View
+            Permissions.Contracts.View,
+            Permissions.Contracts.Create,
+            Permissions.Contracts.Update,
+            Permissions.Registrations.View,
+            Permissions.Registrations.Create,
+            Permissions.Registrations.Update,
+            Permissions.Companies.View,
+            Permissions.Companies.Create,
+            Permissions.Companies.Update,
+            Permissions.Sessions.View,
+            Permissions.Sessions.Create,
+            Permissions.Sessions.Update,
+            Permissions.Documents.View,
+            Permissions.Documents.Upload
         });
 
-        // Receptionist
+        // Receptionist: Client intake, viewing/creating legal works & sessions, uploading documents
         await AssignPermissions(roleManager, "Receptionist", new[] {
             Permissions.Clients.View,
             Permissions.Clients.Create,
             Permissions.Clients.Update,
             Permissions.Cases.View,
-            Permissions.Cases.Create
+            Permissions.Cases.Create,
+            Permissions.Contracts.View,
+            Permissions.Contracts.Create,
+            Permissions.Registrations.View,
+            Permissions.Registrations.Create,
+            Permissions.Companies.View,
+            Permissions.Companies.Create,
+            Permissions.Sessions.View,
+            Permissions.Sessions.Create,
+            Permissions.Documents.View,
+            Permissions.Documents.Upload
+        });
+
+        // Accountant: Full Finance management + read-only access to Clients and Legal Works for billing context
+        await AssignPermissions(roleManager, "Accountant", new[] {
+            Permissions.Finance.View,
+            Permissions.Finance.Manage,
+            Permissions.Clients.View,
+            Permissions.Cases.View,
+            Permissions.Contracts.View,
+            Permissions.Registrations.View,
+            Permissions.Companies.View
         });
     }
 
@@ -152,7 +188,17 @@ public static class DatabaseSeeder
             .Where(v => v != null)
             .Cast<string>();
 
-        await AssignPermissions(roleManager, roleName, allPermissions);
+        var role = await roleManager.FindByNameAsync(roleName);
+        if (role == null) return;
+
+        var existingClaims = await roleManager.GetClaimsAsync(role);
+        foreach (var permission in allPermissions)
+        {
+            if (!existingClaims.Any(c => c.Type == "Permission" && c.Value == permission))
+            {
+                await roleManager.AddClaimAsync(role, new Claim("Permission", permission));
+            }
+        }
     }
 
     private static async Task AssignPermissions(RoleManager<IdentityRole<Guid>> roleManager, string roleName, IEnumerable<string> permissions)
@@ -161,12 +207,13 @@ public static class DatabaseSeeder
         if (role == null) return;
 
         var existingClaims = await roleManager.GetClaimsAsync(role);
+        // Only seed default permissions if the role has no permissions configured yet,
+        // preserving any custom permission rules configured by the administrator.
+        if (existingClaims.Any(c => c.Type == "Permission")) return;
+
         foreach (var permission in permissions)
         {
-            if (!existingClaims.Any(c => c.Type == "Permission" && c.Value == permission))
-            {
-                await roleManager.AddClaimAsync(role, new Claim("Permission", permission));
-            }
+            await roleManager.AddClaimAsync(role, new Claim("Permission", permission));
         }
     }
 }

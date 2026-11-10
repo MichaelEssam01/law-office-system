@@ -11,11 +11,13 @@ public class ContractService : IContractService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditService _auditService;
+    private readonly INotificationService _notificationService;
 
-    public ContractService(IUnitOfWork unitOfWork, IAuditService auditService)
+    public ContractService(IUnitOfWork unitOfWork, IAuditService auditService, INotificationService notificationService)
     {
         _unitOfWork = unitOfWork;
         _auditService = auditService;
+        _notificationService = notificationService;
     }
 
     public async Task<IEnumerable<ContractListDto>> GetAllAsync(string? status = null, Guid? clientId = null, Guid? lawyerId = null)
@@ -173,6 +175,14 @@ public class ContractService : IContractService
         await _unitOfWork.Repository<Contract>().AddAsync(entity);
         await _unitOfWork.CompleteAsync();
         await _auditService.LogAsync("ContractCreated", "Contract", entity.Id.ToString(), userId, $"{{\"number\": \"{entity.ContractNumber}\", \"title\": \"{entity.Title}\"}}");
+
+        await _notificationService.NotifyUserAndAdminsAsync(
+            entity.AssignedLawyerId,
+            "NOTIFICATIONS.CONTRACT_ASSIGNED_TITLE",
+            "NOTIFICATIONS.CONTRACT_ASSIGNED_MSG",
+            "Cases",
+            "/contracts",
+            new Dictionary<string, string> { { "number", entity.ContractNumber }, { "title", entity.Title } });
 
         return (await GetByIdAsync(entity.Id))!;
     }

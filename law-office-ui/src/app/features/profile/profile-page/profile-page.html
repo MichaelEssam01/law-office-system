@@ -7,7 +7,7 @@
             <span class="text-blue-600">{{ 'PROFILE.VIEW_PROFILE' | translate }}</span>
         </div>
         <h1 class="text-2xl font-extrabold text-slate-800 tracking-tight">
-            {{ activeTab() === 'profile' ? ('PROFILE.VIEW_PROFILE' | translate) : (activeTab() === 'security' ? ('PROFILE.SECURITY_LOG' | translate) : (activeTab() === 'preferences' ? ('PROFILE.NOTIFICATION_PREFERENCES' | translate) : ('PROFILE.NOTIFICATION_HISTORY' | translate))) }}
+            {{ activeTab() === 'profile' ? ('PROFILE.VIEW_PROFILE' | translate) : (activeTab() === 'users' ? ('USERS.TITLE' | translate) : (activeTab() === 'security' ? ('PROFILE.SECURITY_LOG' | translate) : (activeTab() === 'preferences' ? ('PROFILE.NOTIFICATION_PREFERENCES' | translate) : ('PROFILE.NOTIFICATION_HISTORY' | translate)))) }}
         </h1>
     </div>
 
@@ -16,7 +16,8 @@
         <div class="lg:col-span-1 space-y-4">
             <div class="bg-white rounded-2xl p-2 shadow-sm border border-slate-100">
                 <nav class="space-y-1">
-                    <button (click)="setTab('profile')" 
+                    <button type="button" (click)="setTab('profile')" 
+                            title="Account Settings" aria-label="Account Settings"
                             [class]="activeTab() === 'profile' ? 'bg-blue-50 text-blue-700 font-bold shadow-sm' : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'"
                             class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-start cursor-pointer group">
                         <div class="w-5 flex justify-center flex-shrink-0">
@@ -24,7 +25,8 @@
                         </div>
                         <span class="text-sm font-medium leading-snug flex-1">{{ 'PROFILE.VIEW_PROFILE' | translate }}</span>
                     </button>
-                    <button (click)="setTab('notifications')" 
+                    <button type="button" (click)="setTab('notifications')" 
+                            title="Notification History" aria-label="Notification History"
                             [class]="activeTab() === 'notifications' ? 'bg-blue-50 text-blue-700 font-bold shadow-sm' : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'"
                             class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-start cursor-pointer group">
                         <div class="w-5 flex justify-center flex-shrink-0">
@@ -32,7 +34,8 @@
                         </div>
                         <span class="text-sm font-medium leading-snug flex-1">{{ 'PROFILE.NOTIFICATION_HISTORY' | translate }}</span>
                     </button>
-                    <button (click)="setTab('preferences')" 
+                    <button type="button" (click)="setTab('preferences')" 
+                            title="Notification Preferences" aria-label="Notification Preferences"
                             [class]="activeTab() === 'preferences' ? 'bg-blue-50 text-blue-700 font-bold shadow-sm' : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'"
                             class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-start cursor-pointer group">
                         <div class="w-5 flex justify-center flex-shrink-0">
@@ -40,7 +43,8 @@
                         </div>
                         <span class="text-sm font-medium leading-snug flex-1">{{ 'PROFILE.NOTIFICATION_PREFERENCES' | translate }}</span>
                     </button>
-                    <button (click)="setTab('security')" 
+                    <button type="button" (click)="setTab('security')" 
+                            title="Security Log" aria-label="Security Log"
                             [class]="activeTab() === 'security' ? 'bg-blue-50 text-blue-700 font-bold shadow-sm' : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'"
                             class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-start border-t border-slate-100 mt-2 pt-2 cursor-pointer group">
                         <div class="w-5 flex justify-center flex-shrink-0">
@@ -48,6 +52,17 @@
                         </div>
                         <span class="text-sm font-medium leading-snug flex-1">{{ 'PROFILE.SECURITY_LOG' | translate }}</span>
                     </button>
+                    @if (canManageUsers) {
+                        <button type="button" (click)="setTab('users')" 
+                                title="Accounts & Roles" aria-label="Accounts & Roles"
+                                [class]="activeTab() === 'users' ? 'bg-blue-50 text-blue-700 font-bold shadow-sm' : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'"
+                                class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-start border-t border-slate-100 mt-2 pt-2 cursor-pointer group">
+                            <div class="w-5 flex justify-center flex-shrink-0">
+                                <i class="pi pi-users text-base group-hover:scale-110 transition-transform"></i>
+                            </div>
+                            <span class="text-sm font-medium leading-snug flex-1">{{ 'USERS.ADMIN_TAB_TITLE' | translate }}</span>
+                        </button>
+                    }
                 </nav>
             </div>
         </div>
@@ -330,12 +345,18 @@
                     
                     <div class="p-6 bg-slate-50/50 border-t border-slate-50 flex items-center justify-between">
                         <p class="text-xs text-slate-400 italic">{{ 'PROFILE.LAST_30_DAYS' | translate }}</p>
-                        <button (click)="downloadLogs()" [disabled]="loading()"
+                        <button type="button" (click)="downloadLogs()" [disabled]="loading()"
+                                title="Download Excel" aria-label="Download Excel"
                                 class="text-blue-600 text-xs font-bold hover:underline transition-all active:scale-95 disabled:opacity-50">
                             {{ 'PROFILE.DOWNLOAD_EXCEL' | translate }}
                         </button>
                     </div>
                 </div>
+            }
+
+            <!-- Admin Users & Roles Tab -->
+            @if (activeTab() === 'users' && canManageUsers) {
+                <app-users-page [embedded]="true"></app-users-page>
             }
         </div>
     </div>

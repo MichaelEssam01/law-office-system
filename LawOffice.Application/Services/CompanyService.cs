@@ -11,11 +11,13 @@ public class CompanyService : ICompanyService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditService _auditService;
+    private readonly INotificationService _notificationService;
 
-    public CompanyService(IUnitOfWork unitOfWork, IAuditService auditService)
+    public CompanyService(IUnitOfWork unitOfWork, IAuditService auditService, INotificationService notificationService)
     {
         _unitOfWork = unitOfWork;
         _auditService = auditService;
+        _notificationService = notificationService;
     }
 
     public async Task<IEnumerable<CompanyListDto>> GetAllAsync(string? status = null, Guid? clientId = null, Guid? lawyerId = null)
@@ -203,6 +205,14 @@ public class CompanyService : ICompanyService
         await _unitOfWork.Repository<Company>().AddAsync(entity);
         await _unitOfWork.CompleteAsync();
         await _auditService.LogAsync("CompanyCreated", "Company", entity.Id.ToString(), userId, $"{{\"code\": \"{entity.CompanyCode}\", \"title\": \"{entity.Title}\"}}");
+
+        await _notificationService.NotifyUserAndAdminsAsync(
+            entity.AssignedLawyerId,
+            "NOTIFICATIONS.COMPANY_ASSIGNED_TITLE",
+            "NOTIFICATIONS.COMPANY_ASSIGNED_MSG",
+            "Cases",
+            "/companies",
+            new Dictionary<string, string> { { "number", entity.CompanyCode }, { "title", entity.Title } });
 
         return (await GetByIdAsync(entity.Id))!;
     }

@@ -67,6 +67,15 @@ public class AuthService : IAuthService
             return null;
         }
 
+        // 0. Check if account is inactive
+        if (!user.IsActive)
+        {
+            _logger.LogWarning("Failed login attempt: Inactive account for email: {Email}", loginRequest.Email);
+            await _auditService.LogAsync("LoginFailed", "User", user.Id.ToString(), user.Id, "Account is inactive", ipAddress, deviceInfo);
+            await _profileService.AddSecurityLogAsync(user.Id, "Login Attempt", deviceInfo, ipAddress, "Inactive Account");
+            throw new AccountInactiveException();
+        }
+
         // 1. Check if account is already locked out
         if (await _userManager.IsLockedOutAsync(user))
         {
@@ -139,7 +148,7 @@ public class AuthService : IAuthService
 
         // We need the user object, so we'll fetch it via UserManager
         var user = await _userManager.FindByIdAsync(storedToken.UserId.ToString());
-        if (user == null) return null;
+        if (user == null || !user.IsActive) return null;
 
         // Token rotation: Mark old token as used and generate new ones
         storedToken.IsUsed = true;
@@ -242,6 +251,7 @@ public class AuthService : IAuthService
             FullName = user.FullName,
             Email = user.Email!,
             Role = roles.FirstOrDefault() ?? "User",
+            Roles = roles.ToList(),
             Permissions = claims.Where(c => c.Type == "Permission").Select(c => c.Value).ToList()
         };
     }
@@ -394,7 +404,7 @@ public class AuthService : IAuthService
     public async Task<UserInfoDto?> GetUserInfoAsync(Guid userId)
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
-        if (user == null) return null;
+        if (user == null || !user.IsActive) return null;
 
         var roles = await _userManager.GetRolesAsync(user);
         var permissions = new List<string>();
@@ -417,6 +427,7 @@ public class AuthService : IAuthService
             FullName = user.FullName,
             Email = user.Email!,
             Role = roles.FirstOrDefault() ?? "User",
+            Roles = roles.ToList(),
             Permissions = permissions
         };
     }

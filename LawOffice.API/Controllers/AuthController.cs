@@ -60,13 +60,22 @@ public class AuthController : ControllerBase
                 fullName = result.FullName,
                 email = result.Email,
                 role = result.Role,
+                roles = result.Roles,
                 permissions = result.Permissions,
                 expiration = result.AccessTokenExpiration
+            });
+        }
+        catch (AccountInactiveException)
+        {
+            return StatusCode(StatusCodes.Status403Forbidden, new { 
+                code = "ACCOUNT_INACTIVE",
+                message = "Your account has been deactivated. Please contact the system administrator." 
             });
         }
         catch (AccountLockedException)
         {
             return StatusCode(StatusCodes.Status403Forbidden, new { 
+                code = "ACCOUNT_LOCKED",
                 message = "Account is locked due to multiple failed attempts. Please try again later or contact support." 
             });
         }
@@ -89,6 +98,7 @@ public class AuthController : ControllerBase
             fullName = result.FullName,
             email = result.Email,
             role = result.Role,
+            roles = result.Roles,
             permissions = result.Permissions,
             expiration = result.AccessTokenExpiration
         });

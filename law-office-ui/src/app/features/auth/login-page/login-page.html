@@ -4,7 +4,10 @@
 
     <!-- Language Toggle -->
     <div class="absolute top-8 right-8 z-50">
-        <button (click)="appState.toggleLanguage()" 
+        <button type="button"
+                (click)="appState.toggleLanguage()"
+                title="Switch Language"
+                aria-label="Switch Language"
                 class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-white/80 hover:text-white hover:bg-white/10 font-semibold text-sm transition-all border border-white/20">
             <i class="pi pi-globe text-lg"></i>
             <span>{{ appState.currentLang() === 'en' ? 'العربية' : 'English' }}</span>
@@ -30,8 +33,15 @@
             </div>
 
             <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+                @if (authNoticeKey() && !errorMessage()) {
+                    <div class="p-4 bg-amber-50 border-s-4 border-amber-500 rounded-xl flex items-start gap-3">
+                        <i class="pi pi-lock text-amber-600 mt-0.5"></i>
+                        <p class="text-sm font-medium text-amber-800">{{ authNoticeKey()! | translate }}</p>
+                    </div>
+                }
+
                 @if (errorMessage()) {
-                    <div class="p-4 bg-red-50 border-l-4 border-red-500 rounded-xl flex items-start gap-3">
+                    <div class="p-4 bg-red-50 border-s-4 border-red-500 rounded-xl flex items-start gap-3">
                         <i class="pi pi-exclamation-circle text-red-500 mt-0.5"></i>
                         <p class="text-sm font-medium text-red-800">{{ errorMessage() }}</p>
                     </div>
@@ -43,10 +53,10 @@
                         <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-slate-900 transition-colors">
                             <i class="pi pi-envelope"></i>
                         </div>
-                        <input id="email" formControlName="email" type="email" required 
+                        <input id="email" formControlName="email" type="email" required
+                               title="Email Address" placeholder="email@firm.com"
                                class="block w-full ps-12 pe-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 outline-none transition-all duration-200"
-                               [class.border-red-500]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
-                               [placeholder]="'email@firm.com'">
+                               [class.border-red-500]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
                     </div>
                 </div>
 
@@ -56,12 +66,14 @@
                         <div class="absolute inset-y-0 start-0 ps-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-slate-900 transition-colors">
                             <i class="pi pi-lock"></i>
                         </div>
-                        <input id="password" formControlName="password" [type]="showPassword() ? 'text' : 'password'" required 
+                        <input id="password" formControlName="password" [type]="showPassword() ? 'text' : 'password'" required
+                               title="Password" placeholder="••••••••"
                                class="block w-full ps-12 pe-12 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 text-sm focus:ring-4 focus:ring-slate-900/5 focus:border-slate-900 outline-none transition-all duration-200"
-                               [class.border-red-500]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-                               [placeholder]="'••••••••'">
-                        <button type="button" 
+                               [class.border-red-500]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+                        <button type="button"
                                 (click)="showPassword.set(!showPassword())"
+                                title="Toggle password visibility"
+                                aria-label="Toggle password visibility"
                                 class="absolute inset-y-0 end-0 pe-4 flex items-center text-slate-400 hover:text-slate-900 transition-colors">
                             <i [class]="showPassword() ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
                         </button>

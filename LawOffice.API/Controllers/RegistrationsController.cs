@@ -19,7 +19,7 @@ public class RegistrationsController : ControllerBase
         _registrationService = registrationService;
     }
 
-    [Authorize(Policy = Permissions.Cases.View)]
+    [Authorize(Policy = Permissions.Registrations.View)]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<RegistrationListDto>>> GetAll(
         [FromQuery] Guid? clientId = null,
@@ -29,7 +29,7 @@ public class RegistrationsController : ControllerBase
         return Ok(items);
     }
 
-    [Authorize(Policy = Permissions.Cases.View)]
+    [Authorize(Policy = Permissions.Registrations.View)]
     [HttpGet("{id}")]
     public async Task<ActionResult<RegistrationDetailDto>> GetById(Guid id)
     {
@@ -38,7 +38,7 @@ public class RegistrationsController : ControllerBase
         return Ok(item);
     }
 
-    [Authorize(Policy = Permissions.Cases.Create)]
+    [Authorize(Policy = Permissions.Registrations.Create)]
     [HttpPost]
     public async Task<ActionResult<RegistrationDetailDto>> Create([FromBody] CreateRegistrationDto dto)
     {
@@ -47,7 +47,7 @@ public class RegistrationsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
-    [Authorize(Policy = Permissions.Cases.Update)]
+    [Authorize(Policy = Permissions.Registrations.Update)]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateRegistrationDto dto)
     {
@@ -58,7 +58,7 @@ public class RegistrationsController : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Policy = Permissions.Cases.Delete)]
+    [Authorize(Policy = Permissions.Registrations.Delete)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {

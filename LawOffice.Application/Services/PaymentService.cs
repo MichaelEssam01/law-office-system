@@ -11,12 +11,14 @@ public class PaymentService : IPaymentService
     private readonly IUnitOfWork _unitOfWork;
     private readonly IInvoiceService _invoiceService;
     private readonly IFinanceService _financeService;
+    private readonly INotificationService _notificationService;
 
-    public PaymentService(IUnitOfWork unitOfWork, IInvoiceService invoiceService, IFinanceService financeService)
+    public PaymentService(IUnitOfWork unitOfWork, IInvoiceService invoiceService, IFinanceService financeService, INotificationService notificationService)
     {
         _unitOfWork = unitOfWork;
         _invoiceService = invoiceService;
         _financeService = financeService;
+        _notificationService = notificationService;
     }
 
     public async Task<IEnumerable<PaymentListDto>> GetPaymentsAsync(Guid? caseId = null, Guid? invoiceId = null)
@@ -128,7 +130,17 @@ public class PaymentService : IPaymentService
             await _invoiceService.UpdateInvoiceStatusAsync(dto.InvoiceId.Value);
         }
 
-        return await GetPaymentByIdAsync(payment.Id) ?? throw new Exception("Failed to retrieve created payment");
+        var created = await GetPaymentByIdAsync(payment.Id) ?? throw new Exception("Failed to retrieve created payment");
+
+        await _notificationService.NotifyUserAndAdminsAsync(
+            null,
+            "NOTIFICATIONS.PAYMENT_RECORDED_TITLE",
+            "NOTIFICATIONS.PAYMENT_RECORDED_MSG",
+            "Finance",
+            $"/cases/{payment.CaseId}",
+            new Dictionary<string, string> { { "amount", payment.Amount.ToString("N0") }, { "number", created.CaseNumber } });
+
+        return created;
     }
 
     public async Task UpdatePaymentAsync(Guid id, UpdatePaymentDto dto)

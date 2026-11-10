@@ -1,0 +1,60 @@
+<div class="min-h-[75vh] flex items-center justify-center p-6">
+    <div class="max-w-lg w-full bg-white rounded-3xl shadow-sm border border-slate-100 p-8 sm:p-10 text-center space-y-6 animate-in fade-in duration-300">
+        <!-- Shield Icon Badge -->
+        <div class="relative mx-auto w-20 h-20 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shadow-2xs">
+            <i class="pi pi-lock text-4xl"></i>
+            <span class="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] font-extrabold px-2 py-0.5 rounded-full tracking-wider">
+                403
+            </span>
+        </div>
+
+        <div class="space-y-2">
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">
+                {{ 'AUTH.UNAUTHORIZED_TITLE' | translate }}
+            </h1>
+            <p class="text-sm text-slate-500 leading-relaxed">
+                {{ 'AUTH.UNAUTHORIZED_DESC' | translate }}
+            </p>
+        </div>
+
+        <!-- Current Role Info Box -->
+        @if (authService.currentUser()) {
+            <div class="bg-slate-50 rounded-2xl p-4 border border-slate-100 flex items-center justify-between text-start gap-3">
+                <div class="min-w-0">
+                    <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                        {{ 'USERS.ROLES_LABEL' | translate }}
+                    </p>
+                    <p class="text-sm font-bold text-slate-800 truncate mt-0.5">
+                        {{ userRolesLabel() }}
+                    </p>
+                </div>
+                <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100 shrink-0">
+                    {{ authService.currentUser()?.fullName }}
+                </span>
+            </div>
+        }
+
+        <!-- Actions -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <button type="button" pButton
+                    icon="pi pi-home"
+                    [label]="'AUTH.BACK_TO_DASHBOARD' | translate"
+                    title="Back to Dashboard"
+                    aria-label="Back to Dashboard"
+                    [title]="'AUTH.BACK_TO_DASHBOARD' | translate"
+                    [attr.aria-label]="'AUTH.BACK_TO_DASHBOARD' | translate"
+                    class="w-full sm:w-auto p-button-primary rounded-xl px-6 py-2.5 font-bold shadow-sm"
+                    (click)="goToDashboard()"></button>
+            <button type="button" pButton
+                    icon="pi pi-sign-out"
+                    [label]="'AUTH.SWITCH_ACCOUNT' | translate"
+                    title="Switch Account"
+                    aria-label="Switch Account"
+                    [title]="'AUTH.SWITCH_ACCOUNT' | translate"
+                    [attr.aria-label]="'AUTH.SWITCH_ACCOUNT' | translate"
+                    class="w-full sm:w-auto p-button-outlined p-button-secondary rounded-xl px-5 py-2.5 font-semibold"
+                    (click)="switchAccount()"></button>
+        </div>
+    </div>
+</div>
+

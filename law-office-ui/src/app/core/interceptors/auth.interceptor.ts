@@ -1,5 +1,6 @@
 import { HttpInterceptorFn, HttpErrorResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { catchError, throwError, switchMap, BehaviorSubject, filter, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
@@ -18,6 +19,7 @@ const refreshTokenSubject = new BehaviorSubject<boolean | null>(null);
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const authService = inject(AuthService);
+  const router = inject(Router);
 
   const authReq = req.clone({ withCredentials: true });
 
@@ -40,6 +42,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
               isRefreshing = false;
               refreshTokenSubject.next(false);
               authService.clearLocalState();
+              router.navigate(['/login'], { queryParams: { reason: 'session_expired', returnUrl: router.url } });
               return throwError(() => refreshErr);
             })
           );

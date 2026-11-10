@@ -1,3 +1,4 @@
+using LawOffice.Application.Common.Security;
 using LawOffice.Application.DTOs.Users;
 using LawOffice.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -17,14 +18,14 @@ public class UsersController : ControllerBase
         _userService = userService;
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.Users.View)]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserListDto>>> GetUsers()
     {
         return Ok(await _userService.GetAllUsersAsync());
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.Users.View)]
     [HttpGet("{id}")]
     public async Task<ActionResult<UserDetailDto>> GetUser(Guid id)
     {
@@ -33,14 +34,65 @@ public class UsersController : ControllerBase
         return Ok(user);
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.Users.View)]
     [HttpGet("permissions")]
     public async Task<ActionResult<List<string>>> GetAvailablePermissions()
     {
         return Ok(await _userService.GetAvailablePermissionsAsync());
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.Users.View)]
+    [HttpGet("roles")]
+    public async Task<ActionResult<List<RolePermissionsDto>>> GetRolesWithPermissions()
+    {
+        return Ok(await _userService.GetRolesWithPermissionsAsync());
+    }
+
+    [Authorize(Policy = Permissions.Users.Create)]
+    [HttpPost("roles")]
+    public async Task<ActionResult<RolePermissionsDto>> CreateRole([FromBody] CreateRoleDto dto)
+    {
+        try
+        {
+            var role = await _userService.CreateRoleAsync(dto);
+            return Ok(role);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [Authorize(Policy = Permissions.Users.Update)]
+    [HttpPut("roles/{roleName}/permissions")]
+    public async Task<IActionResult> UpdateRolePermissions(string roleName, [FromBody] UpdateRolePermissionsDto dto)
+    {
+        var result = await _userService.UpdateRolePermissionsAsync(roleName, dto.Permissions);
+        if (!result) return NotFound();
+        return NoContent();
+    }
+
+    [Authorize(Policy = Permissions.Users.Delete)]
+    [HttpDelete("roles/{roleName}")]
+    public async Task<IActionResult> DeleteRole(string roleName)
+    {
+        try
+        {
+            var result = await _userService.DeleteRoleAsync(roleName);
+            if (!result) return NotFound();
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [Authorize(Policy = Permissions.Users.Create)]
     [HttpPost]
     public async Task<ActionResult<UserDetailDto>> CreateUser(CreateUserDto dto)
     {
@@ -48,7 +100,7 @@ public class UsersController : ControllerBase
         return CreatedAtAction(nameof(GetUser), new { id = user.Id }, user);
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.Users.Update)]
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateUser(Guid id, UpdateUserDto dto)
     {
@@ -58,7 +110,7 @@ public class UsersController : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize(Policy = Permissions.Users.Delete)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(Guid id)
     {

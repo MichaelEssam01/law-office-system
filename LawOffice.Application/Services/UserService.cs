@@ -27,13 +27,14 @@ public class UserService : IUserService
 
         foreach (var user in users)
         {
-            var roles = await _userManager.GetRolesAsync(user);
+            var roles = (await _userManager.GetRolesAsync(user)).ToList();
             dtos.Add(new UserListDto
             {
                 Id = user.Id,
                 FullName = user.FullName,
                 Email = user.Email!,
                 Role = roles.FirstOrDefault() ?? "No Role",
+                Roles = roles,
                 IsActive = user.IsActive,
                 CreatedAt = user.CreatedAt
             });
@@ -52,13 +53,14 @@ public class UserService : IUserService
         var dtos = new List<UserListDto>();
         foreach (var user in allLawyers)
         {
-            var roles = await _userManager.GetRolesAsync(user);
+            var roles = (await _userManager.GetRolesAsync(user)).ToList();
             dtos.Add(new UserListDto
             {
                 Id = user.Id,
                 FullName = user.FullName,
                 Email = user.Email!,
                 Role = roles.FirstOrDefault() ?? "Lawyer",
+                Roles = roles,
                 IsActive = user.IsActive,
                 CreatedAt = user.CreatedAt
             });
@@ -72,18 +74,30 @@ public class UserService : IUserService
         var user = await _userManager.FindByIdAsync(id.ToString());
         if (user == null) return null;
 
-        var roles = await _userManager.GetRolesAsync(user);
-        var claims = await _userManager.GetClaimsAsync(user);
+        var roles = (await _userManager.GetRolesAsync(user)).ToList();
+        var roleName = roles.FirstOrDefault() ?? "Lawyer";
+        var permissions = new List<string>();
+
+        foreach (var rName in roles)
+        {
+            var role = await _roleManager.FindByNameAsync(rName);
+            if (role != null)
+            {
+                var roleClaims = await _roleManager.GetClaimsAsync(role);
+                permissions.AddRange(roleClaims.Where(c => c.Type == "Permission").Select(c => c.Value));
+            }
+        }
 
         return new UserDetailDto
         {
             Id = user.Id,
             FullName = user.FullName,
             Email = user.Email!,
-            Role = roles.FirstOrDefault() ?? "Lawyer",
+            Role = roleName,
+            Roles = roles,
             IsActive = user.IsActive,
             CreatedAt = user.CreatedAt,
-            Permissions = claims.Where(c => c.Type == "Permission").Select(c => c.Value).ToList()
+            Permissions = permissions.Distinct().ToList()
         };
     }
 
@@ -96,7 +110,7 @@ public class UserService : IUserService
             FullName = dto.FullName,
             EmailConfirmed = true,
             CreatedAt = DateTime.UtcNow,
-            IsActive = true
+            IsActive = dto.IsActive
         };
 
         var result = await _userManager.CreateAsync(user, dto.Password);
@@ -105,12 +119,11 @@ public class UserService : IUserService
             throw new Exception($"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
         }
 
-        await _userManager.AddToRoleAsync(user, dto.Role);
+        var rolesToAssign = dto.Roles != null && dto.Roles.Any()
+            ? dto.Roles.Distinct().ToList()
+            : (!string.IsNullOrWhiteSpace(dto.Role) ? new List<string> { dto.Role } : new List<string> { "Lawyer" });
 
-        foreach (var permission in dto.Permissions)
-        {
-            await _userManager.AddClaimAsync(user, new Claim("Permission", permission));
-        }
+        await _userManager.AddToRolesAsync(user, rolesToAssign);
 
         return (await GetUserByIdAsync(user.Id))!;
     }
@@ -126,6 +139,11 @@ public class UserService : IUserService
         var updateResult = await _userManager.UpdateAsync(user);
         if (!updateResult.Succeeded) return false;
 
+        if (!dto.IsActive)
+        {
+            await _userManager.UpdateSecurityStampAsync(user);
+        }
+
         // Update Password if provided
         if (!string.IsNullOrEmpty(dto.Password))
         {
@@ -133,24 +151,14 @@ public class UserService : IUserService
             await _userManager.ResetPasswordAsync(user, token, dto.Password);
         }
 
-        // Update Role
+        // Update Roles
+        var rolesToAssign = dto.Roles != null && dto.Roles.Any()
+            ? dto.Roles.Distinct().ToList()
+            : (!string.IsNullOrWhiteSpace(dto.Role) ? new List<string> { dto.Role } : new List<string> { "Lawyer" });
+
         var currentRoles = await _userManager.GetRolesAsync(user);
         await _userManager.RemoveFromRolesAsync(user, currentRoles);
-        await _userManager.AddToRoleAsync(user, dto.Role);
-
-        // Update Permissions (Claims)
-        var currentClaims = await _userManager.GetClaimsAsync(user);
-        var permissionClaims = currentClaims.Where(c => c.Type == "Permission").ToList();
-        
-        foreach (var claim in permissionClaims)
-        {
-            await _userManager.RemoveClaimAsync(user, claim);
-        }
-
-        foreach (var permission in dto.Permissions)
-        {
-            await _userManager.AddClaimAsync(user, new Claim("Permission", permission));
-        }
+        await _userManager.AddToRolesAsync(user, rolesToAssign);
 
         return true;
     }
@@ -175,5 +183,120 @@ public class UserService : IUserService
             .ToList();
 
         return await Task.FromResult(permissions);
+    }
+
+    private static readonly string[] SystemRoles = { "Admin", "Lawyer", "Receptionist", "Accountant" };
+
+    public async Task<List<RolePermissionsDto>> GetRolesWithPermissionsAsync()
+    {
+        var allRoles = await _roleManager.Roles.ToListAsync();
+        var sortedRoles = allRoles
+            .OrderBy(r =>
+            {
+                var idx = Array.FindIndex(SystemRoles, s => string.Equals(s, r.Name, StringComparison.OrdinalIgnoreCase));
+                return idx >= 0 ? idx : 100;
+            })
+            .ThenBy(r => r.Name)
+            .ToList();
+
+        var result = new List<RolePermissionsDto>();
+
+        foreach (var role in sortedRoles)
+        {
+            var roleName = role.Name!;
+            var claims = await _roleManager.GetClaimsAsync(role);
+            var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
+
+            result.Add(new RolePermissionsDto
+            {
+                Role = roleName,
+                Permissions = claims.Where(c => c.Type == "Permission").Select(c => c.Value).Distinct().ToList(),
+                UsersCount = usersInRole.Count,
+                IsSystemRole = SystemRoles.Contains(roleName, StringComparer.OrdinalIgnoreCase)
+            });
+        }
+
+        return result;
+    }
+
+    public async Task<RolePermissionsDto> CreateRoleAsync(CreateRoleDto dto)
+    {
+        var roleName = dto.RoleName?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(roleName))
+        {
+            throw new ArgumentException("Role name is required.");
+        }
+
+        if (await _roleManager.RoleExistsAsync(roleName))
+        {
+            throw new InvalidOperationException($"Role '{roleName}' already exists.");
+        }
+
+        var role = new IdentityRole<Guid>(roleName);
+        var createResult = await _roleManager.CreateAsync(role);
+        if (!createResult.Succeeded)
+        {
+            throw new Exception($"Failed to create role: {string.Join(", ", createResult.Errors.Select(e => e.Description))}");
+        }
+
+        var distinctPermissions = (dto.Permissions ?? new List<string>()).Distinct().ToList();
+        foreach (var perm in distinctPermissions)
+        {
+            await _roleManager.AddClaimAsync(role, new Claim("Permission", perm));
+        }
+
+        return new RolePermissionsDto
+        {
+            Role = roleName,
+            Permissions = distinctPermissions,
+            UsersCount = 0,
+            IsSystemRole = false
+        };
+    }
+
+    public async Task<bool> UpdateRolePermissionsAsync(string roleName, List<string> permissions)
+    {
+        var role = await _roleManager.FindByNameAsync(roleName);
+        if (role == null) return false;
+
+        // Admin role always keeps all available permissions for safety
+        var targetPermissions = string.Equals(roleName, "Admin", StringComparison.OrdinalIgnoreCase)
+            ? await GetAvailablePermissionsAsync()
+            : permissions.Distinct().ToList();
+
+        var existingClaims = await _roleManager.GetClaimsAsync(role);
+        var permissionClaims = existingClaims.Where(c => c.Type == "Permission").ToList();
+
+        foreach (var claim in permissionClaims)
+        {
+            await _roleManager.RemoveClaimAsync(role, claim);
+        }
+
+        foreach (var perm in targetPermissions)
+        {
+            await _roleManager.AddClaimAsync(role, new Claim("Permission", perm));
+        }
+
+        return true;
+    }
+
+    public async Task<bool> DeleteRoleAsync(string roleName)
+    {
+        if (SystemRoles.Contains(roleName, StringComparer.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Built-in system roles cannot be deleted.");
+        }
+
+        var role = await _roleManager.FindByNameAsync(roleName);
+        if (role == null) return false;
+
+        var usersInRole = await _userManager.GetUsersInRoleAsync(roleName);
+        if (usersInRole.Any())
+        {
+            throw new InvalidOperationException("Cannot delete a role that is currently assigned to users.");
+        }
+
+        var result = await _roleManager.DeleteAsync(role);
+        return result.Succeeded;
     }
 }

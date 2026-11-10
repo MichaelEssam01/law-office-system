@@ -10,10 +10,12 @@ namespace LawOffice.Application.Services;
 public class SessionService : ISessionService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly INotificationService _notificationService;
 
-    public SessionService(IUnitOfWork unitOfWork)
+    public SessionService(IUnitOfWork unitOfWork, INotificationService notificationService)
     {
         _unitOfWork = unitOfWork;
+        _notificationService = notificationService;
     }
 
     public async Task<IEnumerable<SessionListDto>> GetSessionsAsync(Guid? caseId = null, SessionStatus? status = null, DateTime? date = null)
@@ -121,7 +123,17 @@ public class SessionService : ISessionService
         await _unitOfWork.Repository<Session>().AddAsync(session);
         await _unitOfWork.CompleteAsync();
 
-        return await GetSessionByIdAsync(session.Id) ?? throw new Exception("Failed to retrieve created session");
+        var created = await GetSessionByIdAsync(session.Id) ?? throw new Exception("Failed to retrieve created session");
+
+        await _notificationService.NotifyUserAndAdminsAsync(
+            session.AssignedLawyerId,
+            "NOTIFICATIONS.SESSION_SCHEDULED_TITLE",
+            "NOTIFICATIONS.SESSION_SCHEDULED_MSG",
+            "Sessions",
+            $"/cases/{session.CaseId}",
+            new Dictionary<string, string> { { "number", created.CaseNumber }, { "court", session.CourtName } });
+
+        return created;
     }
 
     public async Task UpdateSessionAsync(Guid id, SessionUpdateDto dto)

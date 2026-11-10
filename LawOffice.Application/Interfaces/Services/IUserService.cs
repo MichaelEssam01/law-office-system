@@ -11,4 +11,8 @@ public interface IUserService
     Task<bool> UpdateUserAsync(UpdateUserDto dto);
     Task<bool> DeleteUserAsync(Guid id);
     Task<List<string>> GetAvailablePermissionsAsync();
+    Task<List<RolePermissionsDto>> GetRolesWithPermissionsAsync();
+    Task<RolePermissionsDto> CreateRoleAsync(CreateRoleDto dto);
+    Task<bool> UpdateRolePermissionsAsync(string roleName, List<string> permissions);
+    Task<bool> DeleteRoleAsync(string roleName);
 }

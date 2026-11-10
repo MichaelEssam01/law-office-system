@@ -6,21 +6,16 @@ export const authGuard: CanActivateFn = async (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  // If we have a user in localStorage but no permissions yet, validate session with server
   if (authService.isAuthenticated()) {
-    if (authService.permissions().length === 0 && authService.currentUser()?.role !== 'Admin') {
-      // Permissions not loaded yet — validate session to restore them from /me
-      return authService.validateSession().then(valid => {
-        if (!valid) {
-          router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
-        }
-        return valid;
-      });
-    }
     return true;
   }
 
-  // No user in memory — redirect to login
-  router.navigate(['/login'], { queryParams: { returnUrl: state.url } });
+  // Try restoring session from HttpOnly cookie if not yet in memory
+  const restored = await authService.validateSession();
+  if (restored) {
+    return true;
+  }
+
+  router.navigate(['/login'], { queryParams: { returnUrl: state.url, reason: 'auth_required' } });
   return false;
 };

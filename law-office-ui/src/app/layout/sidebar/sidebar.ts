@@ -26,20 +26,24 @@ export class Sidebar {
 
   legalWorksExpanded = false;
 
-  legalWorkItems: { label: string, key: string, icon: string, routerLink: string }[] = [
-    { label: 'القضايا', key: 'CASES', icon: 'pi pi-briefcase', routerLink: '/cases' },
-    { label: 'العقود', key: 'CONTRACTS', icon: 'pi pi-file-edit', routerLink: '/contracts' },
-    { label: 'التسجيلات', key: 'REGISTRATIONS', icon: 'pi pi-bookmark', routerLink: '/registrations' },
-    { label: 'الشركات', key: 'COMPANIES', icon: 'pi pi-building', routerLink: '/companies' },
+  legalWorkItems: { label: string, key: string, icon: string, routerLink: string, permission?: string }[] = [
+    { label: 'القضايا', key: 'CASES', icon: 'pi pi-briefcase', routerLink: '/cases', permission: 'Cases.View' },
+    { label: 'العقود', key: 'CONTRACTS', icon: 'pi pi-file-edit', routerLink: '/contracts', permission: 'Contracts.View' },
+    { label: 'التسجيلات', key: 'REGISTRATIONS', icon: 'pi pi-bookmark', routerLink: '/registrations', permission: 'Registrations.View' },
+    { label: 'الشركات', key: 'COMPANIES', icon: 'pi pi-building', routerLink: '/companies', permission: 'Companies.View' },
   ];
 
   menuItems: { label: string, key: string, icon: string, routerLink: string, active: boolean, permission?: string }[] = [
     { label: 'الرئيسية', key: 'DASHBOARD', icon: 'pi pi-home', routerLink: '/dashboard', active: true },
-    { label: 'العملاء', key: 'CLIENTS', icon: 'pi pi-users', routerLink: '/clients', active: false },
-    { label: 'الجلسات', key: 'SESSIONS', icon: 'pi pi-calendar', routerLink: '/sessions', active: false },
-    { label: 'المالية', key: 'FINANCE', icon: 'pi pi-wallet', routerLink: '/finance', active: false },
-    { label: 'المستندات', key: 'DOCUMENTS', icon: 'pi pi-file', routerLink: '/documents', active: false },
+    { label: 'العملاء', key: 'CLIENTS', icon: 'pi pi-users', routerLink: '/clients', active: false, permission: 'Clients.View' },
+    { label: 'الجلسات', key: 'SESSIONS', icon: 'pi pi-calendar', routerLink: '/sessions', active: false, permission: 'Sessions.View' },
+    { label: 'المالية', key: 'FINANCE', icon: 'pi pi-wallet', routerLink: '/finance', active: false, permission: 'Finance.View' },
+    { label: 'المستندات', key: 'DOCUMENTS', icon: 'pi pi-file', routerLink: '/documents', active: false, permission: 'Documents.View' },
   ];
+
+  hasAnyLegalWorkPermission(): boolean {
+    return this.legalWorkItems.some(item => !item.permission || this.authService.hasPermission(item.permission));
+  }
 
   toggleLegalWorks() {
     this.legalWorksExpanded = !this.legalWorksExpanded;

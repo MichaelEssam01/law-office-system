@@ -10,11 +10,13 @@ public class RegistrationService : IRegistrationService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IAuditService _auditService;
+    private readonly INotificationService _notificationService;
 
-    public RegistrationService(IUnitOfWork unitOfWork, IAuditService auditService)
+    public RegistrationService(IUnitOfWork unitOfWork, IAuditService auditService, INotificationService notificationService)
     {
         _unitOfWork = unitOfWork;
         _auditService = auditService;
+        _notificationService = notificationService;
     }
 
     public async Task<IEnumerable<RegistrationListDto>> GetAllAsync(Guid? clientId = null, Guid? lawyerId = null)
@@ -163,6 +165,14 @@ public class RegistrationService : IRegistrationService
         await _unitOfWork.Repository<Registration>().AddAsync(entity);
         await _unitOfWork.CompleteAsync();
         await _auditService.LogAsync("RegistrationCreated", "Registration", entity.Id.ToString(), userId, $"{{\"number\": \"{entity.RegistrationNumber}\", \"authority\": \"{entity.AuthorityName}\"}}");
+
+        await _notificationService.NotifyUserAndAdminsAsync(
+            entity.AssignedLawyerId,
+            "NOTIFICATIONS.REGISTRATION_ASSIGNED_TITLE",
+            "NOTIFICATIONS.REGISTRATION_ASSIGNED_MSG",
+            "Cases",
+            "/registrations",
+            new Dictionary<string, string> { { "number", entity.RegistrationNumber }, { "title", entity.AuthorityName } });
 
         return (await GetByIdAsync(entity.Id))!;
     }

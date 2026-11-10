@@ -9,4 +9,5 @@ public interface INotificationService
     Task MarkAsReadAsync(Guid notificationId);
     Task MarkAllAsReadAsync(Guid userId);
     Task CreateNotificationAsync(Guid userId, string title, string message, string type, string? link = null, Dictionary<string, string>? parameters = null);
+    Task NotifyUserAndAdminsAsync(Guid? targetUserId, string title, string message, string type, string? link = null, Dictionary<string, string>? parameters = null);
 }

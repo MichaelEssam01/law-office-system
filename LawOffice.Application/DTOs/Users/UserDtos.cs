@@ -8,6 +8,7 @@ public class UserListDto
     public string FullName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public string Role { get; set; } = string.Empty;
+    public List<string> Roles { get; set; } = new();
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
 }
@@ -23,6 +24,8 @@ public class CreateUserDto
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
     public string Role { get; set; } = "Lawyer";
+    public List<string> Roles { get; set; } = new();
+    public bool IsActive { get; set; } = true;
     public List<string> Permissions { get; set; } = new();
 }
 
@@ -32,6 +35,26 @@ public class UpdateUserDto
     public string FullName { get; set; } = string.Empty;
     public string? Password { get; set; } // Optional: only if changing
     public string Role { get; set; } = "Lawyer";
+    public List<string> Roles { get; set; } = new();
     public bool IsActive { get; set; }
+    public List<string> Permissions { get; set; } = new();
+}
+
+public class RolePermissionsDto
+{
+    public string Role { get; set; } = string.Empty;
+    public List<string> Permissions { get; set; } = new();
+    public int UsersCount { get; set; }
+    public bool IsSystemRole { get; set; }
+}
+
+public class CreateRoleDto
+{
+    public string RoleName { get; set; } = string.Empty;
+    public List<string> Permissions { get; set; } = new();
+}
+
+public class UpdateRolePermissionsDto
+{
     public List<string> Permissions { get; set; } = new();
 }

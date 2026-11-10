@@ -23,8 +23,7 @@ public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
             return Task.CompletedTask;
         }
 
-        // Check if the user has the required permission claim
-        // In ASP.NET Core Identity, Role claims are usually automatically loaded into the User principal
+        // Check if the user has the required permission claim from their assigned role(s)
         var hasPermission = context.User.Claims.Any(c => 
             c.Type == "Permission" && 
             c.Value == requirement.Permission);

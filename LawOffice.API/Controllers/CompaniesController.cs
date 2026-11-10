@@ -19,7 +19,7 @@ public class CompaniesController : ControllerBase
         _companyService = companyService;
     }
 
-    [Authorize(Policy = Permissions.Cases.View)]
+    [Authorize(Policy = Permissions.Companies.View)]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<CompanyListDto>>> GetAll(
         [FromQuery] string? status = null,
@@ -30,7 +30,7 @@ public class CompaniesController : ControllerBase
         return Ok(items);
     }
 
-    [Authorize(Policy = Permissions.Cases.View)]
+    [Authorize(Policy = Permissions.Companies.View)]
     [HttpGet("{id}")]
     public async Task<ActionResult<CompanyDetailDto>> GetById(Guid id)
     {
@@ -39,7 +39,7 @@ public class CompaniesController : ControllerBase
         return Ok(item);
     }
 
-    [Authorize(Policy = Permissions.Cases.Create)]
+    [Authorize(Policy = Permissions.Companies.Create)]
     [HttpPost]
     public async Task<ActionResult<CompanyDetailDto>> Create([FromBody] CreateCompanyDto dto)
     {
@@ -48,7 +48,7 @@ public class CompaniesController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
     }
 
-    [Authorize(Policy = Permissions.Cases.Update)]
+    [Authorize(Policy = Permissions.Companies.Update)]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] UpdateCompanyDto dto)
     {
@@ -59,7 +59,7 @@ public class CompaniesController : ControllerBase
         return NoContent();
     }
 
-    [Authorize(Policy = Permissions.Cases.Delete)]
+    [Authorize(Policy = Permissions.Companies.Delete)]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(Guid id)
     {

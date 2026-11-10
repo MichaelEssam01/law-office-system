@@ -7,6 +7,7 @@ export interface User {
   fullName: string;
   email: string;
   role: string;
+  roles?: string[];
 }
 
 export interface AuthResponse {
@@ -14,6 +15,7 @@ export interface AuthResponse {
   fullName: string;
   email: string;
   role: string;
+  roles?: string[];
   permissions: string[];
 }
 
@@ -21,6 +23,7 @@ export interface UserInfo {
   fullName: string;
   email: string;
   role: string;
+  roles?: string[];
   permissions: string[];
 }
 
@@ -40,15 +43,12 @@ export class AuthService {
   public isAuthenticated = computed(() => !!this._currentUser());
 
   /**
-   * Check if user has a specific permission or role
+   * Check if user has a specific permission from their assigned role rules
    */
   public hasPermission(permission: string): boolean {
     const user = this._currentUser();
-    const permissions = this._permissions();
-    
     if (!user) return false;
-    if (user.role === 'Admin') return true;
-    return permissions.includes(permission);
+    return this._permissions().some(p => p === permission);
   }
 
   constructor() {
@@ -90,7 +90,8 @@ export class AuthService {
     const user: User = {
       fullName: response.fullName,
       email: response.email,
-      role: response.role
+      role: response.role,
+      roles: response.roles && response.roles.length > 0 ? response.roles : [response.role]
     };
     
     this._currentUser.set(user);
@@ -109,7 +110,8 @@ export class AuthService {
     const user: User = {
       fullName: userInfo.fullName,
       email: userInfo.email,
-      role: userInfo.role
+      role: userInfo.role,
+      roles: userInfo.roles && userInfo.roles.length > 0 ? userInfo.roles : [userInfo.role]
     };
     this._currentUser.set(user);
     this._permissions.set(userInfo.permissions || []);
@@ -122,7 +124,8 @@ export class AuthService {
         const user: User = {
           fullName: response.fullName,
           email: response.email,
-          role: response.role
+          role: response.role,
+          roles: response.roles && response.roles.length > 0 ? response.roles : [response.role]
         };
         this._currentUser.set(user);
         this._permissions.set(response.permissions || []);

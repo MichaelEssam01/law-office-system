@@ -7,16 +7,23 @@ import { AuthService } from '../services/auth.service';
  * @param permission The permission string to check
  */
 export const permissionGuard: (permission: string) => CanActivateFn = (permission) => {
-  return (route, state) => {
+  return async (route, state) => {
     const authService = inject(AuthService);
     const router = inject(Router);
+
+    if (!authService.isAuthenticated()) {
+      const valid = await authService.validateSession();
+      if (!valid) {
+        router.navigate(['/login'], { queryParams: { returnUrl: state.url, reason: 'auth_required' } });
+        return false;
+      }
+    }
 
     if (authService.hasPermission(permission)) {
       return true;
     }
 
-    // Redirect to a default page or unauthorized page
-    router.navigate(['/dashboard']); 
+    router.navigate(['/unauthorized'], { queryParams: { required: permission, attemptedUrl: state.url } });
     return false;
   };
 };

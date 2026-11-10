@@ -6,3 +6,10 @@ public class AccountLockedException : Exception
     {
     }
 }
+
+public class AccountInactiveException : Exception
+{
+    public AccountInactiveException() : base("Account is inactive.")
+    {
+    }
+}
