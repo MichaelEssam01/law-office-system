@@ -1,4 +1,4 @@
-import { Component, effect, inject } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AvatarModule } from 'primeng/avatar';
 import { InputTextModule } from 'primeng/inputtext';
@@ -47,6 +47,22 @@ export class Header {
   private router = inject(Router);
 
   profileMenuItems: MenuItem[] = [];
+  notifScopeTab = signal<'personal' | 'system'>('personal');
+
+  canViewSystemNotifications = computed(() =>
+    this.authService.hasPermission('Cases.ViewAll') ||
+    this.authService.hasPermission('Users.View') ||
+    this.notificationService.systemNotifications().length > 0
+  );
+
+  displayedNotifications = computed(() => {
+    if (!this.canViewSystemNotifications()) {
+      return this.notificationService.notifications();
+    }
+    return this.notifScopeTab() === 'system'
+      ? this.notificationService.systemNotifications()
+      : this.notificationService.personalNotifications();
+  });
 
   constructor() {
     // Refresh menu items when language changes or user logs in/changes role
@@ -54,6 +70,13 @@ export class Header {
     effect(() => {
       const user = this.authService.currentUser();
       this.updateMenuItems();
+    });
+    effect(() => {
+      const personalCount = this.notificationService.personalNotifications().length;
+      const systemCount = this.notificationService.systemNotifications().length;
+      if (personalCount === 0 && systemCount > 0 && this.canViewSystemNotifications()) {
+        this.notifScopeTab.set('system');
+      }
     });
   }
 

@@ -13,6 +13,7 @@ namespace LawOffice.Application.Services;
 
 public class NotificationService : INotificationService
 {
+    private static readonly SemaphoreSlim _seedLock = new(1, 1);
     private readonly IUnitOfWork _unitOfWork;
     private readonly IHubContext<NotificationHub> _hubContext;
     private readonly UserManager<User> _userManager;
@@ -30,7 +31,7 @@ public class NotificationService : INotificationService
         _roleManager = roleManager;
     }
 
-    public async Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(Guid userId, int count = 20)
+    public async Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(Guid userId, int count = 100)
     {
         await EnsureInitialNotificationsAsync(userId);
 
@@ -167,6 +168,8 @@ public class NotificationService : INotificationService
                 msgParams["lawyer"] = assignedLawyerName;
             }
 
+            msgParams["scope"] = isAssignedUser ? "personal" : "system";
+
             var effectiveMessage = isAssignedUser
                 ? message
                 : GetAdminMessageKey(message, !string.IsNullOrWhiteSpace(assignedLawyerName));
@@ -200,198 +203,249 @@ public class NotificationService : INotificationService
 
     private async Task EnsureInitialNotificationsAsync(Guid userId)
     {
-        // Upgrade any previously seeded notifications for this user that used CASE_ASSIGNED_MSG when another lawyer was assigned
-        var existingWrongNotifs = await _unitOfWork.Repository<Notification>().Query()
-            .Where(n => n.UserId == userId && n.Message == "NOTIFICATIONS.CASE_ASSIGNED_MSG" && n.Link != null && n.Link.StartsWith("/cases/"))
-            .ToListAsync();
-
-        if (existingWrongNotifs.Any())
+        await _seedLock.WaitAsync();
+        try
         {
-            bool updatedAny = false;
-            foreach (var n in existingWrongNotifs)
+            var existingUserNotifs = await _unitOfWork.Repository<Notification>().Query()
+                .Where(n => n.UserId == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToListAsync();
+
+            if (existingUserNotifs.Any())
             {
-                var caseIdStr = n.Link!.Replace("/cases/", "");
-                if (Guid.TryParse(caseIdStr, out var caseId))
+                bool updatedAny = false;
+                var seenKeys = new HashSet<string>();
+
+                foreach (var n in existingUserNotifs)
                 {
-                    var c = await _unitOfWork.Repository<Case>().Query()
-                        .Include(x => x.AssignedLawyer)
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(x => x.Id == caseId);
+                    var dict = !string.IsNullOrEmpty(n.ParametersJson)
+                        ? JsonSerializer.Deserialize<Dictionary<string, string>>(n.ParametersJson) ?? new Dictionary<string, string>()
+                        : new Dictionary<string, string>();
 
-                    if (c != null && c.AssignedLawyerId != userId)
+                    bool changedThis = false;
+
+                    if (n.Message == "NOTIFICATIONS.CASE_ASSIGNED_MSG" && n.Link != null && n.Link.StartsWith("/cases/"))
                     {
-                        var dict = !string.IsNullOrEmpty(n.ParametersJson)
-                            ? JsonSerializer.Deserialize<Dictionary<string, string>>(n.ParametersJson) ?? new Dictionary<string, string>()
-                            : new Dictionary<string, string>();
+                        var caseIdStr = n.Link.Replace("/cases/", "");
+                        if (Guid.TryParse(caseIdStr, out var caseId))
+                        {
+                            var c = await _unitOfWork.Repository<Case>().Query()
+                                .Include(x => x.AssignedLawyer)
+                                .AsNoTracking()
+                                .FirstOrDefaultAsync(x => x.Id == caseId);
 
-                        if (c.AssignedLawyer != null)
-                        {
-                            dict["lawyer"] = c.AssignedLawyer.FullName;
-                            n.Message = "NOTIFICATIONS.ADMIN_CASE_ASSIGNED_MSG";
+                            if (c != null && c.AssignedLawyerId != userId)
+                            {
+                                if (c.AssignedLawyer != null)
+                                {
+                                    dict["lawyer"] = c.AssignedLawyer.FullName;
+                                    n.Message = "NOTIFICATIONS.ADMIN_CASE_ASSIGNED_MSG";
+                                }
+                                else
+                                {
+                                    n.Message = "NOTIFICATIONS.ADMIN_CASE_CREATED_MSG";
+                                }
+                                dict["scope"] = "system";
+                                changedThis = true;
+                            }
                         }
-                        else
-                        {
-                            n.Message = "NOTIFICATIONS.ADMIN_CASE_CREATED_MSG";
-                        }
+                    }
+
+                    if (!dict.ContainsKey("scope"))
+                    {
+                        bool isSystemMsg = n.Message.StartsWith("NOTIFICATIONS.ADMIN_")
+                            || n.Message == "NOTIFICATIONS.PAYMENT_RECORDED_MSG"
+                            || n.Message == "NOTIFICATIONS.SESSION_SCHEDULED_MSG";
+                        dict["scope"] = isSystemMsg ? "system" : "personal";
+                        changedThis = true;
+                    }
+
+                    var dedupKey = $"{n.Title}|{n.Message}|{n.Link}|{n.CreatedAt:O}";
+                    if (!seenKeys.Add(dedupKey))
+                    {
+                        _unitOfWork.Repository<Notification>().Delete(n);
+                        updatedAny = true;
+                        continue;
+                    }
+
+                    if (changedThis)
+                    {
                         n.ParametersJson = JsonSerializer.Serialize(dict);
                         _unitOfWork.Repository<Notification>().Update(n);
                         updatedAny = true;
                     }
                 }
-            }
-            if (updatedAny)
-            {
-                await _unitOfWork.CompleteAsync();
-            }
-        }
 
-        var hasAny = await _unitOfWork.Repository<Notification>().Query()
-            .AnyAsync(n => n.UserId == userId);
-        if (hasAny) return;
-
-        var user = await _userManager.FindByIdAsync(userId.ToString());
-        if (user == null) return;
-
-        var userRoles = await _userManager.GetRolesAsync(user);
-        bool canViewAllCases = false;
-        foreach (var roleName in userRoles)
-        {
-            var role = await _roleManager.FindByNameAsync(roleName);
-            if (role != null)
-            {
-                var claims = await _roleManager.GetClaimsAsync(role);
-                if (claims.Any(c => c.Type == "Permission" && c.Value == Permissions.Cases.ViewAll))
+                if (updatedAny)
                 {
-                    canViewAllCases = true;
-                    break;
+                    await _unitOfWork.CompleteAsync();
                 }
             }
-        }
 
-        var casesQuery = _unitOfWork.Repository<Case>().Query()
-            .Include(c => c.AssignedLawyer)
-            .AsNoTracking();
-        if (!canViewAllCases)
-        {
-            casesQuery = casesQuery.Where(c => c.AssignedLawyerId == userId);
-        }
+            var existingKeys = new HashSet<string>(
+                existingUserNotifs.Select(n => $"{n.Type}|{n.Link}|{n.CreatedAt:yyyy-MM-dd HH:mm:ss}")
+            );
 
-        var recentCases = await casesQuery
-            .OrderByDescending(c => c.CreatedAt)
-            .Take(3)
-            .ToListAsync();
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null) return;
 
-        var seeded = new List<Notification>();
-        foreach (var c in recentCases)
-        {
-            bool isSelfAssigned = c.AssignedLawyerId.HasValue && c.AssignedLawyerId.Value == userId;
-            var msgKey = isSelfAssigned
-                ? "NOTIFICATIONS.CASE_ASSIGNED_MSG"
-                : (c.AssignedLawyer != null ? "NOTIFICATIONS.ADMIN_CASE_ASSIGNED_MSG" : "NOTIFICATIONS.ADMIN_CASE_CREATED_MSG");
-
-            var paramDict = new Dictionary<string, string>
+            var userRoles = await _userManager.GetRolesAsync(user);
+            bool canViewAllCases = false;
+            foreach (var roleName in userRoles)
             {
-                { "number", c.CaseNumber },
-                { "title", c.Title }
-            };
-            if (c.AssignedLawyer != null)
-            {
-                paramDict["lawyer"] = c.AssignedLawyer.FullName;
+                var role = await _roleManager.FindByNameAsync(roleName);
+                if (role != null)
+                {
+                    var claims = await _roleManager.GetClaimsAsync(role);
+                    if (claims.Any(c => c.Type == "Permission" && c.Value == Permissions.Cases.ViewAll))
+                    {
+                        canViewAllCases = true;
+                        break;
+                    }
+                }
             }
 
-            seeded.Add(new Notification
+            var casesQuery = _unitOfWork.Repository<Case>().Query()
+                .Include(c => c.AssignedLawyer)
+                .AsNoTracking();
+            if (!canViewAllCases)
             {
-                UserId = userId,
-                Title = "NOTIFICATIONS.CASE_ASSIGNED_TITLE",
-                Message = msgKey,
-                Type = "Cases",
-                Link = $"/cases/{c.Id}",
-                IsRead = false,
-                CreatedAt = c.CreatedAt,
-                ParametersJson = JsonSerializer.Serialize(paramDict)
-            });
-        }
-
-        var sessionsQuery = _unitOfWork.Repository<Session>().Query()
-            .Include(s => s.Case)
-            .Include(s => s.AssignedLawyer)
-            .AsNoTracking();
-        if (!canViewAllCases)
-        {
-            sessionsQuery = sessionsQuery.Where(s => s.AssignedLawyerId == userId);
-        }
-
-        var recentSessions = await sessionsQuery
-            .OrderByDescending(s => s.ScheduledAt)
-            .Take(2)
-            .ToListAsync();
-
-        foreach (var s in recentSessions)
-        {
-            bool isSelfAssigned = s.AssignedLawyerId.HasValue && s.AssignedLawyerId.Value == userId;
-            var msgKey = (!isSelfAssigned && s.AssignedLawyer != null)
-                ? "NOTIFICATIONS.ADMIN_SESSION_SCHEDULED_MSG"
-                : "NOTIFICATIONS.SESSION_SCHEDULED_MSG";
-
-            var paramDict = new Dictionary<string, string>
-            {
-                { "number", s.Case?.CaseNumber ?? "" },
-                { "court", s.CourtName }
-            };
-            if (s.AssignedLawyer != null)
-            {
-                paramDict["lawyer"] = s.AssignedLawyer.FullName;
+                casesQuery = casesQuery.Where(c => c.AssignedLawyerId == userId);
             }
 
-            seeded.Add(new Notification
-            {
-                UserId = userId,
-                Title = "NOTIFICATIONS.SESSION_SCHEDULED_TITLE",
-                Message = msgKey,
-                Type = "Sessions",
-                Link = $"/cases/{s.CaseId}",
-                IsRead = false,
-                CreatedAt = s.CreatedAt,
-                ParametersJson = JsonSerializer.Serialize(paramDict)
-            });
-        }
-
-        if (canViewAllCases)
-        {
-            var recentPayments = await _unitOfWork.Repository<Payment>().Query()
-                .Include(p => p.Case)
-                .AsNoTracking()
-                .OrderByDescending(p => p.PaymentDate)
-                .Take(2)
+            var recentCases = await casesQuery
+                .OrderByDescending(c => c.CreatedAt)
+                .Take(50)
                 .ToListAsync();
 
-            foreach (var p in recentPayments)
+            var seeded = new List<Notification>();
+            foreach (var c in recentCases)
             {
+                var key = $"Cases|/cases/{c.Id}|{c.CreatedAt:yyyy-MM-dd HH:mm:ss}";
+                if (!existingKeys.Add(key)) continue;
+
+                bool isSelfAssigned = c.AssignedLawyerId.HasValue && c.AssignedLawyerId.Value == userId;
+                var msgKey = isSelfAssigned
+                    ? "NOTIFICATIONS.CASE_ASSIGNED_MSG"
+                    : (c.AssignedLawyer != null ? "NOTIFICATIONS.ADMIN_CASE_ASSIGNED_MSG" : "NOTIFICATIONS.ADMIN_CASE_CREATED_MSG");
+
+                var paramDict = new Dictionary<string, string>
+                {
+                    { "number", c.CaseNumber },
+                    { "title", c.Title },
+                    { "scope", isSelfAssigned ? "personal" : "system" }
+                };
+                if (c.AssignedLawyer != null)
+                {
+                    paramDict["lawyer"] = c.AssignedLawyer.FullName;
+                }
+
                 seeded.Add(new Notification
                 {
                     UserId = userId,
-                    Title = "NOTIFICATIONS.PAYMENT_RECORDED_TITLE",
-                    Message = "NOTIFICATIONS.PAYMENT_RECORDED_MSG",
-                    Type = "Finance",
-                    Link = $"/cases/{p.CaseId}",
+                    Title = "NOTIFICATIONS.CASE_ASSIGNED_TITLE",
+                    Message = msgKey,
+                    Type = "Cases",
+                    Link = $"/cases/{c.Id}",
                     IsRead = false,
-                    CreatedAt = p.CreatedAt,
-                    ParametersJson = JsonSerializer.Serialize(new Dictionary<string, string>
-                    {
-                        { "amount", p.Amount.ToString("N0") },
-                        { "number", p.Case?.CaseNumber ?? "" }
-                    })
+                    CreatedAt = c.CreatedAt,
+                    ParametersJson = JsonSerializer.Serialize(paramDict)
                 });
             }
-        }
 
-        if (seeded.Any())
-        {
-            foreach (var n in seeded)
+            var sessionsQuery = _unitOfWork.Repository<Session>().Query()
+                .Include(s => s.Case)
+                .Include(s => s.AssignedLawyer)
+                .AsNoTracking();
+            if (!canViewAllCases)
             {
-                await _unitOfWork.Repository<Notification>().AddAsync(n);
+                sessionsQuery = sessionsQuery.Where(s => s.AssignedLawyerId == userId);
             }
-            await _unitOfWork.CompleteAsync();
+
+            var recentSessions = await sessionsQuery
+                .OrderByDescending(s => s.ScheduledAt)
+                .Take(50)
+                .ToListAsync();
+
+            foreach (var s in recentSessions)
+            {
+                var key = $"Sessions|/cases/{s.CaseId}|{s.CreatedAt:yyyy-MM-dd HH:mm:ss}";
+                if (!existingKeys.Add(key)) continue;
+
+                bool isSelfAssigned = s.AssignedLawyerId.HasValue && s.AssignedLawyerId.Value == userId;
+                var msgKey = (!isSelfAssigned && s.AssignedLawyer != null)
+                    ? "NOTIFICATIONS.ADMIN_SESSION_SCHEDULED_MSG"
+                    : "NOTIFICATIONS.SESSION_SCHEDULED_MSG";
+
+                var paramDict = new Dictionary<string, string>
+                {
+                    { "number", s.Case?.CaseNumber ?? "" },
+                    { "court", s.CourtName },
+                    { "scope", isSelfAssigned ? "personal" : "system" }
+                };
+                if (s.AssignedLawyer != null)
+                {
+                    paramDict["lawyer"] = s.AssignedLawyer.FullName;
+                }
+
+                seeded.Add(new Notification
+                {
+                    UserId = userId,
+                    Title = "NOTIFICATIONS.SESSION_SCHEDULED_TITLE",
+                    Message = msgKey,
+                    Type = "Sessions",
+                    Link = $"/cases/{s.CaseId}",
+                    IsRead = false,
+                    CreatedAt = s.CreatedAt,
+                    ParametersJson = JsonSerializer.Serialize(paramDict)
+                });
+            }
+
+            if (canViewAllCases)
+            {
+                var recentPayments = await _unitOfWork.Repository<Payment>().Query()
+                    .Include(p => p.Case)
+                    .AsNoTracking()
+                    .OrderByDescending(p => p.PaymentDate)
+                    .Take(50)
+                    .ToListAsync();
+
+                foreach (var p in recentPayments)
+                {
+                    var key = $"Finance|/cases/{p.CaseId}|{p.CreatedAt:yyyy-MM-dd HH:mm:ss}";
+                    if (!existingKeys.Add(key)) continue;
+
+                    seeded.Add(new Notification
+                    {
+                        UserId = userId,
+                        Title = "NOTIFICATIONS.PAYMENT_RECORDED_TITLE",
+                        Message = "NOTIFICATIONS.PAYMENT_RECORDED_MSG",
+                        Type = "Finance",
+                        Link = $"/cases/{p.CaseId}",
+                        IsRead = false,
+                        CreatedAt = p.CreatedAt,
+                        ParametersJson = JsonSerializer.Serialize(new Dictionary<string, string>
+                        {
+                            { "amount", p.Amount.ToString("N0") },
+                            { "number", p.Case?.CaseNumber ?? "" },
+                            { "scope", "system" }
+                        })
+                    });
+                }
+            }
+
+            if (seeded.Any())
+            {
+                foreach (var n in seeded)
+                {
+                    await _unitOfWork.Repository<Notification>().AddAsync(n);
+                }
+                await _unitOfWork.CompleteAsync();
+            }
+        }
+        finally
+        {
+            _seedLock.Release();
         }
     }
 }

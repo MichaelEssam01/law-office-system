@@ -742,9 +742,12 @@
   "NOTIFICATIONS": {
     "TITLE": "Notifications",
     "SUBTITLE": "View and manage your recent system alerts and updates",
+    "MY_NOTIFICATIONS": "My Notifications",
+    "SYSTEM_ACTIONS": "System Actions",
     "MARK_ALL_READ": "Mark all as read",
     "MARK_READ": "Mark as read",
     "EMPTY": "You don't have any notifications",
+    "EMPTY_PERSONAL": "No personal assignments at the moment",
     "VIEW_ALL": "View All Notifications",
     "CASE_ASSIGNED_TITLE": "New Case Assigned",
     "CASE_ASSIGNED_MSG": "You have been assigned to case {{number}}: {{title}}",

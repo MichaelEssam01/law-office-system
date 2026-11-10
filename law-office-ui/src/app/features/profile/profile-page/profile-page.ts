@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
@@ -58,6 +58,22 @@ export class ProfilePage implements OnInit {
   passwordForm: FormGroup;
   loading = signal(false);
   activeTab = signal<string>('profile');
+  notifScopeTab = signal<'personal' | 'system'>('personal');
+
+  canViewSystemNotifications = computed(() =>
+    this.authService.hasPermission('Cases.ViewAll') ||
+    this.authService.hasPermission('Users.View') ||
+    this.notificationService.systemNotifications().length > 0
+  );
+
+  displayedNotifications = computed(() => {
+    if (!this.canViewSystemNotifications()) {
+      return this.notificationService.notifications();
+    }
+    return this.notifScopeTab() === 'system'
+      ? this.notificationService.systemNotifications()
+      : this.notificationService.personalNotifications();
+  });
 
   // Firm name (admins with Settings.Manage only)
   firmName = this.appState.settings().firmName;
@@ -110,6 +126,14 @@ export class ProfilePage implements OnInit {
       newPassword: ['', [Validators.required, Validators.minLength(8)]],
       confirmPassword: ['', Validators.required]
     }, { validators: this.passwordMatchValidator });
+
+    effect(() => {
+      const personalCount = this.notificationService.personalNotifications().length;
+      const systemCount = this.notificationService.systemNotifications().length;
+      if (personalCount === 0 && systemCount > 0 && this.canViewSystemNotifications()) {
+        this.notifScopeTab.set('system');
+      }
+    });
   }
 
   ngOnInit() {

@@ -4,7 +4,7 @@ namespace LawOffice.Application.Interfaces.Services;
 
 public interface INotificationService
 {
-    Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(Guid userId, int count = 20);
+    Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(Guid userId, int count = 100);
     Task<int> GetUnreadCountAsync(Guid userId);
     Task MarkAsReadAsync(Guid notificationId);
     Task MarkAllAsReadAsync(Guid userId);

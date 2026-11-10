@@ -742,9 +742,12 @@
   "NOTIFICATIONS": {
     "TITLE": "التنبيهات",
     "SUBTITLE": "عرض وإدارة الإشعارات والتحديثات الأخيرة الخاصة بك",
+    "MY_NOTIFICATIONS": "تنبيهاتي",
+    "SYSTEM_ACTIONS": "إجراءات النظام",
     "MARK_ALL_READ": "تحديد الكل كمقروء",
     "MARK_READ": "تحديد كمقروء",
     "EMPTY": "ليس لديك أي تنبيهات",
+    "EMPTY_PERSONAL": "لا توجد تكليفات شخصية حالياً",
     "VIEW_ALL": "عرض كل التنبيهات",
     "CASE_ASSIGNED_TITLE": "تم تعيين قضية جديدة",
     "CASE_ASSIGNED_MSG": "تم تعيينك في القضية رقم {{number}}: {{title}}",

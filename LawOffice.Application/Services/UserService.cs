@@ -46,12 +46,10 @@ public class UserService : IUserService
     public async Task<IEnumerable<UserListDto>> GetLawyersAsync()
     {
         var lawyers = await _userManager.GetUsersInRoleAsync("Lawyer");
-        var admins = await _userManager.GetUsersInRoleAsync("Admin");
-        
-        var allLawyers = lawyers.Union(admins).Where(u => u.IsActive).DistinctBy(u => u.Id).ToList();
+        var activeLawyers = lawyers.Where(u => u.IsActive).DistinctBy(u => u.Id).ToList();
 
         var dtos = new List<UserListDto>();
-        foreach (var user in allLawyers)
+        foreach (var user in activeLawyers)
         {
             var roles = (await _userManager.GetRolesAsync(user)).ToList();
             dtos.Add(new UserListDto

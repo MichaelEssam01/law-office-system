@@ -149,20 +149,55 @@
             <!-- Notification History Tab -->
             @if (activeTab() === 'notifications') {
                 <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 space-y-6 animate-in fade-in slide-in-from-right-4 duration-300">
-                    <div class="flex items-center justify-between border-b border-slate-50 pb-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                         <div>
                             <h2 class="text-xl font-bold text-slate-800">{{ 'NOTIFICATIONS.TITLE' | translate }}</h2>
                             <p class="text-slate-500 text-sm">{{ 'NOTIFICATIONS.SUBTITLE' | translate }}</p>
                         </div>
-                        @if (notificationService.unreadCount() > 0) {
-                            <button pButton (click)="notificationService.markAllAsRead()" [label]="'NOTIFICATIONS.MARK_ALL_READ' | translate" 
-                                    title="Mark all as read" aria-label="Mark all as read" [attr.aria-label]="'NOTIFICATIONS.MARK_ALL_READ' | translate" [title]="'NOTIFICATIONS.MARK_ALL_READ' | translate"
-                                    icon="pi pi-check-circle" class="p-button-outlined p-button-sm p-button-secondary rounded-xl font-bold"></button>
-                        }
+                        <div class="flex flex-wrap items-center gap-3">
+                            @if (canViewSystemNotifications()) {
+                                <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl">
+                                    <button type="button"
+                                            (click)="notifScopeTab.set('personal')"
+                                            title="My Notifications"
+                                            aria-label="My Notifications"
+                                            [title]="'NOTIFICATIONS.MY_NOTIFICATIONS' | translate"
+                                            [attr.aria-label]="'NOTIFICATIONS.MY_NOTIFICATIONS' | translate"
+                                            [class]="notifScopeTab() === 'personal' ? 'bg-white text-blue-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                                            class="px-3.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-2 cursor-pointer">
+                                        <i class="pi pi-user text-xs"></i>
+                                        <span>{{ 'NOTIFICATIONS.MY_NOTIFICATIONS' | translate }}</span>
+                                        <span class="bg-blue-100 text-blue-700 text-[11px] px-2 py-0.5 rounded-full font-bold">
+                                            {{ notificationService.personalNotifications().length }}
+                                        </span>
+                                    </button>
+                                    <button type="button"
+                                            (click)="notifScopeTab.set('system')"
+                                            title="System Actions"
+                                            aria-label="System Actions"
+                                            [title]="'NOTIFICATIONS.SYSTEM_ACTIONS' | translate"
+                                            [attr.aria-label]="'NOTIFICATIONS.SYSTEM_ACTIONS' | translate"
+                                            [class]="notifScopeTab() === 'system' ? 'bg-white text-indigo-600 shadow-sm font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                                            class="px-3.5 py-1.5 rounded-lg text-xs transition-all flex items-center gap-2 cursor-pointer">
+                                        <i class="pi pi-bolt text-xs"></i>
+                                        <span>{{ 'NOTIFICATIONS.SYSTEM_ACTIONS' | translate }}</span>
+                                        <span class="bg-indigo-100 text-indigo-700 text-[11px] px-2 py-0.5 rounded-full font-bold">
+                                            {{ notificationService.systemNotifications().length }}
+                                        </span>
+                                    </button>
+                                </div>
+                            }
+                            @if (notificationService.unreadCount() > 0) {
+                                <button pButton (click)="notificationService.markAllAsRead()" [label]="'NOTIFICATIONS.MARK_ALL_READ' | translate" 
+                                        title="Mark all as read" aria-label="Mark all as read" [attr.aria-label]="'NOTIFICATIONS.MARK_ALL_READ' | translate" [title]="'NOTIFICATIONS.MARK_ALL_READ' | translate"
+                                        icon="pi pi-check-circle" class="p-button-outlined p-button-sm p-button-secondary rounded-xl font-bold"></button>
+                            }
+                        </div>
                     </div>
 
                     <div class="no-page-links">
-                    <p-table [value]="notificationService.notifications()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                    <p-table [value]="displayedNotifications()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                             [paginatorDropdownAppendTo]="'body'"
                              [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                              [pageLinks]="3" class="p-datatable-sm">
                         <ng-template pTemplate="header">
@@ -219,7 +254,7 @@
                         <ng-template pTemplate="emptymessage">
                             <tr>
                                 <td colspan="5" class="text-center py-8 text-slate-400 font-medium">
-                                    {{ 'NOTIFICATIONS.EMPTY' | translate }}
+                                    {{ (canViewSystemNotifications() && notifScopeTab() === 'personal') ? ('NOTIFICATIONS.EMPTY_PERSONAL' | translate) : ('NOTIFICATIONS.EMPTY' | translate) }}
                                 </td>
                             </tr>
                         </ng-template>
@@ -285,7 +320,7 @@
 
             <!-- Security Log Tab -->
             @if (activeTab() === 'security') {
-                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden animate-in fade-in slide-in-from-right-4 duration-300">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-100 animate-in fade-in slide-in-from-right-4 duration-300">
                     <div class="p-8 border-b border-slate-50">
                         <h2 class="text-xl font-bold text-slate-800">{{ 'PROFILE.SECURITY_LOG_TITLE' | translate }}</h2>
                         <p class="text-slate-500 text-sm">{{ 'PROFILE.SECURITY_LOG_DESC' | translate }}</p>
@@ -293,6 +328,7 @@
 
                     <div class="no-page-links">
                     <p-table [value]="securityLogs()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 25, 50]"
+                             [paginatorDropdownAppendTo]="'body'"
                              [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                              [pageLinks]="3" class="p-datatable-sm">
                         <ng-template pTemplate="header">

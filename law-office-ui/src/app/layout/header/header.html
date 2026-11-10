@@ -58,28 +58,65 @@
 
 <p-popover #notificationOp>
     <div class="flex flex-col w-80 md:w-96 -m-3 rounded-xl overflow-hidden">
-        <div class="flex items-center justify-between px-4 py-3 bg-slate-50 border-b border-slate-100">
-            <h3 class="font-bold text-slate-800">{{ 'NOTIFICATIONS.TITLE' | translate }}</h3>
-            @if (notificationService.unreadCount() > 0) {
-                <button type="button" (click)="markAllAsRead()"
-                        title="Mark all as read" aria-label="Mark all as read"
-                        [title]="'NOTIFICATIONS.MARK_ALL_READ' | translate" [attr.aria-label]="'NOTIFICATIONS.MARK_ALL_READ' | translate"
-                        class="text-xs text-blue-600 hover:text-blue-700 font-semibold transition-colors">
-                    {{ 'NOTIFICATIONS.MARK_ALL_READ' | translate }}
-                </button>
+        <div class="px-4 pt-3 pb-2.5 bg-slate-50 border-b border-slate-100 space-y-2.5">
+            <div class="flex items-center justify-between">
+                <h3 class="font-bold text-slate-800">{{ 'NOTIFICATIONS.TITLE' | translate }}</h3>
+                @if (notificationService.unreadCount() > 0) {
+                    <button type="button" (click)="markAllAsRead()"
+                            title="Mark all as read" aria-label="Mark all as read"
+                            [title]="'NOTIFICATIONS.MARK_ALL_READ' | translate" [attr.aria-label]="'NOTIFICATIONS.MARK_ALL_READ' | translate"
+                            class="text-xs text-blue-600 hover:text-blue-700 font-semibold transition-colors cursor-pointer">
+                        {{ 'NOTIFICATIONS.MARK_ALL_READ' | translate }}
+                    </button>
+                }
+            </div>
+
+            @if (canViewSystemNotifications()) {
+                <div class="grid grid-cols-2 gap-1 bg-slate-200/70 p-1 rounded-lg">
+                    <button type="button"
+                            (click)="notifScopeTab.set('personal')"
+                            title="My Notifications"
+                            aria-label="My Notifications"
+                            [title]="'NOTIFICATIONS.MY_NOTIFICATIONS' | translate"
+                            [attr.aria-label]="'NOTIFICATIONS.MY_NOTIFICATIONS' | translate"
+                            [class]="notifScopeTab() === 'personal' ? 'bg-white text-blue-600 shadow-2xs font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                            class="py-1.5 px-2 rounded-md text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="pi pi-user text-[11px]"></i>
+                        <span>{{ 'NOTIFICATIONS.MY_NOTIFICATIONS' | translate }}</span>
+                        <span class="bg-blue-100 text-blue-700 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+                            {{ notificationService.personalNotifications().length }}
+                        </span>
+                    </button>
+                    <button type="button"
+                            (click)="notifScopeTab.set('system')"
+                            title="System Actions"
+                            aria-label="System Actions"
+                            [title]="'NOTIFICATIONS.SYSTEM_ACTIONS' | translate"
+                            [attr.aria-label]="'NOTIFICATIONS.SYSTEM_ACTIONS' | translate"
+                            [class]="notifScopeTab() === 'system' ? 'bg-white text-indigo-600 shadow-2xs font-bold' : 'text-slate-600 hover:text-slate-900 font-medium'"
+                            class="py-1.5 px-2 rounded-md text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+                        <i class="pi pi-bolt text-[11px]"></i>
+                        <span>{{ 'NOTIFICATIONS.SYSTEM_ACTIONS' | translate }}</span>
+                        <span class="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.2 rounded-full font-bold">
+                            {{ notificationService.systemNotifications().length }}
+                        </span>
+                    </button>
+                </div>
             }
         </div>
         
-        <div class="max-h-[400px] overflow-y-auto">
-            @if (notificationService.notifications().length === 0) {
+        <div class="max-h-[380px] overflow-y-auto">
+            @if (displayedNotifications().length === 0) {
                 <div class="flex flex-col items-center justify-center py-10 px-4 text-center">
                     <div class="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-3">
                         <i class="pi pi-bell-slash text-slate-400 text-xl"></i>
                     </div>
-                    <p class="text-sm text-slate-500">{{ 'NOTIFICATIONS.EMPTY' | translate }}</p>
+                    <p class="text-sm text-slate-500">
+                        {{ (canViewSystemNotifications() && notifScopeTab() === 'personal') ? ('NOTIFICATIONS.EMPTY_PERSONAL' | translate) : ('NOTIFICATIONS.EMPTY' | translate) }}
+                    </p>
                 </div>
             } @else {
-                @for (n of notificationService.notifications(); track n.id) {
+                @for (n of displayedNotifications(); track n.id) {
                     <div (click)="onNotificationClick(n, notificationOp)"
                          class="flex items-start gap-3 p-4 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer relative group">
                         @if (!n.isRead) {

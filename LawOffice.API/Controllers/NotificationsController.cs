@@ -18,7 +18,7 @@ public class NotificationsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetNotifications([FromQuery] int count = 20)
+    public async Task<IActionResult> GetNotifications([FromQuery] int count = 100)
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (!Guid.TryParse(userIdString, out var userId)) return Unauthorized();

@@ -1,4 +1,4 @@
-import { Injectable, signal, inject, effect } from '@angular/core';
+import { Injectable, signal, computed, inject, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 import { AuthService } from './auth.service';
@@ -28,6 +28,31 @@ export class NotificationService {
   notifications = signal<NotificationDto[]>([]);
   unreadCount = signal<number>(0);
 
+  personalNotifications = computed(() =>
+    this.notifications().filter(n => !this.isSystemNotification(n))
+  );
+
+  systemNotifications = computed(() =>
+    this.notifications().filter(n => this.isSystemNotification(n))
+  );
+
+  personalUnreadCount = computed(() =>
+    this.personalNotifications().filter(n => !n.isRead).length
+  );
+
+  systemUnreadCount = computed(() =>
+    this.systemNotifications().filter(n => !n.isRead).length
+  );
+
+  isSystemNotification(n: NotificationDto): boolean {
+    if (n.parameters?.['scope']) {
+      return n.parameters['scope'] === 'system';
+    }
+    return n.message.startsWith('NOTIFICATIONS.ADMIN_') ||
+           n.message === 'NOTIFICATIONS.PAYMENT_RECORDED_MSG' ||
+           n.message === 'NOTIFICATIONS.SESSION_SCHEDULED_MSG';
+  }
+
   constructor() {
     // Re-establish connection when user changes
     effect(() => {
@@ -46,7 +71,7 @@ export class NotificationService {
   private async loadInitialData() {
     try {
       const [notifications, { count }] = await Promise.all([
-        this.getNotifications(10),
+        this.getNotifications(100),
         this.getUnreadCount()
       ]);
       this.notifications.set(notifications);
@@ -66,7 +91,7 @@ export class NotificationService {
       .build();
 
     this.hubConnection.on('ReceiveNotification', (notification: NotificationDto) => {
-      this.notifications.update(prev => [notification, ...prev].slice(0, 20));
+      this.notifications.update(prev => [notification, ...prev].slice(0, 100));
       this.unreadCount.update(count => count + 1);
     });
 
@@ -80,7 +105,7 @@ export class NotificationService {
     }
   }
 
-  async getNotifications(count: number = 20): Promise<NotificationDto[]> {
+  async getNotifications(count: number = 100): Promise<NotificationDto[]> {
     return firstValueFrom(this.http.get<NotificationDto[]>(`${this.apiUrl}?count=${count}`));
   }
 

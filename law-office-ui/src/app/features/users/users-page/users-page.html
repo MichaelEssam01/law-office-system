@@ -35,8 +35,9 @@
 
     <!-- SUB-TAB 1: STAFF ACCOUNTS -->
     @if (activeSubTab() === 'accounts') {
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden no-page-links">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 no-page-links">
             <p-table #dt [value]="users()" [loading]="loading()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                     [paginatorDropdownAppendTo]="'body'"
                      [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                      [globalFilterFields]="['fullName', 'email', 'role']"
                      (onFilter)="cdr.detectChanges()"
