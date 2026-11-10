@@ -50,9 +50,8 @@ export class Header {
   notifScopeTab = signal<'personal' | 'system'>('personal');
 
   canViewSystemNotifications = computed(() =>
-    this.authService.hasPermission('Cases.ViewAll') ||
-    this.authService.hasPermission('Users.View') ||
-    this.notificationService.systemNotifications().length > 0
+    this.authService.hasPermission('Settings.Manage') ||
+    this.authService.hasPermission('Users.View')
   );
 
   displayedNotifications = computed(() => {

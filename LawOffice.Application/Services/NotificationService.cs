@@ -206,6 +206,28 @@ public class NotificationService : INotificationService
         await _seedLock.WaitAsync();
         try
         {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null) return;
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+            bool isAdminUser = userRoles.Contains("Admin");
+            if (!isAdminUser)
+            {
+                foreach (var roleName in userRoles)
+                {
+                    var role = await _roleManager.FindByNameAsync(roleName);
+                    if (role != null)
+                    {
+                        var claims = await _roleManager.GetClaimsAsync(role);
+                        if (claims.Any(c => c.Type == "Permission" && (c.Value == Permissions.Settings.Manage || c.Value == Permissions.Users.View)))
+                        {
+                            isAdminUser = true;
+                            break;
+                        }
+                    }
+                }
+            }
+
             var existingUserNotifs = await _unitOfWork.Repository<Notification>().Query()
                 .Where(n => n.UserId == userId)
                 .OrderByDescending(n => n.CreatedAt)
@@ -255,7 +277,7 @@ public class NotificationService : INotificationService
                     {
                         bool isSystemMsg = n.Message.StartsWith("NOTIFICATIONS.ADMIN_")
                             || n.Message == "NOTIFICATIONS.PAYMENT_RECORDED_MSG"
-                            || n.Message == "NOTIFICATIONS.SESSION_SCHEDULED_MSG";
+                            || (isAdminUser && n.Message == "NOTIFICATIONS.SESSION_SCHEDULED_MSG");
                         dict["scope"] = isSystemMsg ? "system" : "personal";
                         changedThis = true;
                     }
@@ -286,29 +308,10 @@ public class NotificationService : INotificationService
                 existingUserNotifs.Select(n => $"{n.Type}|{n.Link}|{n.CreatedAt:yyyy-MM-dd HH:mm:ss}")
             );
 
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null) return;
-
-            var userRoles = await _userManager.GetRolesAsync(user);
-            bool canViewAllCases = false;
-            foreach (var roleName in userRoles)
-            {
-                var role = await _roleManager.FindByNameAsync(roleName);
-                if (role != null)
-                {
-                    var claims = await _roleManager.GetClaimsAsync(role);
-                    if (claims.Any(c => c.Type == "Permission" && c.Value == Permissions.Cases.ViewAll))
-                    {
-                        canViewAllCases = true;
-                        break;
-                    }
-                }
-            }
-
             var casesQuery = _unitOfWork.Repository<Case>().Query()
                 .Include(c => c.AssignedLawyer)
                 .AsNoTracking();
-            if (!canViewAllCases)
+            if (!isAdminUser)
             {
                 casesQuery = casesQuery.Where(c => c.AssignedLawyerId == userId);
             }
@@ -357,7 +360,7 @@ public class NotificationService : INotificationService
                 .Include(s => s.Case)
                 .Include(s => s.AssignedLawyer)
                 .AsNoTracking();
-            if (!canViewAllCases)
+            if (!isAdminUser)
             {
                 sessionsQuery = sessionsQuery.Where(s => s.AssignedLawyerId == userId);
             }
@@ -401,7 +404,7 @@ public class NotificationService : INotificationService
                 });
             }
 
-            if (canViewAllCases)
+            if (isAdminUser)
             {
                 var recentPayments = await _unitOfWork.Repository<Payment>().Query()
                     .Include(p => p.Case)
