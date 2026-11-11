@@ -127,7 +127,8 @@ export class ClientDetailsPage implements OnInit {
     }
   }
 
-  onCancelEdit() {
+  // Dialog Actions
+  onCancelEdit(): void {
     this.displayEditDialog.set(false);
     this.selectedClientForEdit.set(null);
   }
