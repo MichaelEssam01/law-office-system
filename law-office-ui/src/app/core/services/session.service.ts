@@ -48,11 +48,12 @@ export class SessionService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:5137/api/sessions';
 
-  async getSessions(filters?: { caseId?: string, status?: string, date?: string }): Promise<SessionListDto[]> {
+  async getSessions(filters?: { caseId?: string, status?: string, date?: string, lawyerId?: string }): Promise<SessionListDto[]> {
     let params = new HttpParams();
     if (filters?.caseId) params = params.set('caseId', filters.caseId);
     if (filters?.status) params = params.set('status', filters.status);
     if (filters?.date) params = params.set('date', filters.date);
+    if (filters?.lawyerId) params = params.set('lawyerId', filters.lawyerId);
 
     return firstValueFrom(this.http.get<SessionListDto[]>(this.apiUrl, { params }));
   }

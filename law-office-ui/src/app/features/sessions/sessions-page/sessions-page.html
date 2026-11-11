@@ -52,7 +52,7 @@
             </div>
 
             <div class="flex justify-end">
-                <button type="button" pButton icon="pi pi-filter-slash" title="Reset Filters" aria-label="Reset Filters" [attr.aria-label]="'SESSIONS.RESET_FILTERS' | translate" class="p-button-outlined p-button-secondary h-[42px] px-4" (click)="resetFilters()" [pTooltip]="'SESSIONS.RESET_FILTERS' | translate"></button>
+                <button type="button" pButton icon="pi pi-filter-slash" aria-label="Reset Filters" [attr.aria-label]="'SESSIONS.RESET_FILTERS' | translate" class="p-button-outlined p-button-secondary h-[42px] px-4" (click)="resetFilters()" [pTooltip]="'SESSIONS.RESET_FILTERS' | translate"></button>
             </div>
         </div>
     </div>
@@ -118,10 +118,10 @@
                     <td class="p-4 text-center">
                         <div class="flex justify-center gap-1.5">
                             @if (session.status === 0 || !session.decisionText) {
-                                <button type="button" pButton icon="pi pi-check-square" title="Record Outcome" aria-label="Record Outcome" [attr.aria-label]="'SESSIONS.RECORD_OUTCOME' | translate" class="p-button-text p-button-success p-button-sm" (click)="recordOutcome(session)" [pTooltip]="'SESSIONS.RECORD_OUTCOME' | translate"></button>
+                                <button type="button" pButton icon="pi pi-check-square" aria-label="Record Outcome" [attr.aria-label]="'SESSIONS.RECORD_OUTCOME' | translate" class="p-button-text p-button-success p-button-sm" (click)="recordOutcome(session)" [pTooltip]="'SESSIONS.RECORD_OUTCOME' | translate"></button>
                             }
-                            <button type="button" pButton icon="pi pi-pencil" title="Edit" aria-label="Edit" [attr.aria-label]="'COMMON.EDIT' | translate" class="p-button-text p-button-secondary p-button-sm" (click)="editSession(session)" [pTooltip]="'COMMON.EDIT' | translate"></button>
-                            <button type="button" pButton icon="pi pi-trash" title="Delete" aria-label="Delete" [attr.aria-label]="'COMMON.DELETE' | translate" class="p-button-text p-button-danger p-button-sm" (click)="deleteSession(session)" [pTooltip]="'COMMON.DELETE' | translate"></button>
+                            <button type="button" pButton icon="pi pi-pencil" aria-label="Edit" [attr.aria-label]="'COMMON.EDIT' | translate" class="p-button-text p-button-secondary p-button-sm" (click)="editSession(session)" [pTooltip]="'COMMON.EDIT' | translate"></button>
+                            <button type="button" pButton icon="pi pi-trash" aria-label="Delete" [attr.aria-label]="'COMMON.DELETE' | translate" class="p-button-text p-button-danger p-button-sm" (click)="deleteSession(session)" [pTooltip]="'COMMON.DELETE' | translate"></button>
                         </div>
                     </td>
                 </tr>

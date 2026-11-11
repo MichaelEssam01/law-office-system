@@ -27,6 +27,7 @@ export interface Client {
 
   // Relatives
   relativesInfo?: string;
+  relatives?: string;
 
   // POA (التوكيل)
   hasPowerOfAttorney?: boolean;

@@ -18,7 +18,7 @@ public class SessionService : ISessionService
         _notificationService = notificationService;
     }
 
-    public async Task<IEnumerable<SessionListDto>> GetSessionsAsync(Guid? caseId = null, SessionStatus? status = null, DateTime? date = null)
+    public async Task<IEnumerable<SessionListDto>> GetSessionsAsync(Guid? caseId = null, SessionStatus? status = null, DateTime? date = null, Guid? lawyerId = null)
     {
         var query = _unitOfWork.Repository<Session>().Query()
             .AsNoTracking()
@@ -34,6 +34,9 @@ public class SessionService : ISessionService
 
         if (date.HasValue)
             query = query.Where(s => s.ScheduledAt.Date == date.Value.Date);
+
+        if (lawyerId.HasValue)
+            query = query.Where(s => s.AssignedLawyerId == lawyerId.Value);
 
         return await query
             .OrderBy(s => s.ScheduledAt)

@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Table, TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -69,7 +69,8 @@ export class ClientsPage implements OnInit {
     private translate: TranslateService,
     public appState: AppStateService,
     private documentService: DocumentService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   async openDocument(item: { id: string }) {
@@ -203,28 +204,9 @@ export class ClientsPage implements OnInit {
     }
   }
 
-  async viewClientWorks(client: Client) {
+  viewClientWorks(client: Client) {
     if (!client.id) return;
-    this.selectedClient = client;
-    this.activeWorksTab = '0';
-    this.expandedInvoices = {};
-    this.displayWorksDialog = true;
-    this.loadingWorks = true;
-    this.clientWorks = null;
-    this.cdr.detectChanges();
-
-    try {
-      this.clientWorks = await this.clientService.getClientWorks(client.id);
-    } catch (err) {
-      this.messageService.add({
-        severity: 'error',
-        summary: this.translate.instant('COMMON.ERROR'),
-        detail: this.translate.instant('CLIENTS.LOAD_ERROR')
-      });
-    } finally {
-      this.loadingWorks = false;
-      this.cdr.detectChanges();
-    }
+    this.router.navigate(['/clients', client.id]);
   }
 
   getCaseStatusLabel(status: string): string {

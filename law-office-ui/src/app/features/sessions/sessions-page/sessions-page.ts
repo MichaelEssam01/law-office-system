@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, ChangeDetectorRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
@@ -52,6 +52,7 @@ export class SessionsPage implements OnInit {
   private translate = inject(TranslateService);
   public appState = inject(AppStateService);
   private cdr = inject(ChangeDetectorRef);
+  private route = inject(ActivatedRoute);
 
   sessions = signal<SessionListDto[]>([]);
   loading = signal(true);
@@ -86,6 +87,19 @@ export class SessionsPage implements OnInit {
       this.loadSessions(),
       this.loadCases()
     ]);
+    const qCaseId = this.route.snapshot.queryParams['caseId'];
+    if (qCaseId) {
+      this.selectedCase.set(qCaseId);
+      await this.loadSessions();
+    }
+    const qId = this.route.snapshot.queryParams['id'];
+    if (qId) {
+      const found = this.sessions().find(s => s.id === qId);
+      if (found) {
+        this.searchTerm.set(found.caseNumber || found.title);
+        this.editSession(found);
+      }
+    }
   }
 
   async loadCases() {

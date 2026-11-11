@@ -3,6 +3,7 @@ import { MainLayout } from './layout/main-layout/main-layout';
 import { LoginPage } from './features/auth/login-page/login-page';
 import { DashboardPage } from './features/dashboard/dashboard-page/dashboard-page';
 import { ClientsPage } from './features/clients/clients-page/clients-page';
+import { ClientDetailsPage } from './features/clients/client-details-page/client-details-page';
 import { CasesPage } from './features/cases/cases-page/cases-page';
 import { CaseDetailsPage } from './features/cases/case-details-page/case-details-page';
 import { ContractsPage } from './features/contracts/contracts-page/contracts-page';
@@ -35,6 +36,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', component: DashboardPage },
       { path: 'clients', component: ClientsPage, canActivate: [permissionGuard('Clients.View')] },
+      { path: 'clients/:id', component: ClientDetailsPage, canActivate: [permissionGuard('Clients.View')] },
       { path: 'cases', component: CasesPage, canActivate: [permissionGuard('Cases.View')] },
       { path: 'cases/:id', component: CaseDetailsPage, canActivate: [permissionGuard('Cases.View')] },
       { path: 'contracts', component: ContractsPage, canActivate: [permissionGuard('Contracts.View')] },

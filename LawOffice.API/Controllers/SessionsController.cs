@@ -20,9 +20,9 @@ public class SessionsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<SessionListDto>>> GetSessions([FromQuery] Guid? caseId, [FromQuery] SessionStatus? status, [FromQuery] DateTime? date)
+    public async Task<ActionResult<IEnumerable<SessionListDto>>> GetSessions([FromQuery] Guid? caseId, [FromQuery] SessionStatus? status, [FromQuery] DateTime? date, [FromQuery] Guid? lawyerId)
     {
-        var sessions = await _sessionService.GetSessionsAsync(caseId, status, date);
+        var sessions = await _sessionService.GetSessionsAsync(caseId, status, date, lawyerId);
         return Ok(sessions);
     }
 

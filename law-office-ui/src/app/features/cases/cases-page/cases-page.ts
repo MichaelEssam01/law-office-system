@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, computed, ChangeDetectorRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -57,6 +57,7 @@ export class CasesPage implements OnInit {
   public appState = inject(AppStateService);
   public cdr = inject(ChangeDetectorRef);
   private userService = inject(UserManagementService);
+  private route = inject(ActivatedRoute);
 
   allCases = signal<CaseListDto[]>([]);
   loading = signal(true);
@@ -151,6 +152,14 @@ export class CasesPage implements OnInit {
       this.loadCases(),
       this.loadFilterData()
     ]);
+    const qId = this.route.snapshot.queryParams['id'];
+    if (qId) {
+      const found = this.allCases().find(c => c.id === qId);
+      if (found) {
+        this.searchTerm.set(found.caseNumber);
+        this.editCase(found);
+      }
+    }
   }
 
   async loadFilterData() {

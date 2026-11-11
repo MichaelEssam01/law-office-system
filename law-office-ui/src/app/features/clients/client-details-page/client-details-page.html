@@ -1,0 +1,825 @@
+@if (loading()) {
+    <div class="p-16 flex flex-col items-center justify-center gap-4">
+        <i class="pi pi-spin pi-spinner text-5xl text-blue-600"></i>
+        <p class="text-slate-500 animate-pulse text-sm">{{ 'COMMON.LOADING' | translate }}</p>
+    </div>
+} @else if (clientWorks(); as cw) {
+    <div class="p-4 md:p-6 max-w-[1700px] mx-auto space-y-6" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
+        <p-toast></p-toast>
+        <p-confirmDialog></p-confirmDialog>
+
+        <!-- Breadcrumbs / Back button -->
+        <div class="flex items-center justify-between">
+            <button pButton
+                    [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-right' : 'pi pi-arrow-left'"
+                    [iconPos]="appState.currentLang() === 'ar' ? 'right' : 'left'"
+                    [label]="'CLIENTS.BACK_TO_CLIENTS' | translate"
+                    title="Back to Clients"
+                    [title]="'CLIENTS.BACK_TO_CLIENTS' | translate"
+                    aria-label="Back to Clients"
+                    [attr.aria-label]="'CLIENTS.BACK_TO_CLIENTS' | translate"
+                    class="p-button-text p-button-secondary p-button-sm cursor-pointer"
+                    routerLink="/clients"></button>
+
+            <!-- Edit Button on Top Right -->
+            <button pButton
+                    icon="pi pi-pencil"
+                    [label]="'CLIENTS.EDIT_CLIENT' | translate"
+                    title="Edit Client"
+                    [title]="'CLIENTS.EDIT_CLIENT' | translate"
+                    aria-label="Edit Client"
+                    [attr.aria-label]="'CLIENTS.EDIT_CLIENT' | translate"
+                    class="p-button-outlined p-button-primary p-button-sm"
+                    (click)="editClient()"></button>
+        </div>
+
+        <!-- Client Header Card -->
+        <div class="bg-white p-5 md:p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div class="space-y-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg font-mono font-bold text-sm border border-blue-200">
+                            #{{ cw.client.clientNumber || ('CLIENTS.CLIENT_NUMBER' | translate) }}
+                        </span>
+                        @if (cw.client.nationalId) {
+                            <span class="px-2.5 py-1 bg-slate-100 text-slate-700 rounded-lg font-mono text-xs border border-slate-200">
+                                <i class="pi pi-id-card me-1 text-[11px]"></i>
+                                {{ cw.client.nationalId }}
+                            </span>
+                        }
+                        @if (cw.client.hasPowerOfAttorney) {
+                            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-semibold border border-emerald-200 flex items-center gap-1">
+                                <i class="pi pi-verified text-[11px]"></i>
+                                <span>{{ 'CLIENTS.HAS_POA' | translate }}: {{ cw.client.poaNumber }}/{{ cw.client.poaLetter }} ({{ cw.client.poaYear }})</span>
+                            </span>
+                        }
+                    </div>
+
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+                        {{ cw.client.fullName }}
+                    </h1>
+
+                    <div class="flex flex-wrap items-center gap-4 text-xs md:text-sm text-slate-600 pt-1">
+                        @if (cw.client.phone) {
+                            <div class="flex items-center gap-1.5 text-slate-700">
+                                <i class="pi pi-phone text-blue-600 text-xs"></i>
+                                <span class="font-semibold" dir="ltr">{{ cw.client.phone }}</span>
+                            </div>
+                        }
+                        @if (cw.client.email) {
+                            <div class="flex items-center gap-1.5 text-slate-700 border-s ps-3 border-slate-200">
+                                <i class="pi pi-envelope text-indigo-600 text-xs"></i>
+                                <span dir="ltr">{{ cw.client.email }}</span>
+                            </div>
+                        }
+                        @if (cw.client.job) {
+                            <div class="flex items-center gap-1.5 text-slate-600 border-s ps-3 border-slate-200">
+                                <i class="pi pi-briefcase text-slate-400 text-xs"></i>
+                                <span>{{ cw.client.job }}</span>
+                            </div>
+                        }
+                        @if (cw.client.address) {
+                            <div class="flex items-center gap-1.5 text-slate-600 border-s ps-3 border-slate-200">
+                                <i class="pi pi-map-marker text-rose-500 text-xs"></i>
+                                <span>{{ cw.client.address }}</span>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Internal Solvency / Rating Stars -->
+                <div class="flex flex-col items-start md:items-end gap-1.5 p-3 bg-slate-50 rounded-xl border border-slate-200 shrink-0">
+                    <span class="text-xs text-slate-500 font-semibold">{{ 'CLIENTS.RATINGS_SECTION' | translate }}</span>
+                    <div class="flex items-center gap-1 text-amber-500">
+                        @for (star of [1,2,3,4,5]; track star) {
+                            <i class="pi" [ngClass]="star <= getAverageRating(cw.client) ? 'pi-star-fill text-amber-500' : 'pi-star text-slate-300'"></i>
+                        }
+                        <span class="text-xs font-bold text-slate-700 ms-1.5">({{ getAverageRating(cw.client) }}/5)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick KPI Stats Cards Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
+            <!-- Cases -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition-shadow flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-500 font-semibold block">{{ 'CLIENTS.TABS.CASES' | translate }}</span>
+                    <span class="text-2xl font-bold text-slate-800">{{ cw.cases.length }}</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                    <i class="pi pi-briefcase text-lg"></i>
+                </div>
+            </div>
+
+            <!-- Contracts -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition-shadow flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-500 font-semibold block">{{ 'CLIENTS.TABS.CONTRACTS' | translate }}</span>
+                    <span class="text-2xl font-bold text-slate-800">{{ cw.contracts.length }}</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                    <i class="pi pi-file-edit text-lg"></i>
+                </div>
+            </div>
+
+            <!-- Registrations -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition-shadow flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-500 font-semibold block">{{ 'CLIENTS.TABS.REGISTRATIONS' | translate }}</span>
+                    <span class="text-2xl font-bold text-slate-800">{{ cw.registrations.length }}</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                    <i class="pi pi-bookmark text-lg"></i>
+                </div>
+            </div>
+
+            <!-- Companies -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition-shadow flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-500 font-semibold block">{{ 'CLIENTS.TABS.COMPANIES' | translate }}</span>
+                    <span class="text-2xl font-bold text-slate-800">{{ cw.companies.length }}</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center">
+                    <i class="pi pi-building text-lg"></i>
+                </div>
+            </div>
+
+            <!-- Sessions -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition-shadow flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-500 font-semibold block">{{ 'CLIENTS.TABS.SESSIONS' | translate }}</span>
+                    <span class="text-2xl font-bold text-slate-800">{{ cw.sessions.length }}</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                    <i class="pi pi-calendar text-lg"></i>
+                </div>
+            </div>
+
+            <!-- Invoices -->
+            <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs hover:shadow-xs transition-shadow flex items-center justify-between">
+                <div>
+                    <span class="text-xs text-slate-500 font-semibold block">{{ 'CLIENTS.TABS.INVOICES' | translate }}</span>
+                    <span class="text-2xl font-bold text-slate-800">{{ cw.invoices.length }}</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                    <i class="pi pi-wallet text-lg"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Tabs Section -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+            <p-tabs [(value)]="activeTab">
+                <p-tablist class="bg-slate-50/80 border-b border-slate-200 px-3 pt-2">
+                    <p-tab value="0">
+                        <i class="pi pi-user me-2 text-indigo-600"></i>
+                        <span>{{ 'CLIENTS.TABS.OVERVIEW' | translate }}</span>
+                    </p-tab>
+                    <p-tab value="1">
+                        <i class="pi pi-briefcase me-2 text-blue-600"></i>
+                        <span>{{ 'CLIENTS.TABS.CASES' | translate }}</span>
+                        <span class="ms-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-700 rounded-full font-semibold">{{ cw.cases.length }}</span>
+                    </p-tab>
+                    <p-tab value="2">
+                        <i class="pi pi-file-edit me-2 text-emerald-600"></i>
+                        <span>{{ 'CLIENTS.TABS.CONTRACTS' | translate }}</span>
+                        <span class="ms-2 px-2 py-0.5 text-xs bg-emerald-100 text-emerald-700 rounded-full font-semibold">{{ cw.contracts.length }}</span>
+                    </p-tab>
+                    <p-tab value="3">
+                        <i class="pi pi-bookmark me-2 text-purple-600"></i>
+                        <span>{{ 'CLIENTS.TABS.REGISTRATIONS' | translate }}</span>
+                        <span class="ms-2 px-2 py-0.5 text-xs bg-purple-100 text-purple-700 rounded-full font-semibold">{{ cw.registrations.length }}</span>
+                    </p-tab>
+                    <p-tab value="4">
+                        <i class="pi pi-building me-2 text-teal-600"></i>
+                        <span>{{ 'CLIENTS.TABS.COMPANIES' | translate }}</span>
+                        <span class="ms-2 px-2 py-0.5 text-xs bg-teal-100 text-teal-700 rounded-full font-semibold">{{ cw.companies.length }}</span>
+                    </p-tab>
+                    <p-tab value="5">
+                        <i class="pi pi-calendar me-2 text-rose-600"></i>
+                        <span>{{ 'CLIENTS.TABS.SESSIONS' | translate }}</span>
+                        <span class="ms-2 px-2 py-0.5 text-xs bg-rose-100 text-rose-700 rounded-full font-semibold">{{ cw.sessions.length }}</span>
+                    </p-tab>
+                    <p-tab value="6">
+                        <i class="pi pi-wallet me-2 text-amber-600"></i>
+                        <span>{{ 'CLIENTS.TABS.INVOICES' | translate }}</span>
+                        <span class="ms-2 px-2 py-0.5 text-xs bg-amber-100 text-amber-700 rounded-full font-semibold">{{ cw.invoices.length }}</span>
+                    </p-tab>
+                    <p-tab value="7">
+                        <i class="pi pi-file me-2 text-slate-600"></i>
+                        <span>{{ 'CLIENTS.TABS.DOCUMENTS' | translate }}</span>
+                        <span class="ms-2 px-2 py-0.5 text-xs bg-slate-200 text-slate-700 rounded-full font-semibold">{{ cw.documents.length }}</span>
+                    </p-tab>
+                </p-tablist>
+
+                <p-tabpanels class="p-4 md:p-6">
+                    <!-- Tab 0: Comprehensive Client Profile & Overview -->
+                    <p-tabpanel value="0">
+                        <div class="space-y-6">
+                            <!-- Basic Details Grid -->
+                            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
+                                <h3 class="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
+                                    <i class="pi pi-id-card text-indigo-600"></i>
+                                    <span>{{ 'CLIENTS.CLIENT_DETAILS' | translate }}</span>
+                                </h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+                                    <div>
+                                        <span class="text-xs text-slate-400 font-medium block mb-1">{{ 'CLIENTS.NAME' | translate }}</span>
+                                        <p class="text-sm font-bold text-slate-800">{{ cw.client.fullName || '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-slate-400 font-medium block mb-1">{{ 'CLIENTS.NATIONAL_ID' | translate }}</span>
+                                        <p class="text-sm font-semibold font-mono text-slate-800">{{ cw.client.nationalId || '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-slate-400 font-medium block mb-1">{{ 'CLIENTS.JOB' | translate }}</span>
+                                        <p class="text-sm text-slate-700">{{ cw.client.job || '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-slate-400 font-medium block mb-1">{{ 'CLIENTS.ADDRESS' | translate }}</span>
+                                        <p class="text-sm text-slate-700 leading-relaxed">{{ cw.client.address || '-' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contact Numbers & Communications -->
+                            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
+                                <h3 class="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
+                                    <i class="pi pi-phone text-emerald-600"></i>
+                                    <span>{{ 'CLIENTS.PHONE_SECTION' | translate }}</span>
+                                </h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+                                    <div>
+                                        <span class="text-xs text-slate-400 font-medium block mb-1">{{ 'CLIENTS.PHONE' | translate }}</span>
+                                        @if (getPhoneList(cw.client.phone).length > 0) {
+                                            <div class="flex flex-wrap gap-1.5">
+                                                @for (ph of getPhoneList(cw.client.phone); track ph) {
+                                                    <a [href]="'tel:' + ph" class="inline-block px-2.5 py-1 rounded-lg bg-white border border-slate-200 font-mono text-xs font-bold text-blue-700 hover:bg-blue-50 transition-colors" dir="ltr">{{ ph }}</a>
+                                                }
+                                            </div>
+                                        } @else {
+                                            <p class="text-sm text-slate-500">-</p>
+                                        }
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-slate-400 font-medium block mb-1">{{ 'CLIENTS.HOME_LANDLINE' | translate }}</span>
+                                        <p class="text-sm font-mono text-slate-700" dir="ltr">{{ cw.client.homeLandline || '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-slate-400 font-medium block mb-1">{{ 'CLIENTS.WORK_LANDLINE' | translate }}</span>
+                                        <p class="text-sm font-mono text-slate-700" dir="ltr">{{ cw.client.workLandline || '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-slate-400 font-medium block mb-1">{{ 'CLIENTS.EMAIL' | translate }}</span>
+                                        @if (cw.client.email) {
+                                            <a [href]="'mailto:' + cw.client.email" class="text-sm font-medium text-blue-600 hover:underline" dir="ltr">{{ cw.client.email }}</a>
+                                        } @else {
+                                            <p class="text-sm text-slate-500">-</p>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Power of Attorney (POA) -->
+                            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
+                                <h3 class="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
+                                    <i class="pi pi-verified text-blue-600"></i>
+                                    <span>{{ 'CLIENTS.POA_SECTION' | translate }}</span>
+                                </h3>
+                                @if (cw.client.hasPowerOfAttorney) {
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+                                        <div>
+                                            <span class="text-xs text-slate-400 font-medium block mb-1">{{ 'CLIENTS.POA_NUMBER' | translate }} / {{ 'CLIENTS.POA_LETTER' | translate }}</span>
+                                            <p class="text-sm font-bold font-mono text-emerald-700">
+                                                {{ cw.client.poaNumber }} / {{ cw.client.poaLetter }} ({{ cw.client.poaYear }})
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <span class="text-xs text-slate-400 font-medium block mb-1">{{ 'CLIENTS.POA_OFFICE' | translate }}</span>
+                                            <p class="text-sm font-semibold text-slate-800">{{ cw.client.poaOffice || '-' }}</p>
+                                        </div>
+                                        <div>
+                                            <span class="text-xs text-slate-400 font-medium block mb-1">{{ 'CLIENTS.POA_TYPE' | translate }}</span>
+                                            <p class="text-sm font-semibold text-slate-800">{{ getPoaTypeLabel(cw.client.poaType) }}</p>
+                                        </div>
+                                        <div>
+                                            <span class="text-xs text-slate-400 font-medium block mb-1">{{ 'CLIENTS.POA_CAPACITY_DETAILS' | translate }}</span>
+                                            <p class="text-sm text-slate-700">{{ cw.client.poaCapacityDetails || '-' }}</p>
+                                        </div>
+                                    </div>
+                                } @else {
+                                    <div class="p-4 bg-white rounded-xl border border-slate-200 text-slate-500 text-sm flex items-center gap-2">
+                                        <i class="pi pi-info-circle text-slate-400"></i>
+                                        <span>{{ 'CLIENTS.NO_POA' | translate }}</span>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Internal Ratings & Relatives & Notes -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <!-- Ratings Card -->
+                                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                        <i class="pi pi-star text-amber-500"></i>
+                                        <span>{{ 'CLIENTS.RATINGS_SECTION' | translate }}</span>
+                                    </h3>
+                                    <div class="space-y-3">
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="text-slate-600 font-medium">{{ 'CLIENTS.SOLVENCY_RATING' | translate }}</span>
+                                            <span class="font-bold text-amber-600">{{ cw.client.solvencyRating || 0 }} / 5</span>
+                                        </div>
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="text-slate-600 font-medium">{{ 'CLIENTS.COMMITMENT_RATING' | translate }}</span>
+                                            <span class="font-bold text-amber-600">{{ cw.client.commitmentRating || 0 }} / 5</span>
+                                        </div>
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="text-slate-600 font-medium">{{ 'CLIENTS.COOPERATION_RATING' | translate }}</span>
+                                            <span class="font-bold text-amber-600">{{ cw.client.cooperationRating || 0 }} / 5</span>
+                                        </div>
+                                        <div class="flex items-center justify-between text-xs">
+                                            <span class="text-slate-600 font-medium">{{ 'CLIENTS.NETWORK_RATING' | translate }}</span>
+                                            <span class="font-bold text-amber-600">{{ cw.client.networkRating || 0 }} / 5</span>
+                                        </div>
+                                        @if (cw.client.otherRatings) {
+                                            <div class="pt-2 border-t border-slate-200 text-xs text-slate-600">
+                                                <span class="font-bold block mb-1">{{ 'CLIENTS.OTHER_RATINGS' | translate }}:</span>
+                                                <p>{{ cw.client.otherRatings }}</p>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Special Instructions / Relatives -->
+                                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                                        <i class="pi pi-exclamation-circle text-rose-500"></i>
+                                        <span>{{ 'CLIENTS.INSTRUCTIONS_SECTION' | translate }}</span>
+                                    </h3>
+                                    @if (cw.client.instructions) {
+                                        <div class="p-3 bg-rose-50/80 border border-rose-200 rounded-xl text-xs text-rose-950 font-medium leading-relaxed">
+                                            {{ cw.client.instructions }}
+                                        </div>
+                                    } @else {
+                                        <p class="text-xs text-slate-400 italic">{{ 'COMMON.NONE' | translate }}</p>
+                                    }
+
+                                    @if (cw.client.relativesInfo || cw.client.relatives) {
+                                        <div class="pt-3 border-t border-slate-200">
+                                            <span class="font-bold text-xs text-slate-700 block mb-1 flex items-center gap-1.5">
+                                                <i class="pi pi-users text-slate-500 text-xs"></i>
+                                                <span>{{ 'CLIENTS.RELATIVES_SECTION' | translate }}</span>
+                                            </span>
+                                            <p class="text-xs text-slate-600 leading-relaxed">{{ cw.client.relativesInfo || cw.client.relatives }}</p>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </p-tabpanel>
+
+                    <!-- Tab 1: Cases Table -->
+                    <p-tabpanel value="1">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-base font-bold text-slate-800">{{ 'CLIENTS.TABS.CASES' | translate }} ({{ cw.cases.length }})</h3>
+                                <button pButton
+                                        icon="pi pi-plus"
+                                        [label]="'CASES.ADD_CASE' | translate"
+                                        title="Add Case"
+                                        [title]="'CASES.ADD_CASE' | translate"
+                                        aria-label="Add Case"
+                                        [attr.aria-label]="'CASES.ADD_CASE' | translate"
+                                        class="p-button-sm p-button-primary"
+                                        routerLink="/cases"></button>
+                            </div>
+
+                            <p-table [value]="cw.cases" class="p-datatable-sm shadow-xs rounded-xl overflow-hidden" [rowHover]="true">
+                                <ng-template pTemplate="header">
+                                    <tr class="bg-slate-50 text-slate-700 text-xs">
+                                        <th class="p-3">{{ 'CASES.CASE_NUMBER' | translate }}</th>
+                                        <th class="p-3">{{ 'CASES.TITLE' | translate }}</th>
+                                        <th class="p-3">{{ 'CASES.COURT' | translate }}</th>
+                                        <th class="p-3">{{ 'CASES.LAWYER' | translate }}</th>
+                                        <th class="p-3">{{ 'CASES.STATUS' | translate }}</th>
+                                        <th class="p-3 text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-item>
+                                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                        <td class="p-3 font-mono font-bold text-blue-700">
+                                            <a [routerLink]="['/cases', item.id]" class="hover:underline cursor-pointer">{{ item.caseNumber }}</a>
+                                        </td>
+                                        <td class="p-3 font-semibold text-slate-800">
+                                            <a [routerLink]="['/cases', item.id]" class="hover:text-blue-600 transition-colors cursor-pointer">{{ item.title }}</a>
+                                        </td>
+                                        <td class="p-3 text-xs text-slate-600">{{ item.court || '-' }}</td>
+                                        <td class="p-3 text-xs text-slate-700">{{ item.lawyerName || '-' }}</td>
+                                        <td class="p-3">
+                                            <p-tag [value]="getCaseStatusLabel(item.status)" [severity]="getCaseStatusSeverity(item.status)"></p-tag>
+                                        </td>
+                                        <td class="p-3 text-center">
+                                            <a [routerLink]="['/cases', item.id]"
+                                               pButton
+                                               icon="pi pi-arrow-right"
+                                               title="View Case"
+                                               [title]="'DASHBOARD.GO_TO_CASE' | translate"
+                                               aria-label="View Case"
+                                               [attr.aria-label]="'DASHBOARD.GO_TO_CASE' | translate"
+                                               class="p-button-text p-button-sm p-button-primary"></a>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="emptymessage">
+                                    <tr>
+                                        <td colspan="6" class="p-12 text-center text-slate-400">
+                                            <i class="pi pi-briefcase text-4xl mb-2 block text-slate-300"></i>
+                                            <p>{{ 'CLIENTS.NO_CASES' | translate }}</p>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </p-tabpanel>
+
+                    <!-- Tab 2: Contracts Table -->
+                    <p-tabpanel value="2">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-base font-bold text-slate-800">{{ 'CLIENTS.TABS.CONTRACTS' | translate }} ({{ cw.contracts.length }})</h3>
+                                <button pButton
+                                        icon="pi pi-plus"
+                                        [label]="'CONTRACTS.ADD_CONTRACT' | translate"
+                                        title="Add Contract"
+                                        [title]="'CONTRACTS.ADD_CONTRACT' | translate"
+                                        aria-label="Add Contract"
+                                        [attr.aria-label]="'CONTRACTS.ADD_CONTRACT' | translate"
+                                        class="p-button-sm p-button-primary"
+                                        routerLink="/contracts"></button>
+                            </div>
+
+                            <p-table [value]="cw.contracts" class="p-datatable-sm shadow-xs rounded-xl overflow-hidden" [rowHover]="true">
+                                <ng-template pTemplate="header">
+                                    <tr class="bg-slate-50 text-slate-700 text-xs">
+                                        <th class="p-3">{{ 'CONTRACTS.CONTRACT_NUMBER' | translate }}</th>
+                                        <th class="p-3">{{ 'CONTRACTS.TITLE' | translate }}</th>
+                                        <th class="p-3">{{ 'CONTRACTS.TYPE' | translate }}</th>
+                                        <th class="p-3">{{ 'CONTRACTS.LAWYER' | translate }}</th>
+                                        <th class="p-3">{{ 'CONTRACTS.STATUS' | translate }}</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-item>
+                                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                        <td class="p-3 font-mono font-bold text-sky-700">{{ item.contractNumber }}</td>
+                                        <td class="p-3 font-semibold text-slate-800">{{ item.title }}</td>
+                                        <td class="p-3 text-xs text-slate-600">{{ getContractTypeLabel(item.contractType) }}</td>
+                                        <td class="p-3 text-xs text-slate-700">{{ item.lawyerName || '-' }}</td>
+                                        <td class="p-3">
+                                            <p-tag [value]="getContractStatusLabel(item.status)"></p-tag>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="emptymessage">
+                                    <tr>
+                                        <td colspan="5" class="p-12 text-center text-slate-400">
+                                            <i class="pi pi-file-edit text-4xl mb-2 block text-slate-300"></i>
+                                            <p>{{ 'CLIENTS.NO_CONTRACTS' | translate }}</p>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </p-tabpanel>
+
+                    <!-- Tab 3: Registrations Table -->
+                    <p-tabpanel value="3">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-base font-bold text-slate-800">{{ 'CLIENTS.TABS.REGISTRATIONS' | translate }} ({{ cw.registrations.length }})</h3>
+                                <button pButton
+                                        icon="pi pi-plus"
+                                        [label]="'REGISTRATIONS.ADD_REGISTRATION' | translate"
+                                        title="Add Registration"
+                                        [title]="'REGISTRATIONS.ADD_REGISTRATION' | translate"
+                                        aria-label="Add Registration"
+                                        [attr.aria-label]="'REGISTRATIONS.ADD_REGISTRATION' | translate"
+                                        class="p-button-sm p-button-primary"
+                                        routerLink="/registrations"></button>
+                            </div>
+
+                            <p-table [value]="cw.registrations" class="p-datatable-sm shadow-xs rounded-xl overflow-hidden" [rowHover]="true">
+                                <ng-template pTemplate="header">
+                                    <tr class="bg-slate-50 text-slate-700 text-xs">
+                                        <th class="p-3">{{ 'REGISTRATIONS.REGISTRATION_NUMBER' | translate }}</th>
+                                        <th class="p-3">{{ 'REGISTRATIONS.AUTHORITY_NAME' | translate }}</th>
+                                        <th class="p-3">{{ 'REGISTRATIONS.REQUEST_TYPE' | translate }}</th>
+                                        <th class="p-3">{{ 'REGISTRATIONS.APPLICATION_NUMBER' | translate }}</th>
+                                        <th class="p-3">{{ 'REGISTRATIONS.LAWYER' | translate }}</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-item>
+                                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                        <td class="p-3 font-mono font-bold text-purple-700">{{ item.registrationNumber }}</td>
+                                        <td class="p-3 font-semibold text-slate-800">{{ item.authorityName }}</td>
+                                        <td class="p-3 text-xs text-slate-600">{{ getRegistrationTypeLabel(item.requestType) }}</td>
+                                        <td class="p-3 font-mono text-xs text-slate-700">{{ item.applicationNumber || '-' }}</td>
+                                        <td class="p-3 text-xs text-slate-700">{{ item.lawyerName || '-' }}</td>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="emptymessage">
+                                    <tr>
+                                        <td colspan="5" class="p-12 text-center text-slate-400">
+                                            <i class="pi pi-bookmark text-4xl mb-2 block text-slate-300"></i>
+                                            <p>{{ 'CLIENTS.NO_REGISTRATIONS' | translate }}</p>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </p-tabpanel>
+
+                    <!-- Tab 4: Companies Table -->
+                    <p-tabpanel value="4">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-base font-bold text-slate-800">{{ 'CLIENTS.TABS.COMPANIES' | translate }} ({{ cw.companies.length }})</h3>
+                                <button pButton
+                                        icon="pi pi-plus"
+                                        [label]="'COMPANIES.ADD_COMPANY' | translate"
+                                        title="Add Company"
+                                        [title]="'COMPANIES.ADD_COMPANY' | translate"
+                                        aria-label="Add Company"
+                                        [attr.aria-label]="'COMPANIES.ADD_COMPANY' | translate"
+                                        class="p-button-sm p-button-primary"
+                                        routerLink="/companies"></button>
+                            </div>
+
+                            <p-table [value]="cw.companies" class="p-datatable-sm shadow-xs rounded-xl overflow-hidden" [rowHover]="true">
+                                <ng-template pTemplate="header">
+                                    <tr class="bg-slate-50 text-slate-700 text-xs">
+                                        <th class="p-3">{{ 'COMPANIES.CODE' | translate }}</th>
+                                        <th class="p-3">{{ 'COMPANIES.TITLE' | translate }}</th>
+                                        <th class="p-3">{{ 'COMPANIES.TYPE' | translate }}</th>
+                                        <th class="p-3">{{ 'COMPANIES.CAPITAL' | translate }}</th>
+                                        <th class="p-3">{{ 'COMPANIES.LAWYER' | translate }}</th>
+                                        <th class="p-3">{{ 'COMPANIES.STATUS' | translate }}</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-item>
+                                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                        <td class="p-3 font-mono font-bold text-teal-700">{{ item.companyCode }}</td>
+                                        <td class="p-3 font-semibold text-slate-800">{{ item.title }}</td>
+                                        <td class="p-3 text-xs text-slate-600">{{ getCompanyTypeLabel(item.companyType) }}</td>
+                                        <td class="p-3 font-bold text-xs text-slate-700">{{ item.capital | currency:'EGP':'symbol-narrow':'1.0-0' }}</td>
+                                        <td class="p-3 text-xs text-slate-700">{{ item.lawyerName || '-' }}</td>
+                                        <td class="p-3">
+                                            <p-tag [value]="getCompanyStatusLabel(item.status)"></p-tag>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="emptymessage">
+                                    <tr>
+                                        <td colspan="6" class="p-12 text-center text-slate-400">
+                                            <i class="pi pi-building text-4xl mb-2 block text-slate-300"></i>
+                                            <p>{{ 'CLIENTS.NO_COMPANIES' | translate }}</p>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </p-tabpanel>
+
+                    <!-- Tab 5: Sessions Table -->
+                    <p-tabpanel value="5">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-base font-bold text-slate-800">{{ 'CLIENTS.TABS.SESSIONS' | translate }} ({{ cw.sessions.length }})</h3>
+                                <button pButton
+                                        icon="pi pi-plus"
+                                        [label]="'SESSIONS.ADD_SESSION' | translate"
+                                        title="Add Session"
+                                        [title]="'SESSIONS.ADD_SESSION' | translate"
+                                        aria-label="Add Session"
+                                        [attr.aria-label]="'SESSIONS.ADD_SESSION' | translate"
+                                        class="p-button-sm p-button-primary"
+                                        routerLink="/sessions"></button>
+                            </div>
+
+                            <p-table [value]="cw.sessions" class="p-datatable-sm shadow-xs rounded-xl overflow-hidden" [rowHover]="true">
+                                <ng-template pTemplate="header">
+                                    <tr class="bg-slate-50 text-slate-700 text-xs">
+                                        <th class="p-3">{{ 'SESSIONS.CASE' | translate }}</th>
+                                        <th class="p-3">{{ 'SESSIONS.SESSION_TITLE' | translate }}</th>
+                                        <th class="p-3 text-center">{{ 'COMMON.DATE' | translate }}</th>
+                                        <th class="p-3">{{ 'SESSIONS.LOCATION' | translate }}</th>
+                                        <th class="p-3">{{ 'SESSIONS.LAWYER' | translate }}</th>
+                                        <th class="p-3">{{ 'SESSIONS.STATUS' | translate }}</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-item>
+                                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                        <td class="p-3 font-mono font-bold text-indigo-700">
+                                            <a [routerLink]="['/cases', item.caseId]" class="hover:underline cursor-pointer">{{ item.caseNumber }}</a>
+                                        </td>
+                                        <td class="p-3 font-semibold text-slate-800">{{ item.title }}</td>
+                                        <td class="p-3 text-center text-xs font-semibold text-slate-700">{{ item.scheduledAt | date:'yyyy/MM/dd' }} - {{ item.scheduledAt | date:'shortTime' }}</td>
+                                        <td class="p-3 text-xs text-slate-600">{{ item.courtName || '-' }}</td>
+                                        <td class="p-3 text-xs text-slate-700">{{ item.lawyerName || '-' }}</td>
+                                        <td class="p-3">
+                                            <p-tag [value]="getSessionStatusLabel(item.status)"></p-tag>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="emptymessage">
+                                    <tr>
+                                        <td colspan="6" class="p-12 text-center text-slate-400">
+                                            <i class="pi pi-calendar text-4xl mb-2 block text-slate-300"></i>
+                                            <p>{{ 'CLIENTS.NO_SESSIONS' | translate }}</p>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </p-tabpanel>
+
+                    <!-- Tab 6: Invoices & Financials -->
+                    <p-tabpanel value="6">
+                        <div class="space-y-6">
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-base font-bold text-slate-800">{{ 'CLIENTS.TABS.INVOICES' | translate }} ({{ cw.invoices.length }})</h3>
+                                <button pButton
+                                        (click)="toggleAllInvoices()"
+                                        [icon]="isAnyInvoiceExpanded() ? 'pi pi-chevron-up' : 'pi pi-chevron-down'"
+                                        [label]="(isAnyInvoiceExpanded() ? 'FINANCE.COLLAPSE_ALL' : 'FINANCE.EXPAND_ALL') | translate"
+                                        title="Toggle All Invoices"
+                                        [title]="(isAnyInvoiceExpanded() ? 'FINANCE.COLLAPSE_ALL' : 'FINANCE.EXPAND_ALL') | translate"
+                                        aria-label="Toggle All Invoices"
+                                        [attr.aria-label]="(isAnyInvoiceExpanded() ? 'FINANCE.COLLAPSE_ALL' : 'FINANCE.EXPAND_ALL') | translate"
+                                        class="p-button-outlined p-button-secondary p-button-sm"></button>
+                            </div>
+
+                            <p-table [value]="cw.invoices"
+                                     dataKey="id"
+                                     [expandedRowKeys]="expandedInvoices"
+                                     (expandedRowKeysChange)="onExpandedInvoicesChange($event)"
+                                     class="p-datatable-sm shadow-xs rounded-xl overflow-hidden">
+                                <ng-template pTemplate="header">
+                                    <tr class="bg-slate-50 text-slate-700 text-xs">
+                                        <th style="width: 3rem"></th>
+                                        <th class="p-3">{{ 'FINANCE.INVOICE_NUMBER' | translate }}</th>
+                                        <th class="p-3">{{ 'FINANCE.CASE' | translate }}</th>
+                                        <th class="p-3">{{ 'FINANCE.AMOUNT' | translate }}</th>
+                                        <th class="p-3">{{ 'FINANCE.PAID' | translate }}</th>
+                                        <th class="p-3">{{ 'FINANCE.STATUS' | translate }}</th>
+                                        <th class="p-3 text-center">{{ 'FINANCE.DUE_DATE' | translate }}</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-item let-expanded="expanded">
+                                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                        <td>
+                                            <button type="button" pButton pRipple [pRowToggler]="item"
+                                                    class="p-button-text p-button-rounded p-button-plain p-button-sm"
+                                                    [icon]="expanded ? 'pi pi-chevron-down' : (appState.currentLang() === 'ar' ? 'pi pi-chevron-left' : 'pi pi-chevron-right')"
+                                                    title="Toggle Details"
+                                                    aria-label="Toggle Details"></button>
+                                        </td>
+                                        <td class="p-3 font-mono font-bold text-slate-800">{{ item.invoiceNumber }}</td>
+                                        <td class="p-3 text-xs text-indigo-700 font-semibold">
+                                            @if (item.caseId) {
+                                                <a [routerLink]="['/cases', item.caseId]" class="hover:underline">{{ item.caseNumber || item.caseTitle }}</a>
+                                            } @else {
+                                                <span>{{ item.caseTitle || '-' }}</span>
+                                            }
+                                        </td>
+                                        <td class="p-3 font-bold text-slate-900">{{ item.amount | currency:'EGP':'symbol-narrow':'1.0-0' }}</td>
+                                        <td class="p-3 font-semibold text-emerald-600">{{ item.paidAmount | currency:'EGP':'symbol-narrow':'1.0-0' }}</td>
+                                        <td class="p-3">
+                                            <p-tag [value]="getInvoiceStatusLabel(item.status)"></p-tag>
+                                        </td>
+                                        <td class="p-3 text-center text-xs text-slate-600">{{ item.dueDate | date:'yyyy/MM/dd' }}</td>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="rowexpansion" let-item>
+                                    <tr>
+                                        <td colspan="7" class="p-4 bg-slate-50/80">
+                                            <div class="space-y-3">
+                                                <span class="text-xs font-bold text-slate-700 block">{{ 'FINANCE.PAYMENT_HISTORY' | translate }}</span>
+                                                @if (item.payments && item.payments.length > 0) {
+                                                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                                                        @for (pay of item.payments; track pay.id) {
+                                                            <div class="p-3 bg-white rounded-xl border border-slate-200 shadow-2xs text-xs space-y-1">
+                                                                <div class="flex items-center justify-between">
+                                                                    <span class="font-bold text-emerald-700">{{ pay.amount | currency:'EGP':'symbol-narrow':'1.0-0' }}</span>
+                                                                    <span class="text-slate-400 font-mono">{{ pay.paymentDate | date:'yyyy/MM/dd' }}</span>
+                                                                </div>
+                                                                <div class="flex items-center gap-1.5 text-slate-600">
+                                                                    <i [class]="getPaymentMethodIcon(pay.paymentMethod)" class="text-xs text-slate-400"></i>
+                                                                    <span>{{ getPaymentMethodLabel(pay.paymentMethod) }}</span>
+                                                                    @if (pay.referenceNumber) {
+                                                                        <span class="text-slate-400 font-mono">(#{{ pay.referenceNumber }})</span>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                } @else {
+                                                    <p class="text-xs text-slate-400 italic">{{ 'FINANCE.NO_PAYMENTS_RECORDED' | translate }}</p>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="emptymessage">
+                                    <tr>
+                                        <td colspan="7" class="p-12 text-center text-slate-400">
+                                            <i class="pi pi-wallet text-4xl mb-2 block text-slate-300"></i>
+                                            <p>{{ 'CLIENTS.NO_INVOICES' | translate }}</p>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </p-tabpanel>
+
+                    <!-- Tab 7: Documents -->
+                    <p-tabpanel value="7">
+                        <div class="space-y-4">
+                            <h3 class="text-base font-bold text-slate-800">{{ 'CLIENTS.TABS.DOCUMENTS' | translate }} ({{ cw.documents.length }})</h3>
+
+                            <p-table [value]="cw.documents" class="p-datatable-sm shadow-xs rounded-xl overflow-hidden" [rowHover]="true">
+                                <ng-template pTemplate="header">
+                                    <tr class="bg-slate-50 text-slate-700 text-xs">
+                                        <th class="p-3">{{ 'COMMON.FILE_NAME' | translate }}</th>
+                                        <th class="p-3">{{ 'COMMON.CATEGORY' | translate }}</th>
+                                        <th class="p-3 text-center">{{ 'COMMON.SIZE' | translate }}</th>
+                                        <th class="p-3 text-center">{{ 'COMMON.DATE' | translate }}</th>
+                                        <th class="p-3 text-center">{{ 'COMMON.ACTIONS' | translate }}</th>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="body" let-doc>
+                                    <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                                        <td class="p-3">
+                                            <div class="flex items-center gap-2">
+                                                <i class="pi pi-file text-blue-500"></i>
+                                                <span class="font-medium text-slate-800">{{ doc.originalFileName || doc.title }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="p-3 text-xs">
+                                            <span class="px-2 py-0.5 bg-slate-100 rounded text-slate-600">{{ getDocumentCategoryLabel(doc.category) }}</span>
+                                        </td>
+                                        <td class="p-3 text-center text-xs text-slate-500">{{ formatSize(doc.fileSize) }}</td>
+                                        <td class="p-3 text-center text-xs font-mono">{{ doc.uploadedAt | date:'yyyy/MM/dd' }}</td>
+                                        <td class="p-3 text-center">
+                                            <div class="flex justify-center gap-1">
+                                                <button pButton icon="pi pi-download" class="p-button-text p-button-info p-button-xs"
+                                                        title="Download"
+                                                        [title]="'COMMON.DOWNLOAD' | translate"
+                                                        aria-label="Download"
+                                                        [attr.aria-label]="'COMMON.DOWNLOAD' | translate"
+                                                        (click)="downloadDocument(doc)"></button>
+                                                <button pButton icon="pi pi-eye" class="p-button-text p-button-secondary p-button-xs"
+                                                        title="View"
+                                                        [title]="'COMMON.VIEW' | translate"
+                                                        aria-label="View"
+                                                        [attr.aria-label]="'COMMON.VIEW' | translate"
+                                                        (click)="openDocument(doc)"></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                                <ng-template pTemplate="emptymessage">
+                                    <tr>
+                                        <td colspan="5" class="p-12 text-center text-slate-400">
+                                            <i class="pi pi-folder-open text-4xl mb-2 block text-slate-300"></i>
+                                            <p>{{ 'CLIENTS.NO_DOCUMENTS' | translate }}</p>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+                            </p-table>
+                        </div>
+                    </p-tabpanel>
+                </p-tabpanels>
+            </p-tabs>
+        </div>
+    </div>
+
+    <!-- Client Edit Dialog -->
+    <p-dialog [(visible)]="displayEditDialog"
+              [style]="{ width: '95vw', maxWidth: '850px' }"
+              [header]="'CLIENTS.EDIT_CLIENT' | translate"
+              [modal]="true"
+              [draggable]="false"
+              [resizable]="false"
+              [dismissableMask]="true"
+              (onHide)="onCancelEdit()"
+              class="p-fluid">
+        @if (displayEditDialog() && selectedClientForEdit()) {
+            <app-client-dialog [client]="selectedClientForEdit()"
+                               (onSave)="onSave($event)"
+                               (onCancel)="onCancelEdit()">
+            </app-client-dialog>
+        }
+    </p-dialog>
+}
+
