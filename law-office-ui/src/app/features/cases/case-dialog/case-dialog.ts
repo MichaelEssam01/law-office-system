@@ -31,6 +31,7 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
 import { AppStateService } from '../../../core/services/app-state.service';
 import { UserManagementService } from '../../../core/services/user-management.service';
 import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-filter.directive';
+import { SuspensionReasonPipe } from '../../../core/pipes/suspension-reason.pipe';
 
 @Component({
   selector: 'app-case-dialog',
@@ -47,6 +48,7 @@ import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-
     SelectModule,
     MultiSelectModule,
     AutoSelectFilterDirective,
+    SuspensionReasonPipe,
     DatePickerModule,
     CheckboxModule,
     TabsModule,
@@ -112,12 +114,12 @@ export class CaseDialog implements OnInit, OnChanges {
     // Court Information
     courtCaseNumber: [''],
     yearType: [YearType.Gregorian],
-    year: [new Date().getFullYear() as number | null],
+    year: [null as Date | number | null],
     litigationDegree: [null as LitigationDegree | null],
 
     // Physical File Archive
     fileNumber: [''],
-    fileYear: [new Date().getFullYear() as number | null],
+    fileYear: [null as Date | null],
     fileColor: [''],
 
     // Outcome & Notes
@@ -148,21 +150,30 @@ export class CaseDialog implements OnInit, OnChanges {
   requiredActionOptions = signal<any[]>([]);
   suspensionReasons = signal<any[]>([]);
 
-  // Year choices for Gregorian
-  gregorianYears: number[] = [];
-
   constructor() {
-    // Populate gregorian years list from current year + 5 down to 1980
-    const currYear = new Date().getFullYear();
-    for (let y = currYear + 5; y >= 1980; y--) {
-      this.gregorianYears.push(y);
-    }
-
     effect(() => {
       // Trigger update on language changes
       const lang = this.appState.currentLang();
       this.initDropdownOptions();
     });
+
+    this.caseForm.get('yearType')?.valueChanges.subscribe(type => {
+      this.handleYearTypeChange(type);
+    });
+  }
+
+  handleYearTypeChange(type: YearType | null | undefined) {
+    if (type === YearType.Judicial) {
+      const cur = this.caseForm.get('year')?.value;
+      if (cur instanceof Date || (typeof cur === 'number' && cur > 999)) {
+        this.caseForm.get('year')?.setValue(null);
+      }
+    } else if (type === YearType.Gregorian) {
+      const cur = this.caseForm.get('year')?.value;
+      if (typeof cur === 'number' && cur <= 999) {
+        this.caseForm.get('year')?.setValue(null);
+      }
+    }
   }
 
   get clientParties(): FormArray {
@@ -456,10 +467,12 @@ export class CaseDialog implements OnInit, OnChanges {
         familyCaseSubtype: this.case.familyCaseSubtype ?? null,
         courtCaseNumber: this.case.courtCaseNumber || '',
         yearType: this.case.yearType ?? YearType.Gregorian,
-        year: this.case.year ?? new Date().getFullYear(),
+        year: this.case.year
+          ? (this.case.yearType === YearType.Judicial ? this.case.year : new Date(this.case.year, 0, 1))
+          : null,
         litigationDegree: this.case.litigationDegree ?? null,
         fileNumber: this.case.fileNumber || '',
-        fileYear: this.case.fileYear ?? new Date().getFullYear(),
+        fileYear: this.case.fileYear ? new Date(this.case.fileYear, 0, 1) : null,
         fileColor: this.case.fileColor || '',
         judgmentResult: this.case.judgmentResult || '',
         judgmentDate: this.case.judgmentDate ? new Date(this.case.judgmentDate) : null,
@@ -482,8 +495,8 @@ export class CaseDialog implements OnInit, OnChanges {
         status: CaseStatus.InProgress,
         startDate: null,
         yearType: YearType.Gregorian,
-        year: new Date().getFullYear(),
-        fileYear: new Date().getFullYear(),
+        year: null,
+        fileYear: null,
         selectedRequiredActions: [],
         selectedSuspensionReasons: [],
         hasOfficeAction: false,
@@ -672,8 +685,18 @@ export class CaseDialog implements OnInit, OnChanges {
       suspensionReason = selectedReasons.join('، ');
     }
 
+    const finalYear = val.year instanceof Date 
+      ? val.year.getFullYear() 
+      : (val.year ? Number(val.year) : null);
+
+    const finalFileYear = val.fileYear instanceof Date 
+      ? val.fileYear.getFullYear() 
+      : (val.fileYear ? Number(val.fileYear) : null);
+
     const payload = {
       ...val,
+      year: finalYear,
+      fileYear: finalFileYear,
       hasOfficeAction,
       hasCourtAction,
       hasExternalAction,

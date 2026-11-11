@@ -226,13 +226,18 @@
                 </div>
                 <div class="flex flex-col gap-1.5">
                   <label for="regFileYearInput" class="text-xs font-bold text-slate-600">{{ 'CASES.FILE_YEAR' | translate }}</label>
-                  <p-inputnumber
-                    inputId="regFileYearInput"
+                  <p-datepicker
+                    id="regFileYearInput"
+                    view="year"
+                    dateFormat="yy"
                     formControlName="fileYear"
-                    [useGrouping]="false"
+                    [showIcon]="true"
+                    appendTo="body"
                     class="w-full"
-                    inputStyleClass="w-full !py-2 !px-3 !rounded-lg !border-slate-300 text-sm bg-white"
-                  ></p-inputnumber>
+                    title="File Year"
+                    aria-label="File Year"
+                    [attr.aria-label]="'CASES.FILE_YEAR' | translate"
+                  ></p-datepicker>
                 </div>
                 <div class="flex flex-col gap-1.5">
                   <label for="regFileColorInput" class="text-xs font-bold text-slate-600">{{ 'CASES.FILE_COLOR' | translate }}</label>
@@ -281,46 +286,34 @@
   </form>
 
   <ng-template pTemplate="footer">
-    <div class="flex items-center justify-between w-full pt-4 border-t border-slate-100 mt-2">
-      <div class="flex gap-2">
-        @if (activeTab() > 0) {
-          <p-button
-            [label]="'COMMON.PREVIOUS' | translate"
-            [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-right' : 'pi pi-arrow-left'"
-            [text]="true"
-            severity="secondary"
-            (onClick)="prevTab()"
-            class="!py-2 !px-3 !rounded-lg font-medium text-xs"
-          ></p-button>
-        }
-        @if (activeTab() < 3) {
-          <p-button
-            [label]="'COMMON.NEXT' | translate"
-            [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-left' : 'pi pi-arrow-right'"
-            iconPos="right"
-            [outlined]="true"
-            severity="info"
-            (onClick)="nextTab()"
-            class="!py-2 !px-3 !rounded-lg font-medium text-xs !text-sky-600 !border-sky-300 !bg-sky-50/70 hover:!bg-sky-100"
-          ></p-button>
-        }
+    <div class="flex items-center justify-between w-full pt-4 border-t border-slate-100 mt-2" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
+      <div class="flex items-center gap-2">
+        <button type="button" pButton [label]="'COMMON.PREVIOUS' | translate" [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-right' : 'pi pi-arrow-left'" title="Previous" aria-label="Previous" [attr.aria-label]="'COMMON.PREVIOUS' | translate" class="p-button-outlined p-button-secondary p-button-sm" [disabled]="activeTab() === 0" (click)="prevTab()"></button>
+        <button type="button" pButton [label]="'COMMON.NEXT' | translate" [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-left' : 'pi pi-arrow-right'" iconPos="right" title="Next" aria-label="Next" [attr.aria-label]="'COMMON.NEXT' | translate" class="p-button-outlined p-button-info p-button-sm" [disabled]="activeTab() === 3" (click)="nextTab()"></button>
       </div>
 
-      <div class="flex gap-3">
-        <p-button
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          pButton
           [label]="'COMMON.CANCEL' | translate"
-          icon="pi pi-times"
-          [text]="true"
-          severity="secondary"
-          (onClick)="close()"
-          class="!py-2.5 !px-4 !rounded-lg font-medium"
-        ></p-button>
-        <p-button
+          title="Cancel"
+          aria-label="Cancel"
+          [attr.aria-label]="'COMMON.CANCEL' | translate"
+          class="p-button-text p-button-secondary"
+          (click)="close()"
+        ></button>
+        <button
+          type="button"
+          pButton
           [label]="'COMMON.SAVE' | translate"
           icon="pi pi-check"
-          (onClick)="save()"
-          class="!bg-primary-600 hover:!bg-primary-700 !py-2.5 !px-6 !rounded-lg font-bold shadow-md shadow-primary-200 border-none text-white transition-all"
-        ></p-button>
+          title="Save"
+          aria-label="Save"
+          [attr.aria-label]="'COMMON.SAVE' | translate"
+          class="p-button-primary shadow-md px-6"
+          (click)="save()"
+        ></button>
       </div>
     </div>
   </ng-template>

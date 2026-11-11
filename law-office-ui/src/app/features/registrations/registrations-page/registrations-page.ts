@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -51,6 +52,7 @@ export class RegistrationsPage implements OnInit {
   private translate = inject(TranslateService);
   public appState = inject(AppStateService);
   private userService = inject(UserManagementService);
+  private route = inject(ActivatedRoute);
 
   allRegistrations = signal<RegistrationListDto[]>([]);
   loading = signal(true);
@@ -108,6 +110,11 @@ export class RegistrationsPage implements OnInit {
   }
 
   async ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['search']) {
+        this.searchTerm.set(params['search']);
+      }
+    });
     await Promise.all([this.loadRegistrations(), this.loadClients(), this.loadLawyers()]);
   }
 
@@ -172,7 +179,11 @@ export class RegistrationsPage implements OnInit {
     }
   }
 
+  private isSaving = false;
+
   async saveRegistration(data: any) {
+    if (this.isSaving || !this.displayDialog()) return;
+    this.isSaving = true;
     try {
       if (data.id) {
         await this.registrationService.updateRegistration(data.id, data);
@@ -185,6 +196,8 @@ export class RegistrationsPage implements OnInit {
       await this.loadRegistrations();
     } catch (error) {
       this.messageService.add({ severity: 'error', summary: this.translate.instant('COMMON.ERROR'), detail: this.translate.instant('REGISTRATIONS.SAVE_ERROR') });
+    } finally {
+      this.isSaving = false;
     }
   }
 

@@ -78,10 +78,11 @@
     <!-- Table Card -->
     <div class="bg-white rounded-xl border border-slate-200 shadow-sm no-page-links">
         <p-table #dt [value]="cases()" [loading]="loading()" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                 [paginatorDropdownAppendTo]="'body'"
                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                  [globalFilterFields]="['caseNumber', 'courtCaseNumber', 'fileNumber', 'title', 'clientName', 'opponentName', 'lawyerName']"
                  (onFilter)="cdr.detectChanges()"
-                 class="p-datatable-sm shadow-sm rounded-lg overflow-hidden" [rowHover]="true">
+                 class="p-datatable-sm shadow-sm rounded-lg" [rowHover]="true">
             
             <ng-template pTemplate="header">
                 <tr class="bg-slate-50 text-slate-700 text-xs uppercase tracking-wider">
@@ -220,8 +221,8 @@
                                 </span>
                             }
                             @if ((case.status === 2 || case.status === 5) && case.suspensionReason) {
-                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 max-w-[130px] truncate" [pTooltip]="case.suspensionReason">
-                                    {{ case.suspensionReason }}
+                                <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 max-w-[130px] truncate" [pTooltip]="case.suspensionReason | suspensionReason:appState.currentLang()">
+                                    {{ case.suspensionReason | suspensionReason:appState.currentLang() }}
                                 </span>
                             }
                         </div>

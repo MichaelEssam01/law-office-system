@@ -207,7 +207,12 @@ export class FinancePage implements OnInit {
     this.displayPaymentDialog.set(true);
   }
 
+  private isSavingInvoice = false;
+  private isSavingPayment = false;
+
   async onInvoiceSave(data: any) {
+    if (this.isSavingInvoice || !this.displayInvoiceDialog()) return;
+    this.isSavingInvoice = true;
     try {
       if (data.id) {
         await this.financeService.updateInvoice(data.id, data);
@@ -225,6 +230,7 @@ export class FinancePage implements OnInit {
         });
       }
       this.displayInvoiceDialog.set(false);
+      this.selectedInvoice.set(null);
       await this.loadData();
     } catch (error: any) {
       this.messageService.add({ 
@@ -232,10 +238,14 @@ export class FinancePage implements OnInit {
         summary: this.translate.instant('COMMON.ERROR'), 
         detail: error.message || this.translate.instant('COMMON.ERROR')
       });
+    } finally {
+      this.isSavingInvoice = false;
     }
   }
 
   async onPaymentSave(data: any) {
+    if (this.isSavingPayment || !this.displayPaymentDialog()) return;
+    this.isSavingPayment = true;
     try {
       await this.financeService.createPayment(data);
       this.messageService.add({ 
@@ -251,6 +261,8 @@ export class FinancePage implements OnInit {
         summary: this.translate.instant('COMMON.ERROR'), 
         detail: error.message || this.translate.instant('COMMON.ERROR')
       });
+    } finally {
+      this.isSavingPayment = false;
     }
   }
 

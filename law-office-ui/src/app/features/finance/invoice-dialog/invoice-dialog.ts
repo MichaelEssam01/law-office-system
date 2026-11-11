@@ -229,18 +229,12 @@ export class InvoiceDialog {
     }
   }
 
-  async save() {
+  save() {
     if (this.invoiceForm.invalid) {
       this.invoiceForm.markAllAsTouched();
       return;
     }
-
-    this.saving.set(true);
-    try {
-      this.onSave.emit(this.invoiceForm.value);
-    } finally {
-      this.saving.set(false);
-    }
+    this.onSave.emit(this.invoiceForm.value);
   }
 
   close() {

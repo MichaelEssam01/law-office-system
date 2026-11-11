@@ -21,6 +21,7 @@ import { AppStateService } from '../../../core/services/app-state.service';
 import { UserManagementService } from '../../../core/services/user-management.service';
 
 import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-filter.directive';
+import { SuspensionReasonPipe } from '../../../core/pipes/suspension-reason.pipe';
 
 @Component({
   selector: 'app-cases-page',
@@ -40,6 +41,7 @@ import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-
     SelectModule,
     AutoSelectFilterDirective,
     CaseDialog,
+    SuspensionReasonPipe,
     TranslateModule,
     TooltipModule
   ],
@@ -242,7 +244,11 @@ export class CasesPage implements OnInit {
     });
   }
 
+  private isSaving = false;
+
   async onSave(caseData: any) {
+    if (this.isSaving || !this.displayDialog()) return;
+    this.isSaving = true;
     try {
       if (caseData.id) {
         await this.caseService.updateCase(caseData.id, caseData);
@@ -267,6 +273,8 @@ export class CasesPage implements OnInit {
         summary: this.translate.instant('COMMON.ERROR'), 
         detail: this.translate.instant('CASES.SAVE_ERROR') 
       });
+    } finally {
+      this.isSaving = false;
     }
   }
 

@@ -76,7 +76,7 @@ export class CompanyDialog implements OnInit, OnChanges {
     companyDuration: [''],
     authorityDetails: [''],
     fileNumber: [''],
-    fileYear: [new Date().getFullYear() as number | null],
+    fileYear: [null as Date | null],
     fileColor: [''],
     contractProcedure: [''],
     registryProcedure: [''],
@@ -139,7 +139,7 @@ export class CompanyDialog implements OnInit, OnChanges {
             companyDuration: this.company.companyDuration || '',
             authorityDetails: this.company.authorityDetails || '',
             fileNumber: this.company.fileNumber || '',
-            fileYear: this.company.fileYear ?? new Date().getFullYear(),
+            fileYear: this.company.fileYear ? new Date(this.company.fileYear, 0, 1) : null,
             fileColor: this.company.fileColor || '',
             contractProcedure: this.company.contractProcedure || '',
             registryProcedure: this.company.registryProcedure || '',
@@ -166,7 +166,7 @@ export class CompanyDialog implements OnInit, OnChanges {
           this.companyForm.reset({
             status: CompanyStatus.Active,
             startDate: null,
-            fileYear: new Date().getFullYear()
+            fileYear: null
           });
         }
       }
@@ -407,7 +407,7 @@ export class CompanyDialog implements OnInit, OnChanges {
       companyDuration: raw.companyDuration,
       authorityDetails: raw.authorityDetails,
       fileNumber: raw.fileNumber,
-      fileYear: raw.fileYear,
+      fileYear: raw.fileYear instanceof Date ? raw.fileYear.getFullYear() : (raw.fileYear ? Number(raw.fileYear) : null),
       fileColor: raw.fileColor,
       contractProcedure: raw.contractProcedure,
       registryProcedure: raw.registryProcedure,

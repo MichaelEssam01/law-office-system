@@ -159,9 +159,10 @@
       [rows]="10"
       [paginator]="true"
       [rowsPerPageOptions]="[5, 10, 30, 50]"
+      [paginatorDropdownAppendTo]="'body'"
       [showCurrentPageReport]="true"
       [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
-      class="p-datatable-sm shadow-sm rounded-lg overflow-hidden"
+      class="p-datatable-sm shadow-sm rounded-lg"
       [rowHover]="true"
     >
       <ng-template pTemplate="header">

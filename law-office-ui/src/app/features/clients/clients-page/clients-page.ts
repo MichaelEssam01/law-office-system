@@ -1,7 +1,8 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { TableModule } from 'primeng/table';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Table, TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
@@ -25,6 +26,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterModule,
     TableModule,
     ButtonModule,
@@ -46,7 +48,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
   providers: [MessageService, ConfirmationService]
 })
 export class ClientsPage implements OnInit {
+  @ViewChild('dt') dt?: Table;
   clients: Client[] = [];
+  searchTerm: string = '';
   selectedClient: Client | null = null;
   displayDialog: boolean = false;
   loading: boolean = true;
@@ -64,7 +68,8 @@ export class ClientsPage implements OnInit {
     public cdr: ChangeDetectorRef,
     private translate: TranslateService,
     public appState: AppStateService,
-    private documentService: DocumentService
+    private documentService: DocumentService,
+    private route: ActivatedRoute
   ) {}
 
   async openDocument(item: { id: string }) {
@@ -85,6 +90,15 @@ export class ClientsPage implements OnInit {
 
   async ngOnInit(): Promise<void> {
     await this.loadClients();
+    this.route.queryParams.subscribe(params => {
+      if (params['search']) {
+        this.searchTerm = params['search'];
+        setTimeout(() => {
+          this.dt?.filterGlobal(this.searchTerm, 'contains');
+          this.cdr.detectChanges();
+        });
+      }
+    });
   }
 
   async loadClients() {
@@ -147,7 +161,11 @@ export class ClientsPage implements OnInit {
     this.displayDialog = false;
   }
 
+  private isSaving = false;
+
   async onSave(client: Client) {
+    if (this.isSaving || !this.displayDialog) return;
+    this.isSaving = true;
     try {
       if (client.id) {
         await this.clientService.updateClient(client.id, client);
@@ -180,6 +198,8 @@ export class ClientsPage implements OnInit {
           detail: this.translate.instant('CLIENTS.SAVE_ERROR') 
         });
       }
+    } finally {
+      this.isSaving = false;
     }
   }
 

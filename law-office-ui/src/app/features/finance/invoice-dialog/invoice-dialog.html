@@ -155,7 +155,7 @@
     <ng-template pTemplate="footer">
         <div class="flex justify-end gap-2" [dir]="appState.currentLang() === 'ar' ? 'rtl' : 'ltr'">
             <button type="button" pButton [label]="'COMMON.CANCEL' | translate" title="Cancel" aria-label="Cancel" [title]="'COMMON.CANCEL' | translate" [attr.aria-label]="'COMMON.CANCEL' | translate" icon="pi pi-times" class="p-button-text p-button-secondary" (click)="close()"></button>
-            <button type="button" pButton [label]="(invoice() ? 'COMMON.SAVE' : 'COMMON.ADD') | translate" title="Save" aria-label="Save" [title]="(invoice() ? 'COMMON.SAVE' : 'COMMON.ADD') | translate" [attr.aria-label]="(invoice() ? 'COMMON.SAVE' : 'COMMON.ADD') | translate" icon="pi pi-check" class="p-button-primary shadow-md" [loading]="saving()" (click)="save()"></button>
+            <button type="button" pButton [label]="(invoice() ? 'COMMON.SAVE' : 'COMMON.ADD') | translate" title="Save" aria-label="Save" [title]="(invoice() ? 'COMMON.SAVE' : 'COMMON.ADD') | translate" [attr.aria-label]="(invoice() ? 'COMMON.SAVE' : 'COMMON.ADD') | translate" icon="pi pi-check" class="p-button-primary shadow-md px-6" (click)="save()"></button>
         </div>
     </ng-template>
 </p-dialog>

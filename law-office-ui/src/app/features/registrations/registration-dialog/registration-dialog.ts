@@ -65,7 +65,7 @@ export class RegistrationDialog implements OnInit, OnChanges {
     requestType: [null as RegistrationRequestType | null, Validators.required],
     otherRequestType: [''],
     fileNumber: [''],
-    fileYear: [new Date().getFullYear() as number | null],
+    fileYear: [null as Date | null],
     fileColor: [''],
     resultNumber: [''],
     resultDate: [null as Date | null],
@@ -139,7 +139,7 @@ export class RegistrationDialog implements OnInit, OnChanges {
             requestType: this.registration.requestType,
             otherRequestType: this.registration.otherRequestType || '',
             fileNumber: this.registration.fileNumber || '',
-            fileYear: this.registration.fileYear ?? new Date().getFullYear(),
+            fileYear: this.registration.fileYear ? new Date(this.registration.fileYear, 0, 1) : null,
             fileColor: this.registration.fileColor || '',
             resultNumber: this.registration.resultNumber || '',
             resultDate: this.registration.resultDate ? new Date(this.registration.resultDate) : null,
@@ -151,7 +151,7 @@ export class RegistrationDialog implements OnInit, OnChanges {
           this.initProcedureControls(this.registration.procedures);
         } else {
           this.registrationForm.reset({
-            fileYear: new Date().getFullYear()
+            fileYear: null
           });
           this.initProcedureControls();
         }
@@ -251,7 +251,7 @@ export class RegistrationDialog implements OnInit, OnChanges {
       requestType: raw.requestType,
       otherRequestType: raw.requestType === RegistrationRequestType.Other ? raw.otherRequestType : null,
       fileNumber: raw.fileNumber,
-      fileYear: raw.fileYear,
+      fileYear: raw.fileYear instanceof Date ? raw.fileYear.getFullYear() : (raw.fileYear ? Number(raw.fileYear) : null),
       fileColor: raw.fileColor,
       resultNumber: raw.resultNumber,
       resultDate: raw.resultDate,

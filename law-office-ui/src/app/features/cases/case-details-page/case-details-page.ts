@@ -30,6 +30,7 @@ import { SessionDialog } from '../../sessions/session-dialog/session-dialog';
 import { InvoiceDialog } from '../../finance/invoice-dialog/invoice-dialog';
 import { PaymentDialog } from '../../finance/payment-dialog/payment-dialog';
 import { DocumentUploadDialog } from '../document-upload-dialog/document-upload-dialog';
+import { SuspensionReasonPipe } from '../../../core/pipes/suspension-reason.pipe';
 
 @Component({
   selector: 'app-case-details-page',
@@ -50,7 +51,8 @@ import { DocumentUploadDialog } from '../document-upload-dialog/document-upload-
     SessionDialog,
     InvoiceDialog,
     PaymentDialog,
-    DocumentUploadDialog  
+    DocumentUploadDialog,
+    SuspensionReasonPipe
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './case-details-page.html'
@@ -242,7 +244,13 @@ export class CaseDetailsPage implements OnInit {
     });
   }
 
+  private isSavingSession = false;
+  private isSavingInvoice = false;
+  private isSavingPayment = false;
+
   async onSessionSave(sessionData: any) {
+    if (this.isSavingSession || !this.displaySessionDialog()) return;
+    this.isSavingSession = true;
     try {
       if (sessionData.id) {
         await this.sessionService.updateSession(sessionData.id, sessionData);
@@ -261,6 +269,7 @@ export class CaseDetailsPage implements OnInit {
         });
       }
       this.displaySessionDialog.set(false);
+      this.selectedSession.set(null);
       if (this.caseId()) await this.loadSessions(this.caseId()!);
     } catch (error) {
       this.messageService.add({ 
@@ -268,6 +277,8 @@ export class CaseDetailsPage implements OnInit {
         summary: this.translate.instant('COMMON.ERROR'), 
         detail: this.translate.instant('SESSIONS.SAVE_ERROR') 
       });
+    } finally {
+      this.isSavingSession = false;
     }
   }
 
@@ -291,6 +302,8 @@ export class CaseDetailsPage implements OnInit {
   }
 
   async onInvoiceSave(data: any) {
+    if (this.isSavingInvoice || !this.displayInvoiceDialog()) return;
+    this.isSavingInvoice = true;
     try {
       if (!data.caseId && this.caseId()) data.caseId = this.caseId();
       
@@ -317,10 +330,14 @@ export class CaseDetailsPage implements OnInit {
         summary: this.translate.instant('COMMON.ERROR'), 
         detail: error.message || this.translate.instant('CASES.SAVE_ERROR') 
       });
+    } finally {
+      this.isSavingInvoice = false;
     }
   }
 
   async onPaymentSave(data: any) {
+    if (this.isSavingPayment || !this.displayPaymentDialog()) return;
+    this.isSavingPayment = true;
     try {
       if (!data.caseId && this.caseId()) data.caseId = this.caseId();
       await this.financeService.createPayment(data);
@@ -337,6 +354,8 @@ export class CaseDetailsPage implements OnInit {
         summary: this.translate.instant('COMMON.ERROR'), 
         detail: error.message || this.translate.instant('CASES.SAVE_ERROR') 
       });
+    } finally {
+      this.isSavingPayment = false;
     }
   }
 

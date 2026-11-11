@@ -148,6 +148,7 @@
         </div>
         
         <p-table #dt [value]="filteredInvoices()" [loading]="loading()" [rows]="10" [paginator]="true" [rowsPerPageOptions]="[5, 10, 30, 50]"
+                 [paginatorDropdownAppendTo]="'body'"
                  [showCurrentPageReport]="true" [currentPageReportTemplate]="'PAGINATOR.CURRENT_PAGE_REPORT' | translate"
                  class="p-datatable-sm" dataKey="id" 
                  [globalFilterFields]="['invoiceNumber', 'clientName', 'caseNumber', 'caseTitle', 'title']"

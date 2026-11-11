@@ -34,7 +34,8 @@ export const appConfig: ApplicationConfig = {
             options: {
                 darkModeSelector: '.my-app-dark'
             }
-        }
+        },
+        overlayAppendTo: 'body'
     }),
     provideTranslateService({
         fallbackLang: 'ar'

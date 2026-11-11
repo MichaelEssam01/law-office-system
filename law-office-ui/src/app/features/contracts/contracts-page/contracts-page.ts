@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, signal, computed, ChangeDetectorRef, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -52,6 +53,7 @@ export class ContractsPage implements OnInit {
   public appState = inject(AppStateService);
   public cdr = inject(ChangeDetectorRef);
   private userService = inject(UserManagementService);
+  private route = inject(ActivatedRoute);
 
   allContracts = signal<ContractListDto[]>([]);
   loading = signal(true);
@@ -132,6 +134,11 @@ export class ContractsPage implements OnInit {
   }
 
   async ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['search']) {
+        this.searchTerm.set(params['search']);
+      }
+    });
     await Promise.all([this.loadContracts(), this.loadClients(), this.loadLawyers()]);
   }
 
@@ -197,7 +204,11 @@ export class ContractsPage implements OnInit {
     }
   }
 
+  private isSaving = false;
+
   async saveContract(data: any) {
+    if (this.isSaving || !this.displayDialog()) return;
+    this.isSaving = true;
     try {
       if (data.id) {
         await this.contractService.updateContract(data.id, data);
@@ -210,6 +221,8 @@ export class ContractsPage implements OnInit {
       await this.loadContracts();
     } catch (error) {
       this.messageService.add({ severity: 'error', summary: this.translate.instant('COMMON.ERROR'), detail: this.translate.instant('CONTRACTS.SAVE_ERROR') });
+    } finally {
+      this.isSaving = false;
     }
   }
 

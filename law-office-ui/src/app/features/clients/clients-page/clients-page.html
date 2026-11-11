@@ -20,7 +20,7 @@
                         <i class="pi pi-search absolute text-slate-400 pointer-events-none text-sm"
                            [class.right-3]="appState.currentLang() !== 'ar'"
                            [class.left-3]="appState.currentLang() === 'ar'"></i>
-                        <input id="clientsSearchInput" pInputText type="text" (input)="dt.filterGlobal($any($event.target).value, 'contains')" title="Search" placeholder="Search" aria-label="Search" [placeholder]="'COMMON.SEARCH' | translate" [attr.aria-label]="'COMMON.SEARCH' | translate" class="w-full sm:w-64 p-inputtext-sm" [class.pr-9]="appState.currentLang() !== 'ar'" [class.pl-9]="appState.currentLang() === 'ar'" [class.pl-3]="appState.currentLang() !== 'ar'" [class.pr-3]="appState.currentLang() === 'ar'" />
+                        <input id="clientsSearchInput" pInputText type="text" [(ngModel)]="searchTerm" (input)="dt.filterGlobal($any($event.target).value, 'contains')" title="Search" placeholder="Search" aria-label="Search" [placeholder]="'COMMON.SEARCH' | translate" [attr.aria-label]="'COMMON.SEARCH' | translate" class="w-full sm:w-64 p-inputtext-sm" [class.pr-9]="appState.currentLang() !== 'ar'" [class.pl-9]="appState.currentLang() === 'ar'" [class.pl-3]="appState.currentLang() !== 'ar'" [class.pr-3]="appState.currentLang() === 'ar'" />
                     </div>
                 </div>
             </ng-template>

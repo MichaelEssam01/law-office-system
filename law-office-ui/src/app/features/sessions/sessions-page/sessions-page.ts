@@ -134,6 +134,13 @@ export class SessionsPage implements OnInit {
     this.displayDialog.set(true);
   }
 
+  onDialogVisibleChange(visible: boolean) {
+    this.displayDialog.set(visible);
+    if (!visible) {
+      this.selectedSession.set(null);
+    }
+  }
+
   async editSession(sessionItem: SessionListDto) {
     try {
       const fullSession = await this.sessionService.getSessionById(sessionItem.id);
@@ -179,7 +186,11 @@ export class SessionsPage implements OnInit {
     });
   }
 
+  private isSaving = false;
+
   async onSave(sessionData: any) {
+    if (this.isSaving || !this.displayDialog()) return;
+    this.isSaving = true;
     try {
       if (sessionData.id) {
         await this.sessionService.updateSession(sessionData.id, sessionData);
@@ -197,6 +208,7 @@ export class SessionsPage implements OnInit {
         });
       }
       this.displayDialog.set(false);
+      this.selectedSession.set(null);
       await this.loadSessions();
     } catch (error) {
       this.messageService.add({ 
@@ -204,6 +216,8 @@ export class SessionsPage implements OnInit {
         summary: this.translate.instant('COMMON.ERROR'), 
         detail: this.translate.instant('SESSIONS.SAVE_ERROR') 
       });
+    } finally {
+      this.isSaving = false;
     }
   }
 

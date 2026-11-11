@@ -72,7 +72,7 @@ export class ContractDialog implements OnInit, OnChanges {
     contractType: [null as ContractType | null, Validators.required],
     otherContractType: [''],
     fileNumber: [''],
-    fileYear: [new Date().getFullYear() as number | null],
+    fileYear: [null as Date | null],
     fileColor: [''],
     notes: [''],
     clientId: [null as string | null, Validators.required],
@@ -123,7 +123,7 @@ export class ContractDialog implements OnInit, OnChanges {
             contractType: this.contract.contractType,
             otherContractType: this.contract.otherContractType || '',
             fileNumber: this.contract.fileNumber || '',
-            fileYear: this.contract.fileYear ?? new Date().getFullYear(),
+            fileYear: this.contract.fileYear ? new Date(this.contract.fileYear, 0, 1) : null,
             fileColor: this.contract.fileColor || '',
             notes: this.contract.notes || '',
             clientId: this.contract.clientId,
@@ -143,7 +143,7 @@ export class ContractDialog implements OnInit, OnChanges {
           this.contractForm.reset({
             status: ContractStatus.InDrafting,
             startDate: null,
-            fileYear: new Date().getFullYear()
+            fileYear: null
           });
         }
       }
@@ -366,7 +366,7 @@ export class ContractDialog implements OnInit, OnChanges {
       contractType: raw.contractType,
       otherContractType: raw.contractType === ContractType.Other ? raw.otherContractType : null,
       fileNumber: raw.fileNumber,
-      fileYear: raw.fileYear,
+      fileYear: raw.fileYear instanceof Date ? raw.fileYear.getFullYear() : (raw.fileYear ? Number(raw.fileYear) : null),
       fileColor: raw.fileColor,
       notes: raw.notes,
       clientId: raw.clientId,

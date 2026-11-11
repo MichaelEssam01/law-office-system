@@ -512,7 +512,7 @@
                                 </span>
                                 @if (c.suspensionReason) {
                                     <div class="bg-white p-1.5 rounded border border-amber-100 font-semibold text-slate-800">
-                                        {{ c.suspensionReason }}
+                                        {{ c.suspensionReason | suspensionReason:appState.currentLang() }}
                                     </div>
                                 }
                                 @if (c.suspensionDocumentsText) {
@@ -597,7 +597,8 @@
 
         <!-- Dialogs -->
         <app-case-dialog [case]="case()" [visible]="displayDialog()" (visibleChange)="displayDialog.set($event)" (onSave)="onSave($event)"></app-case-dialog>
-        <app-session-dialog [(visible)]="displaySessionDialog" 
+        <app-session-dialog [visible]="displaySessionDialog()" 
+                            (visibleChange)="displaySessionDialog.set($event)"
                             [session]="selectedSession()" 
                             [caseId]="caseId()"
                             (onSave)="onSessionSave($event)">

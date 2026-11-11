@@ -7,14 +7,68 @@
             <i class="pi pi-bars text-xl"></i>
         </button>
         
-        <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'" class="hidden md:flex w-full max-w-md">
-            <p-inputIcon class="pi pi-search"></p-inputIcon>
-            <input id="headerSearchInput" pInputText type="text"
-                   title="Search" placeholder="Search" aria-label="Search"
-                   [title]="'COMMON.SEARCH' | translate" [attr.aria-label]="'COMMON.SEARCH' | translate"
-                   [placeholder]="'COMMON.SEARCH' | translate" 
-                   class="w-full py-2.5 rounded-xl border-slate-200 bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all duration-200 text-sm outline-none shadow-sm" />
-        </p-iconField>
+        <div class="hidden md:block relative w-full max-w-md">
+            <p-iconField [iconPosition]="appState.currentLang() === 'ar' ? 'left' : 'right'" class="w-full">
+                <p-inputIcon class="pi pi-search"></p-inputIcon>
+                <input id="headerSearchInput" pInputText type="text"
+                       [ngModel]="searchQuery()"
+                       (ngModelChange)="onSearchInput($event)"
+                       (focus)="onSearchFocus()"
+                       (keydown.enter)="onSearchEnter()"
+                       (keydown.escape)="searchOpen.set(false)"
+                       autocomplete="off"
+                       title="Search" placeholder="Search" aria-label="Search"
+                       [title]="'COMMON.SEARCH' | translate" [attr.aria-label]="'COMMON.SEARCH' | translate"
+                       [placeholder]="'COMMON.SEARCH' | translate" 
+                       class="w-full py-2.5 rounded-xl border-slate-200 bg-white focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all duration-200 text-sm outline-none shadow-sm" />
+            </p-iconField>
+
+            @if (searchOpen() && searchQuery().trim().length > 0) {
+                <div class="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-slate-200 z-50 overflow-hidden max-h-96 overflow-y-auto">
+                    @if (searchLoading()) {
+                        <div class="p-6 text-center text-slate-400 text-sm flex items-center justify-center gap-2">
+                            <i class="pi pi-spin pi-spinner text-blue-600"></i>
+                            <span>{{ 'COMMON.LOADING' | translate }}</span>
+                        </div>
+                    } @else if (searchResults().length === 0) {
+                        <div class="p-6 text-center text-slate-400 text-sm">
+                            <i class="pi pi-search text-xl mb-1.5 block text-slate-300"></i>
+                            <span>{{ 'COMMON.NO_DATA' | translate }}</span>
+                        </div>
+                    } @else {
+                        <div class="divide-y divide-slate-100">
+                            @for (item of searchResults(); track item.id) {
+                                <button type="button"
+                                        (click)="selectSearchResult(item)"
+                                        [title]="item.title"
+                                        [attr.aria-label]="item.title"
+                                        class="w-full px-4 py-3 text-start hover:bg-blue-50/60 transition-colors flex items-center justify-between gap-3 cursor-pointer">
+                                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                                        <span class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" [ngClass]="item.badgeClass">
+                                            <i [class]="item.icon + ' text-xs'"></i>
+                                        </span>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="flex items-center gap-2">
+                                                @if (item.code) {
+                                                    <span class="font-mono text-xs font-bold text-blue-600 shrink-0">{{ item.code }}</span>
+                                                }
+                                                <span class="font-semibold text-slate-800 text-sm truncate">{{ item.title }}</span>
+                                            </div>
+                                            @if (item.subtitle) {
+                                                <p class="text-xs text-slate-500 truncate mt-0.5">{{ item.subtitle }}</p>
+                                            }
+                                        </div>
+                                    </div>
+                                    <span class="text-[11px] font-bold px-2.5 py-1 rounded-full shrink-0" [ngClass]="item.badgeClass">
+                                        {{ item.categoryLabelKey | translate }}
+                                    </span>
+                                </button>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
     </div>
 
     <!-- Right Section (Actions & Profile) -->
@@ -23,13 +77,15 @@
         <button type="button" (click)="notificationOp.toggle($event)" 
                 title="Notifications" aria-label="Notifications"
                 [title]="'NOTIFICATIONS.TITLE' | translate" [attr.aria-label]="'NOTIFICATIONS.TITLE' | translate"
-                class="relative p-2.5 text-slate-500 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all duration-200 active:scale-90 cursor-pointer">
-            <i class="pi pi-bell text-xl"></i>
-            @if (notificationService.unreadCount() > 0) {
-                <span class="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white border-2 border-white">
-                    {{ notificationService.unreadCount() > 9 ? '9+' : notificationService.unreadCount() }}
-                </span>
-            }
+                class="p-2.5 text-slate-500 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all duration-200 active:scale-90 cursor-pointer flex items-center justify-center">
+            <div class="relative inline-flex items-center justify-center">
+                <i class="pi pi-bell text-xl"></i>
+                @if (notificationService.unreadCount() > 0) {
+                    <span class="absolute -top-1.5 -end-2 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-red-500 text-[9px] leading-none font-bold text-white ring-2 ring-white pointer-events-none">
+                        {{ notificationService.unreadCount() > 9 ? '9+' : notificationService.unreadCount() }}
+                    </span>
+                }
+            </div>
         </button>
 
         <!-- Language Switcher -->

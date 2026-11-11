@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, signal, effect, model, input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, signal, effect, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DialogModule } from 'primeng/dialog';
@@ -34,21 +34,21 @@ import { AutoSelectFilterDirective } from '../../../core/directives/auto-select-
   ],
   templateUrl: './session-dialog.html'
 })
-export class SessionDialog {
+export class SessionDialog implements OnInit, OnChanges {
   private fb = inject(FormBuilder);
   private caseService = inject(CaseService);
   private userService = inject(UserManagementService);
   private translate = inject(TranslateService);
   public appState = inject(AppStateService);
 
-  visible = model<boolean>(false);
-  session = input<SessionDetailDto | null>(null);
-  caseId = input<string | null>(null);
-  initialMode = input<'edit' | 'outcome'>('edit');
+  @Input() session: SessionDetailDto | null = null;
+  @Input() caseId: string | null = null;
+  @Input() visible: boolean = false;
+  @Input() initialMode: 'edit' | 'outcome' = 'edit';
+  @Output() visibleChange = new EventEmitter<boolean>();
   @Output() onSave = new EventEmitter<any>();
 
   sessionForm: FormGroup;
-  saving = signal(false);
   showOutcomeSection = signal(false);
   cases = signal<CaseListDto[]>([]);
   lawyers = signal<any[]>([]);
@@ -92,83 +92,88 @@ export class SessionDialog {
       notes: ['']
     });
 
-    // Effect to load cases and lawyers when dialog opens
-    effect(async () => {
-      if (this.visible()) {
-        await Promise.all([
-          this.loadCases(),
-          this.loadLawyers()
-        ]);
-      }
-    });
-
     // Effect to update labels when language changes
     effect(() => {
       const lang = this.appState.currentLang();
       this.updateDropdownLabels();
     });
-
-    // Effect to patch form when session changes
-    effect(() => {
-      const s = this.session();
-      if (s) {
-        const d = new Date(s.scheduledAt);
-        const hh = d.getHours().toString().padStart(2, '0');
-        const mm = d.getMinutes().toString().padStart(2, '0');
-        this.sessionForm.patchValue({
-          id: s.id,
-          title: s.title,
-          caseId: s.caseId,
-          scheduledDate: d,
-          scheduledTime: `${hh}:${mm}`,
-          courtName: s.courtName || '',
-          location: s.location || '',
-          circuitNumber: s.circuitNumber || '',
-          status: s.status,
-          currentSessionRole: s.currentSessionRole || '',
-          assignedLawyerId: s.assignedLawyerId || null,
-          previousSessionRole: s.previousSessionRole || '',
-          postponementReason: s.postponementReason || '',
-          previousSessionLawyerId: s.previousSessionLawyerId || null,
-          sessionProceedings: s.sessionProceedings || '',
-          decisionKey: s.decisionKey || null,
-          decisionText: s.decisionText || '',
-          notes: s.notes || ''
-        });
-
-        // If editing an existing session, show outcome section by default
-        this.showOutcomeSection.set(true);
-      } else {
-        this.sessionForm.reset({
-          id: null,
-          title: '',
-          caseId: this.caseId(),
-          status: SessionStatus.Scheduled,
-          scheduledDate: new Date(),
-          scheduledTime: '09:00',
-          courtName: '',
-          location: '',
-          circuitNumber: '',
-          currentSessionRole: '',
-          assignedLawyerId: null,
-          previousSessionRole: '',
-          postponementReason: '',
-          previousSessionLawyerId: null,
-          sessionProceedings: '',
-          decisionKey: null,
-          decisionText: '',
-          notes: ''
-        });
-
-        // For new sessions, hide outcome/decision by default to keep initial view clean
-        this.showOutcomeSection.set(false);
-      }
-    });
   }
 
-  getSelectedCase() {
-    const id = this.sessionForm.get('caseId')?.value;
-    return this.cases().find(c => c.id === id);
+  async ngOnInit() {
+    this.updateDropdownLabels();
+    await this.loadCases();
+    await this.loadLawyers();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['session'] && !changes['session'].firstChange) {
+      this.patchForm();
+    }
+    
+    if (changes['visible'] && changes['visible'].currentValue === true) {
+      this.patchForm();
+      this.loadCases();
+      this.loadLawyers();
+    }
+  }
+
+  patchForm() {
+    if (this.session) {
+      const s = this.session;
+      const d = new Date(s.scheduledAt);
+      const hh = d.getHours().toString().padStart(2, '0');
+      const mm = d.getMinutes().toString().padStart(2, '0');
+      this.sessionForm.reset({
+        id: s.id,
+        title: s.title,
+        caseId: s.caseId,
+        scheduledDate: d,
+        scheduledTime: `${hh}:${mm}`,
+        courtName: s.courtName || '',
+        location: s.location || '',
+        circuitNumber: s.circuitNumber || '',
+        status: s.status,
+        currentSessionRole: s.currentSessionRole || '',
+        assignedLawyerId: s.assignedLawyerId || null,
+        previousSessionRole: s.previousSessionRole || '',
+        postponementReason: s.postponementReason || '',
+        previousSessionLawyerId: s.previousSessionLawyerId || null,
+        sessionProceedings: s.sessionProceedings || '',
+        decisionKey: s.decisionKey || null,
+        decisionText: s.decisionText || '',
+        notes: s.notes || ''
+      });
+      this.showOutcomeSection.set(true);
+    } else {
+      this.sessionForm.reset({
+        id: null,
+        title: '',
+        caseId: this.caseId || null,
+        status: SessionStatus.Scheduled,
+        scheduledDate: new Date(),
+        scheduledTime: '09:00',
+        courtName: '',
+        location: '',
+        circuitNumber: '',
+        currentSessionRole: '',
+        assignedLawyerId: null,
+        previousSessionRole: '',
+        postponementReason: '',
+        previousSessionLawyerId: null,
+        sessionProceedings: '',
+        decisionKey: null,
+        decisionText: '',
+        notes: ''
+      });
+      this.showOutcomeSection.set(false);
+    }
+  }
+
+  getSelectedCase(): CaseListDto | undefined {
+    const id = this.sessionForm.get('caseId')?.value || this.caseId;
+    if (!id) return undefined;
+    const norm = String(id).toLowerCase();
+    return this.cases().find(c => String(c.id).toLowerCase() === norm);
   }
 
   updateDropdownLabels() {
@@ -212,25 +217,24 @@ export class SessionDialog {
     }
   }
 
-  async save() {
+  save() {
     if (this.sessionForm.invalid) {
       this.sessionForm.markAllAsTouched();
       return;
     }
 
-    this.saving.set(true);
-    try {
-      const formVal = this.sessionForm.value;
-      const date: Date = new Date(formVal.scheduledDate);
-      const [hours, minutes] = (formVal.scheduledTime || '00:00').split(':').map(Number);
-      date.setHours(hours, minutes, 0, 0);
-      this.onSave.emit({ ...formVal, scheduledAt: date });
-    } finally {
-      this.saving.set(false);
-    }
+    const formVal = this.sessionForm.value;
+    const date: Date = new Date(formVal.scheduledDate);
+    const [hours, minutes] = (formVal.scheduledTime || '00:00').split(':').map(Number);
+    date.setHours(hours, minutes, 0, 0);
+
+    this.onSave.emit({
+      ...formVal,
+      scheduledAt: date
+    });
   }
 
   close() {
-    this.visible.set(false);
+    this.visibleChange.emit(false);
   }
 }

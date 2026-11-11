@@ -292,7 +292,7 @@
         <button type="button" pButton [label]="'COMMON.NEXT' | translate" [icon]="appState.currentLang() === 'ar' ? 'pi pi-arrow-left' : 'pi pi-arrow-right'" iconPos="right" title="Next" aria-label="Next" [attr.aria-label]="'COMMON.NEXT' | translate" class="p-button-outlined p-button-info p-button-sm" [disabled]="activeTab === '3'" (click)="nextTab()"></button>
     </div>
     <div class="flex items-center gap-2">
-        <p-button [label]="'COMMON.CANCEL' | translate" icon="pi pi-times" [text]="true" severity="secondary" (onClick)="cancel()"></p-button>
-        <p-button [label]="'COMMON.SAVE' | translate" icon="pi pi-check" (onClick)="save()"></p-button>
+        <button type="button" pButton [label]="'COMMON.CANCEL' | translate" title="Cancel" aria-label="Cancel" [attr.aria-label]="'COMMON.CANCEL' | translate" class="p-button-text p-button-secondary" (click)="cancel()"></button>
+        <button type="button" pButton [label]="'COMMON.SAVE' | translate" icon="pi pi-check" title="Save" aria-label="Save" [attr.aria-label]="'COMMON.SAVE' | translate" class="p-button-primary shadow-md px-6" (click)="save()"></button>
     </div>
 </div>

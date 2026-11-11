@@ -1,5 +1,6 @@
-<p-dialog [header]="(session() ? 'SESSIONS.EDIT_SESSION' : 'SESSIONS.ADD_SESSION_NEW') | translate" 
+<p-dialog [header]="(session ? 'SESSIONS.EDIT_SESSION' : 'SESSIONS.ADD_SESSION_NEW') | translate" 
           [(visible)]="visible" 
+          (visibleChange)="close()"
           [modal]="true" 
           [breakpoints]="{ '1200px': '85vw', '960px': '92vw', '640px': '96vw' }" 
           [style]="{ width: '920px', maxWidth: '96vw' }" 
@@ -23,42 +24,39 @@
             </div>
 
             <!-- Case Selection -->
-            <div class="flex flex-col gap-1.5" [class.opacity-60]="caseId()">
+            <div class="flex flex-col gap-1.5">
                 <label for="caseId" class="font-bold text-slate-700 text-sm">
                     {{ 'SESSIONS.LINKED_CASE' | translate }} <span class="text-red-500">*</span>
                 </label>
                 
-                @if (caseId()) {
-                    <div class="w-full">
-                        <input id="linkedCaseReadonly" pInputText [value]="getSelectedCase()?.caseNumber + ' - ' + getSelectedCase()?.title" title="Linked Case" placeholder="Linked Case" aria-label="Linked Case" [attr.aria-label]="'SESSIONS.LINKED_CASE' | translate" class="w-full bg-slate-100 border-slate-200 text-slate-600 font-medium cursor-not-allowed p-disabled" readonly />
-                    </div>
-                } @else {
-                    <p-select id="caseId" [options]="cases()" formControlName="caseId" 
-                              optionLabel="title" optionValue="id" [filter]="true" filterBy="caseNumber,courtCaseNumber,title"
-                              [placeholder]="'SESSIONS.SELECT_CASE' | translate" class="w-full" appendTo="body"
-                              [class.p-invalid]="sessionForm.get('caseId')?.touched && sessionForm.get('caseId')?.invalid">
-                        <ng-template pTemplate="selectedItem">
-                            @if (getSelectedCase(); as selected) {
-                                <div class="flex items-center gap-2 truncate">
-                                    <span class="font-mono text-blue-600 font-bold text-xs">{{ selected.courtCaseNumber || selected.caseNumber }}</span>
-                                    <span>-</span>
-                                    <span class="truncate text-sm">{{ selected.title }}</span>
-                                </div>
-                            }
-                        </ng-template>
-                        <ng-template pTemplate="item" let-c>
-                            <div class="flex flex-col">
+                <p-select id="caseId" [options]="cases()" formControlName="caseId" 
+                          optionLabel="title" optionValue="id"
+                          [filter]="true" filterBy="caseNumber,courtCaseNumber,title"
+                          [placeholder]="'SESSIONS.SELECT_CASE' | translate" class="w-full" appendTo="body"
+                          [class.p-invalid]="sessionForm.get('caseId')?.touched && sessionForm.get('caseId')?.invalid">
+                    <ng-template pTemplate="selectedItem" let-selected>
+                        @if (getSelectedCase(); as c) {
+                            <div class="flex items-center gap-2 truncate">
+                                <span class="font-mono text-blue-600 font-bold text-xs">{{ c.courtCaseNumber || c.caseNumber }}</span>
+                                <span>-</span>
+                                <span class="truncate text-sm font-medium">{{ c.title }}</span>
+                            </div>
+                        }
+                    </ng-template>
+                    <ng-template pTemplate="item" let-c>
+                        <div class="flex flex-col py-1">
+                            <div class="flex items-center gap-2">
                                 <span class="font-mono text-blue-600 text-xs font-bold">{{ c.courtCaseNumber ? c.courtCaseNumber + ' (' + c.caseNumber + ')' : c.caseNumber }}</span>
                                 <span class="text-sm font-medium text-slate-800">{{ c.title }}</span>
-                                @if (c.clientName) {
-                                    <span class="text-xs text-slate-500">{{ c.clientName }}</span>
-                                }
                             </div>
-                        </ng-template>
-                    </p-select>
-                    @if (sessionForm.get('caseId')?.touched && sessionForm.get('caseId')?.invalid) {
-                        <small class="text-red-500 text-xs">{{ 'SESSIONS.CASE_REQUIRED' | translate }}</small>
-                    }
+                            @if (c.clientName) {
+                                <span class="text-xs text-slate-500 mt-0.5">{{ c.clientName }}</span>
+                            }
+                        </div>
+                    </ng-template>
+                </p-select>
+                @if (sessionForm.get('caseId')?.touched && sessionForm.get('caseId')?.invalid) {
+                    <small class="text-red-500 text-xs">{{ 'SESSIONS.CASE_REQUIRED' | translate }}</small>
                 }
             </div>
         </div>
@@ -201,7 +199,7 @@
         </div>
 
         <!-- Toggle outcome/decision section (when adding new session) -->
-        @if (!session()) {
+        @if (!session) {
             <div class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-slate-50/70 hover:bg-slate-100/70 transition-colors cursor-pointer select-none"
                  (click)="showOutcomeSection.set(!showOutcomeSection())">
                 <p-checkbox [binary]="true" [ngModel]="showOutcomeSection()" (ngModelChange)="showOutcomeSection.set($event)" 
@@ -260,8 +258,8 @@
 
         <!-- Actions -->
         <div class="flex justify-end gap-3 mt-4 pt-3 border-t border-slate-100">
-            <button pButton type="button" [label]="'COMMON.CANCEL' | translate" title="Cancel" aria-label="Cancel" [attr.aria-label]="'COMMON.CANCEL' | translate" class="p-button-outlined p-button-secondary" (click)="close()"></button>
-            <button pButton type="submit" [label]="'COMMON.SAVE' | translate" title="Save" aria-label="Save" [attr.aria-label]="'COMMON.SAVE' | translate" class="p-button-primary shadow-sm" [loading]="saving()" (click)="save()"></button>
+            <button pButton type="button" [label]="'COMMON.CANCEL' | translate" title="Cancel" aria-label="Cancel" [attr.aria-label]="'COMMON.CANCEL' | translate" class="p-button-text p-button-secondary" (click)="close()"></button>
+            <button pButton type="button" [label]="'COMMON.SAVE' | translate" icon="pi pi-check" title="Save" aria-label="Save" [attr.aria-label]="'COMMON.SAVE' | translate" class="p-button-primary shadow-md px-6" (click)="save()"></button>
         </div>
     </form>
 </p-dialog>
